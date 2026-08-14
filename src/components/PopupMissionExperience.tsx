@@ -105,7 +105,7 @@ function AnimalHabitat({ health, isDanger }: { health: number; isDanger: boolean
 
 function ButterflyRooms({ step, answers }: { step: number; answers: readonly boolean[] }) {
   return (
-    <div className="butterfly-rooms" role="img" aria-label={`나비효과 미션 ${step + 1}번째 방`}>
+    <div className="butterfly-rooms" role="img" aria-label={`나비효과 체험 ${step + 1}번째 방`}>
       <div className="butterfly-path"><i /><i /><i /><i /></div>
       <div className={`room-card room-card--a${step === 0 ? ' is-current' : ''}${answers[0] === true ? ' is-saved' : ''}${answers[0] === false ? ' is-danger' : ''}`}>
         <span>ROOM A</span>
@@ -148,9 +148,8 @@ function ResultModal({ mission, score, maxScore, success, isCompleted, isSaving,
     <div className="mission-result-backdrop" role="presentation">
       <section ref={modalRef} tabIndex={-1} className={`mission-result-modal${success ? '' : ' is-retry'}`} role="dialog" aria-modal="true" aria-labelledby="mission-result-title">
         <div className="mission-result-modal__symbol"><Icon name={success ? 'check' : 'warning'} /></div>
-        <span className="section-label">{success ? 'MISSION CLEAR' : 'CLIMATE SIGNAL'}</span>
         <h2 id="mission-result-title">{success ? '지구를 위한 선택, 모두 성공!' : '한 번 더 지구의 신호를 읽어볼까요?'}</h2>
-        <p>{success ? `미션 ${mission}의 모든 친환경 선택을 찾아 동물과 지구의 내일을 지켰어요.` : '놓친 선택을 다시 살펴보면 더 많은 ECO POINT와 건강한 지구를 만들 수 있어요.'}</p>
+        <p>{success ? '이 부스의 모든 친환경 선택을 찾아 동물과 지구의 내일을 지켰어요.' : '놓친 선택을 다시 살펴보면 더 많은 ECO POINT와 건강한 지구를 만들 수 있어요.'}</p>
         <div className="mission-result-score">
           <span>{success ? 'TOTAL ECO POINT' : '추가 ECO POINT'}</span>
           <strong>+{success ? 120 + score : score} P</strong>
@@ -163,7 +162,7 @@ function ResultModal({ mission, score, maxScore, success, isCompleted, isSaving,
         {saveError ? <p className="mission-save-error" role="alert">{saveError}</p> : null}
         <div className="mission-result-actions">
           <button className="secondary-button" type="button" onClick={onRetry} disabled={isSaving}><Icon name="rotate" /> 다시 도전</button>
-          <button className="primary-button" type="button" disabled={isSaving} onClick={success && !isCompleted ? onClaim : onBack}>{isSaving ? '저장 중...' : success && !isCompleted ? '포인트 받고 완료' : '미션 목록으로'} {!isSaving ? <Icon name="arrow" /> : null}</button>
+          <button className="primary-button" type="button" disabled={isSaving} onClick={success && !isCompleted ? onClaim : onBack}>{isSaving ? '스탬프 발급 중...' : success && !isCompleted ? '스탬프 받고 완료' : '부스 안내로'} {!isSaving ? <Icon name="arrow" /> : null}</button>
         </div>
       </section>
     </div>
@@ -220,11 +219,10 @@ export function PopupMissionExperience({ mission, isCompleted, onComplete, onBac
 
   return (
     <main id="main-content" className="page popup-experience-page">
-      <button className="back-button" type="button" onClick={onBack}><Icon name="chevronLeft" /> 팝업 미션</button>
+      <button className="back-button" type="button" onClick={onBack}><Icon name="chevronLeft" /> 부스 안내</button>
 
       <header className="popup-experience-header">
         <div>
-          <span className="section-label">MISSION 0{mission} · CHOICE LAB</span>
           <h1>{mission === 3 ? '기후 위기에서 동물들을 구하라' : '나비효과로부터 지구를 지켜라'}</h1>
           <p>{mission === 3 ? '일상 속 세 번의 선택으로 빙하와 야생동물의 서식지를 회복하세요.' : '두 개의 방에서 내린 작은 선택이 지구에 어떤 파동을 만드는지 확인하세요.'}</p>
         </div>
@@ -282,7 +280,7 @@ export function PopupMissionExperience({ mission, isCompleted, onComplete, onBac
             </div>
           ) : null}
           <button className="choice-next-button" type="button" onClick={continueMission} disabled={!hasAnswered}>
-            {step === scenarios.length - 1 ? '미션 결과 확인' : '다음 선택으로'} <Icon name="arrow" />
+            {step === scenarios.length - 1 ? '체험 결과 확인' : '다음 선택으로'} <Icon name="arrow" />
           </button>
         </section>
       </div>

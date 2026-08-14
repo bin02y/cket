@@ -11,7 +11,7 @@ const joinedAtFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium'
 const transactionTimeFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })
 
 function isMissionId(value: number | null): value is MissionId {
-  return value === 1 || value === 2 || value === 3 || value === 4
+  return value === 1 || value === 2 || value === 3 || value === 4 || value === 5
 }
 
 function isRewardId(value: string | null): value is RewardId {
@@ -67,14 +67,14 @@ export async function loadParticipantData(user: User) {
   }
 }
 
-export async function saveMissionCompletion(missionId: MissionId, bonusPoints: number) {
+export async function saveBoothCompletion(missionId: MissionId, bonusPoints: number) {
   if (!supabase) throw new Error('Supabase 연결 정보가 없습니다.')
   const { data, error } = await supabase.rpc('complete_mission', {
     p_mission_id: missionId,
     p_bonus_points: bonusPoints,
   })
   if (error) throw error
-  if (!isJsonObject(data)) throw new Error('미션 저장 응답 형식이 올바르지 않습니다.')
+  if (!isJsonObject(data)) throw new Error('부스 체험 저장 응답 형식이 올바르지 않습니다.')
   return data.status === 'completed' || data.status === 'already_completed'
 }
 
@@ -96,7 +96,7 @@ export async function saveRewardRedemption(rewardId: RewardId): Promise<RewardRe
 
 export function translateDataError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error)
-  if (message.includes('Invalid mission bonus')) return '미션 보너스 점수를 확인해 주세요.'
+  if (message.includes('Invalid mission bonus')) return '체험 보너스 점수를 확인해 주세요.'
   if (message.includes('Reward out of stock')) return '현재 굿즈 재고가 모두 소진됐어요.'
   if (message.includes('Authentication required') || message.includes('JWT')) return '로그인 세션이 만료됐습니다. 다시 로그인해 주세요.'
   return '데이터를 저장하지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도해 주세요.'

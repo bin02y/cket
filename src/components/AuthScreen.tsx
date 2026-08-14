@@ -74,13 +74,12 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
           <span><Icon name="leaf" /></span><strong>ECO EXPRESS<small>YOUTH ESG ACADEMY</small></strong>
         </a>
         <div className="auth-scene__copy">
-          <span className="eyebrow"><span className="status-dot" /> SEOUL · ECO LINE</span>
           <h1>배우고, 실천하고,<br /><em>더 푸른 내일로</em></h1>
-          <p>청년 ESG 아카데미의 공조 기술 미션부터 친환경 리워드까지 하나의 여정으로 기록하세요.</p>
+          <p>청년 ESG 아카데미의 공조 기술 체험부터 친환경 리워드까지 하나의 여정으로 기록하세요.</p>
           <div className="auth-feature-list">
-            <span><Icon name="missions" /><strong>4 ECO MISSIONS</strong></span>
-            <span><Icon name="wallet" /><strong>POINT & REWARD</strong></span>
-            <span><Icon name="sparkle" /><strong>MY ESG REPORT</strong></span>
+            <span><Icon name="train" /><strong>5 ECO STAMPS</strong></span>
+            <span><Icon name="sparkle" /><strong>ECO PASSPORT</strong></span>
+            <span><Icon name="shop" /><strong>REWARD SHOP</strong></span>
           </div>
         </div>
         <div className="auth-landscape" aria-hidden="true"><i /><i /><div className="auth-train"><span /><span /><span /></div><div className="auth-rail" /></div>
@@ -88,9 +87,8 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
 
       <section className="auth-panel" aria-labelledby="auth-title">
         <div className="auth-panel__mobile-brand"><span><Icon name="leaf" /></span><strong>ECO EXPRESS</strong></div>
-        <span className="section-label">WELCOME ON BOARD</span>
         <h2 id="auth-title">{mode === 'signup' ? '에코 여정을 시작해요' : '다시 만나 반가워요'}</h2>
-        <p>{mode === 'signup' ? '간편 가입 후 미션과 나의 ESG 변화를 기록할 수 있어요.' : '가입한 이메일로 에코 익스프레스에 다시 탑승하세요.'}</p>
+        <p>{mode === 'signup' ? '간편 가입 후 부스 스탬프와 나의 ESG 변화를 기록할 수 있어요.' : '가입한 이메일로 에코 익스프레스에 다시 탑승하세요.'}</p>
 
         <div className="auth-tabs" role="tablist" aria-label="인증 방식">
           <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => changeMode('signup')}>회원가입</button>

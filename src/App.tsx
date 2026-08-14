@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { AcademyMissions } from './components/AcademyMissions'
 import { AppHeader } from './components/AppHeader'
 import { AuthScreen } from './components/AuthScreen'
 import { BottomNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
-import { EcoWallet } from './components/EcoWallet'
 import { HomeDashboard } from './components/HomeDashboard'
 import { Icon } from './components/Icon'
 import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
-import { loadParticipantData, saveMissionCompletion, saveRewardRedemption, translateDataError } from './lib/participantData'
+import { loadParticipantData, saveBoothCompletion, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
 import type { AuthActionResult, AuthCredentials, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
@@ -22,7 +20,7 @@ function App() {
   const [isDataLoading, setIsDataLoading] = useState(false)
   const [dataError, setDataError] = useState('')
   const dataRequestId = useRef(0)
-  const completedMissions = new Set(transactions.flatMap((transaction) => transaction.missionId ? [transaction.missionId] : []))
+  const completedBooths = new Set(transactions.flatMap((transaction) => transaction.missionId ? [transaction.missionId] : []))
   const balance = transactions.reduce((total, transaction) => total + transaction.amount, 0)
 
   const loadRemoteState = useCallback(async (user: User) => {
@@ -69,9 +67,10 @@ function App() {
       if (isActive) setIsAuthLoading(false)
     }
 
-    void supabase.auth.getSession().then(({ data }) => syncSession(data.session))
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      void syncSession(session)
+      window.setTimeout(() => {
+        void syncSession(session)
+      }, 0)
     })
 
     return () => {
@@ -93,7 +92,6 @@ function App() {
     if (!data.session) return { error: '가입 세션을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.' }
 
     setCurrentParticipant(profileFromAuthUser(data.session.user))
-    await loadRemoteState(data.session.user)
     setActiveTab('home')
     return {}
   }
@@ -105,7 +103,6 @@ function App() {
     if (error) return { error: translateAuthError(error.message) }
 
     setCurrentParticipant(profileFromAuthUser(data.user))
-    await loadRemoteState(data.user)
     setActiveTab('home')
     return {}
   }
@@ -140,9 +137,9 @@ function App() {
     return loadRemoteState(data.session.user)
   }
 
-  async function completeMission(missionId: MissionId, bonusPoints = 0) {
+  async function completeBooth(boothId: MissionId, bonusPoints = 0) {
     try {
-      await saveMissionCompletion(missionId, bonusPoints)
+      await saveBoothCompletion(boothId, bonusPoints)
       await refreshCurrentParticipant()
       return null
     } catch (error) {
@@ -179,17 +176,13 @@ function App() {
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {isDataLoading && !dataError ? <div className="data-sync-status" role="status"><span className="status-dot" /> Supabase 활동 기록 동기화 중</div> : null}
       {activeTab === 'home' ? (
-        <HomeDashboard participantName={currentParticipant.name} balance={balance} completedMissions={completedMissions} onOpenMissions={() => navigateTo('missions')} />
+        <HomeDashboard balance={balance} completedBooths={completedBooths} onOpenBooths={() => navigateTo('booths')} />
       ) : activeTab === 'booths' ? (
-        <BoothGuide completedMissions={completedMissions} onOpenMissions={() => navigateTo('missions')} onOpenShop={() => navigateTo('shop')} />
-      ) : activeTab === 'missions' ? (
-        <AcademyMissions completedMissions={completedMissions} onMissionComplete={completeMission} />
-      ) : activeTab === 'wallet' ? (
-        <EcoWallet balance={balance} transactions={transactions} completedMissions={completedMissions} onOpenMissions={() => navigateTo('missions')} />
+        <BoothGuide completedBooths={completedBooths} onBoothComplete={completeBooth} onOpenShop={() => navigateTo('shop')} />
       ) : activeTab === 'shop' ? (
-        <RewardShop balance={balance} onRedeem={redeemReward} onOpenWallet={() => navigateTo('wallet')} />
+        <RewardShop balance={balance} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} balance={balance} transactions={transactions} completedMissions={completedMissions} onLogout={logout} onDeleteAccount={deleteAccount} onOpenMissions={() => navigateTo('missions')} />
+        <MyProfile profile={currentParticipant} balance={balance} transactions={transactions} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

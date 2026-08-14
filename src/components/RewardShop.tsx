@@ -8,7 +8,6 @@ type RewardFilter = 'all' | RewardProduct['category']
 type RewardShopProps = {
   balance: number
   onRedeem: (rewardId: RewardProduct['id']) => Promise<RewardRedemptionResult>
-  onOpenWallet: () => void
 }
 
 const filters: readonly { id: RewardFilter; label: string }[] = [
@@ -18,7 +17,7 @@ const filters: readonly { id: RewardFilter; label: string }[] = [
   { id: 'event', label: '현장 한정' },
 ]
 
-export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps) {
+export function RewardShop({ balance, onRedeem }: RewardShopProps) {
   const [filter, setFilter] = useState<RewardFilter>('all')
   const [selectedReward, setSelectedReward] = useState<RewardProduct | null>(null)
   const [redemption, setRedemption] = useState<RewardRedemptionResult | null>(null)
@@ -50,16 +49,13 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
     <main id="main-content" className="page reward-shop-page">
       <section className="reward-shop-hero" aria-labelledby="reward-shop-title">
         <div className="reward-shop-hero__copy">
-          <span className="eyebrow"><span className="status-dot" /> REWARD STATION · OPEN</span>
-          <p className="reward-shop-hero__route">ECO POINT <Icon name="arrow" /> BETTER DAILY LIFE</p>
           <h1 id="reward-shop-title">지구를 위한 마음을<br /><em>일상의 리워드로</em></h1>
-          <p>미션으로 모은 ECO POINT를 오래 쓰는 친환경 굿즈로 교환하세요. 모든 상품은 현장 굿즈 스테이션에서 수령합니다.</p>
-          <button type="button" className="shop-wallet-chip" onClick={onOpenWallet}>
+          <p>부스 체험으로 모은 ECO POINT를 오래 쓰는 친환경 굿즈로 교환하세요. 모든 상품은 현장 굿즈 스테이션에서 수령합니다.</p>
+          <div className="shop-wallet-chip">
             <span><Icon name="wallet" /></span>
             <small>MY ECO POINT</small>
             <strong>{balance.toLocaleString('ko-KR')} P</strong>
-            <Icon name="arrow" />
-          </button>
+          </div>
         </div>
         <div className="reward-shop-hero__scene" aria-hidden="true">
           <span className="shop-sun" />
@@ -71,14 +67,12 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
             <Icon name="shop" />
           </div>
           <div className="shop-track"><Icon name="train" /></div>
-          <span className="shop-scene-label">NEXT ACTION · REUSE EVERY DAY</span>
         </div>
       </section>
 
       <section className="reward-catalog" aria-labelledby="reward-catalog-title">
         <header className="reward-catalog__heading">
           <div>
-            <span className="section-label">ECO GOODS COLLECTION</span>
             <h2 id="reward-catalog-title">오늘부터 함께할 굿즈</h2>
             <p>제품을 선택해 상세 정보와 필요한 포인트를 확인하세요.</p>
           </div>
@@ -116,7 +110,7 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
 
       <section className="reward-pickup-guide" aria-label="굿즈 수령 방법">
         <span className="reward-pickup-guide__icon"><Icon name="shop" /></span>
-        <div><span className="section-label">HOW TO PICK UP</span><h2>교환 완료 후 현장 스테이션에서 바로 수령</h2><p>교환 화면에 표시되는 6자리 수령 코드를 스태프에게 보여주세요.</p></div>
+        <div><h2>교환 완료 후 현장 스테이션에서 바로 수령</h2><p>교환 화면에 표시되는 6자리 수령 코드를 스태프에게 보여주세요.</p></div>
         <ol><li><strong>01</strong><span>굿즈 선택</span></li><li><strong>02</strong><span>포인트 교환</span></li><li><strong>03</strong><span>코드 제시</span></li></ol>
       </section>
 
@@ -127,7 +121,6 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
             {redemption?.status === 'success' ? (
               <div className="reward-result reward-result--success">
                 <span className="reward-result__icon"><Icon name="check" /></span>
-                <span className="section-label">EXCHANGE COMPLETE</span>
                 <h2 id="reward-dialog-title">굿즈 교환이 완료됐어요!</h2>
                 <p><strong>{selectedReward.name}</strong>을 준비하고 있어요.<br />아래 코드를 현장 스태프에게 보여주세요.</p>
                 <div className="pickup-code"><small>PICK-UP CODE</small><strong>{redemption.orderCode}</strong></div>
@@ -135,17 +128,16 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
                 <p className="reward-result__note"><Icon name="shop" /> {selectedReward.pickupNote}</p>
                 <div className="reward-result__actions">
                   <button type="button" className="secondary-button" onClick={closeDialog}>계속 둘러보기</button>
-                  <button type="button" className="primary-button" onClick={onOpenWallet}>사용 내역 보기 <Icon name="arrow" /></button>
+                  <button type="button" className="primary-button" onClick={closeDialog}>확인 <Icon name="arrow" /></button>
                 </div>
               </div>
             ) : redemption?.status === 'insufficient' ? (
               <div className="reward-result reward-result--warning">
                 <span className="reward-result__icon"><Icon name="warning" /></span>
-                <span className="section-label">POINT CHECK</span>
                 <h2 id="reward-dialog-title">ECO POINT가 조금 부족해요</h2>
                 <p><strong>{selectedReward.name}</strong> 교환까지<br /><em>{redemption.shortage.toLocaleString('ko-KR')} P</em>가 더 필요합니다.</p>
                 <div className="point-comparison"><span><small>보유 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></span><i /><span><small>필요 포인트</small><strong>{selectedReward.points.toLocaleString('ko-KR')} P</strong></span></div>
-                <p className="reward-result__note"><Icon name="missions" /> 남은 미션을 완료하면 포인트를 더 모을 수 있어요.</p>
+                <p className="reward-result__note"><Icon name="booths" /> 남은 부스를 체험하면 포인트를 더 모을 수 있어요.</p>
                 <div className="reward-result__actions">
                   <button type="button" className="secondary-button" onClick={() => setRedemption(null)}>상품으로 돌아가기</button>
                   <button type="button" className="primary-button" onClick={closeDialog}>확인</button>
@@ -154,7 +146,6 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
             ) : redemption?.status === 'error' ? (
               <div className="reward-result reward-result--notice">
                 <span className="reward-result__icon"><Icon name="lock" /></span>
-                <span className="section-label">CONNECTION CHECK</span>
                 <h2 id="reward-dialog-title">교환을 완료하지 못했어요</h2>
                 <p>{redemption.message}</p>
                 <div className="reward-result__actions">
@@ -169,7 +160,6 @@ export function RewardShop({ balance, onRedeem, onOpenWallet }: RewardShopProps)
                   <div className="reward-product-object"><Icon name={selectedReward.icon} /><i /><i /></div>
                 </div>
                 <div className="reward-dialog__content">
-                  <span className="section-label">REWARD DETAIL</span>
                   <h2 id="reward-dialog-title">{selectedReward.name}</h2>
                   <p className="reward-dialog__subtitle">{selectedReward.subtitle}</p>
                   <p className="reward-dialog__description">{selectedReward.description}</p>

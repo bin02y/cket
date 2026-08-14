@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Icon } from './Icon'
 import { KtxDataPanel } from './KtxDataPanel'
-import { TemperatureChart } from './TemperatureChart'
 import { useSimulationPlayback } from '../hooks/useSimulationPlayback'
 
 type MissionExperienceProps = {
-  mission: 1 | 2
+  mission: 1
   isCompleted: boolean
   onComplete: () => Promise<string | null>
   onBack: () => void
@@ -16,13 +15,6 @@ const cycleStages = [
   { name: '응축', english: 'CONDENSE', value: '열 방출', detail: '뜨거운 냉매가 바깥으로 열을 내보내며 액체로 바뀌어요.', icon: 'wind' as const },
   { name: '팽창', english: 'EXPAND', value: '압력 하강', detail: '좁은 팽창밸브를 통과한 냉매의 압력과 온도가 뚝 떨어져요.', icon: 'thermometer' as const },
   { name: '증발', english: 'EVAPORATE', value: '실내 냉각', detail: '차가운 냉매가 객실의 열을 흡수해 시원한 바람을 만들어요.', icon: 'snowflake' as const },
-]
-
-const controlMoments = [
-  { name: '출발', value: '29.8°C', detail: '승객이 탑승한 객실의 온도와 외부 열 부하를 센서가 확인해요.' },
-  { name: '급속 냉각', value: '26.7°C', detail: '초기에는 풍량을 빠르게 높여 목표 온도까지 도달 시간을 줄여요.' },
-  { name: '미세 제어', value: '24.4°C', detail: '목표에 가까워지면 출력을 세밀하게 낮춰 과냉각을 막아요.' },
-  { name: '안정 운전', value: '24.0°C', detail: '승객과 외기 변화를 감지하며 쾌적 온도를 안정적으로 유지해요.' },
 ]
 
 function formatTime(seconds: number) {
@@ -54,47 +46,18 @@ function RefrigerationFilm({ activeStage, isPlaying }: { activeStage: number; is
   )
 }
 
-function ControlFilm({ progress, activeMoment, isPlaying }: { progress: number; activeMoment: number; isPlaying: boolean }) {
-  const cabinTemperature = Math.max(24, 29.8 - progress * 0.065).toFixed(1)
-
-  return (
-    <div className={`control-film${isPlaying ? ' is-playing' : ''}`} aria-label="KTX 객실 초고속 냉방 제어 실험 시각화" role="img">
-      <div className="control-film__sky"><i /><i /><i /></div>
-      <div className="control-film__train">
-        <span className="control-film__window" />
-        <span className="control-film__window" />
-        <span className="control-film__window" />
-        <div className="air-duct">
-          <i /><i /><i /><i /><i />
-        </div>
-      </div>
-      <div className="control-film__temperature">
-        <span>COACH 04</span>
-        <strong>{cabinTemperature}<small>°C</small></strong>
-        <em>{activeMoment >= 2 ? '정밀 제어 중' : '급속 냉각 중'}</em>
-      </div>
-      <div className="control-film__status">
-        <i /> SENSOR SYNC · {Math.round(progress)}%
-      </div>
-    </div>
-  )
-}
-
 export function MissionExperience({ mission, isCompleted, onComplete, onBack }: MissionExperienceProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const { progress, isPlaying, togglePlayback, reset, seek } = useSimulationPlayback()
   const activeIndex = Math.min(Math.floor(progress / 25), 3)
-  const isCycleMission = mission === 1
-  const chapters = isCycleMission ? cycleStages : controlMoments
-  const totalSeconds = isCycleMission ? 200 : 240
+  const chapters = cycleStages
+  const totalSeconds = 200
   const currentSeconds = totalSeconds * (progress / 100)
-  const title = isCycleMission ? '냉동 사이클을 조립하라' : '초고속 냉방을 제어하라'
-  const description = isCycleMission
-    ? '냉매가 순환하며 객실의 열을 밖으로 옮기는 네 가지 순간을 따라가 보세요.'
-    : '고정 출력과 센서 기반 스마트 제어의 온도 변화를 비교해 보세요.'
+  const title = '냉동 사이클을 조립하라'
+  const description = '냉매가 순환하며 객실의 열을 밖으로 옮기는 네 가지 순간을 따라가 보세요.'
 
-  async function finishMission() {
+  async function finishBooth() {
     if (isCompleted) {
       onBack()
       return
@@ -113,12 +76,11 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
   return (
     <main id="main-content" className="page experience-page">
       <button className="back-button" type="button" onClick={onBack}>
-        <Icon name="chevronLeft" /> 아카데미 미션
+        <Icon name="chevronLeft" /> 부스 안내
       </button>
 
       <header className="experience-header">
         <div>
-          <span className="section-label">MISSION 0{mission} · INTERACTIVE FILM</span>
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
@@ -132,18 +94,14 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
               <span>REC · ECO TECH LAB</span>
               <span>KTX / COACH 04</span>
             </div>
-            {isCycleMission ? (
-              <RefrigerationFilm activeStage={activeIndex} isPlaying={isPlaying} />
-            ) : (
-              <ControlFilm progress={progress} activeMoment={activeIndex} isPlaying={isPlaying} />
-            )}
+            <RefrigerationFilm activeStage={activeIndex} isPlaying={isPlaying} />
             {progress >= 100 ? (
               <div className="film-complete" role="status">
                 <span><Icon name="check" /></span>
                 <strong>교육 영상 확인 완료</strong>
-                <small>{isCompleted ? '이미 포인트가 적립된 미션입니다.' : `미션 ${mission} 기본 포인트를 받을 준비가 됐어요.`}</small>
+                <small>{isCompleted ? '이미 스탬프가 발급된 체험입니다.' : '첫 번째 스탬프를 받을 준비가 됐어요.'}</small>
                 {saveError ? <p className="mission-save-error" role="alert">{saveError}</p> : null}
-                <button type="button" onClick={finishMission} disabled={isSaving}>{isSaving ? '저장 중...' : isCompleted ? '미션 목록으로' : '완료하고 포인트 받기'} {!isSaving ? <Icon name="arrow" /> : null}</button>
+                <button type="button" onClick={finishBooth} disabled={isSaving}>{isSaving ? '스탬프 발급 중...' : isCompleted ? '부스 안내로' : '스탬프 받고 완료'} {!isSaving ? <Icon name="arrow" /> : null}</button>
               </div>
             ) : null}
           </div>
@@ -177,8 +135,7 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
       <section className="chapter-panel" aria-labelledby="chapter-title">
         <div className="chapter-panel__heading">
           <div>
-            <span className="section-label">CHAPTER GUIDE</span>
-            <h2 id="chapter-title">{isCycleMission ? '냉기가 만들어지는 4단계' : '냉방 제어의 4가지 순간'}</h2>
+            <h2 id="chapter-title">냉기가 만들어지는 4단계</h2>
           </div>
           <span>단계를 눌러 바로 확인하세요</span>
         </div>
@@ -199,7 +156,7 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
           ))}
         </div>
         <div className="chapter-insight" role="tabpanel">
-          <span><Icon name={isCycleMission ? cycleStages[activeIndex].icon : 'sparkle'} /></span>
+          <span><Icon name={cycleStages[activeIndex].icon} /></span>
           <div>
             <small>지금 알아둘 포인트</small>
             <p>{chapters[activeIndex].detail}</p>
@@ -207,12 +164,10 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
         </div>
       </section>
 
-      {mission === 2 ? <TemperatureChart progress={progress} /> : (
-        <section className="cycle-summary" aria-label="냉동 사이클 핵심 요약">
-          <div><Icon name="snowflake" /><span><small>열을 만드는 장치?</small><strong>아니요, 열을 옮기는 기술!</strong></span></div>
-          <p>에어컨은 차가움을 새로 만드는 대신, 객실 안의 열을 냉매에 실어 밖으로 이동시킵니다.</p>
-        </section>
-      )}
+      <section className="cycle-summary" aria-label="냉동 사이클 핵심 요약">
+        <div><Icon name="snowflake" /><span><small>열을 만드는 장치?</small><strong>아니요, 열을 옮기는 기술!</strong></span></div>
+        <p>에어컨은 차가움을 새로 만드는 대신, 객실 안의 열을 냉매에 실어 밖으로 이동시킵니다.</p>
+      </section>
     </main>
   )
 }

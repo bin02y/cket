@@ -1,6 +1,6 @@
-export type TabId = 'home' | 'booths' | 'missions' | 'wallet' | 'shop' | 'my'
+export type TabId = 'home' | 'booths' | 'shop' | 'my'
 
-export type MissionId = 1 | 2 | 3 | 4
+export type MissionId = 1 | 2 | 3 | 4 | 5
 
 export type ParticipantProfile = {
   id: string
