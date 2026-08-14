@@ -1,0 +1,60 @@
+import type { RewardProduct } from '../types'
+
+export const rewardProducts: readonly RewardProduct[] = [
+  {
+    id: 'seed-ticket',
+    name: '씨앗 기차 티켓',
+    subtitle: '심으면 자라는 에코 패스',
+    description: '팝업 체험의 기억을 담은 씨앗 종이 티켓이에요. 사용 후 흙에 심고 물을 주면 작은 허브가 자랍니다.',
+    impact: '버려지는 종이 대신 생분해 씨앗 종이를 사용해요.',
+    points: 80,
+    category: 'event',
+    categoryLabel: 'POP-UP ONLY',
+    icon: 'leaf',
+    theme: 'mint',
+    pickupNote: '교환 후 팝업 안내 데스크에서 바로 수령할 수 있어요.',
+  },
+  {
+    id: 'reusable-kit',
+    name: '리유저블 커트러리 키트',
+    subtitle: '한 끼부터 시작하는 제로 웨이스트',
+    description: '가볍게 휴대할 수 있는 숟가락, 포크와 전용 케이스 세트예요. 일회용 식기 대신 매일 사용할 수 있습니다.',
+    impact: '일회용 플라스틱 식기 사용을 줄이는 데 도움을 줘요.',
+    points: 120,
+    category: 'lifestyle',
+    categoryLabel: 'DAILY ACTION',
+    icon: 'recycle',
+    theme: 'sky',
+    pickupNote: '수령 코드를 스태프에게 보여주면 밀봉 상품으로 전달해 드려요.',
+  },
+  {
+    id: 'ktx-pouch',
+    name: '업사이클 KTX 파우치',
+    subtitle: '여정의 소재를 다시 잇다',
+    description: '철도 현수막의 질감과 컬러를 살려 만든 한정 파우치예요. 소재 특성상 무늬가 제품마다 조금씩 다릅니다.',
+    impact: '폐현수막을 새로운 생활용품으로 되돌려요.',
+    points: 160,
+    category: 'upcycle',
+    categoryLabel: 'UPCYCLE EDITION',
+    icon: 'train',
+    theme: 'navy',
+    pickupNote: '한정 수량 상품으로 현장 재고 확인 후 수령할 수 있어요.',
+  },
+  {
+    id: 'eco-tumbler',
+    name: '에코 익스프레스 텀블러',
+    subtitle: '시원함은 오래, 일회용품은 적게',
+    description: '공조 기술에서 영감을 받은 이중 단열 텀블러예요. 차가운 음료의 온도를 오래 유지하도록 설계했습니다.',
+    impact: '개인 컵 사용으로 일회용 컵 소비를 줄여요.',
+    points: 280,
+    category: 'lifestyle',
+    categoryLabel: 'SIGNATURE GOODS',
+    icon: 'cup',
+    theme: 'aqua',
+    pickupNote: '교환 완료 화면의 수령 코드를 굿즈 스테이션에 제시해 주세요.',
+  },
+]
+
+export const rewardsById = Object.fromEntries(
+  rewardProducts.map((reward) => [reward.id, reward]),
+) as Record<RewardProduct['id'], RewardProduct>
