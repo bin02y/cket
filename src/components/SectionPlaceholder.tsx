@@ -1,7 +1,9 @@
 import { Icon } from './Icon'
 import type { TabId } from '../types'
 
-const sectionCopy: Record<Exclude<TabId, 'home'>, { eyebrow: string; title: string; body: string; phase: string }> = {
+type PlaceholderTab = Exclude<TabId, 'home' | 'booths'>
+
+const sectionCopy: Record<PlaceholderTab, { eyebrow: string; title: string; body: string; phase: string }> = {
   missions: {
     eyebrow: 'MISSION LINE',
     title: '에코 미션',
@@ -29,7 +31,7 @@ const sectionCopy: Record<Exclude<TabId, 'home'>, { eyebrow: string; title: stri
 }
 
 type SectionPlaceholderProps = {
-  section: Exclude<TabId, 'home'>
+  section: PlaceholderTab
   onBackHome: () => void
 }
 

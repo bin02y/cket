@@ -19,6 +19,7 @@ export function Icon({ name, ...props }: IconProps) {
 
   const paths = {
     home: <><path d="m3.5 10.5 8.5-7 8.5 7" /><path d="M5.5 9.2V21h13V9.2M9.5 21v-6h5v6" /></>,
+    booths: <><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /><path d="M7.5 7.5h.01M16.5 7.5h.01M7.5 16.5h.01M16.5 16.5h.01" /></>,
     missions: <><path d="M8 4h8M9 2h6v4H9z" /><path d="M6 4.5H4.5v17h15v-17H18M8 11l2 2 5-5M8 17h8" /></>,
     wallet: <><path d="M3 6.5h15.5a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2z" /><path d="M3 7V5a2 2 0 0 1 2-2h12M15 12h5.5v4H15a2 2 0 1 1 0-4Z" /></>,
     shop: <><path d="M4 9v12h16V9M3 9l2-6h14l2 6" /><path d="M3 9a3 3 0 0 0 5 2.2A3 3 0 0 0 12 11a3 3 0 0 0 4 .2A3 3 0 0 0 21 9M9 21v-6h6v6" /></>,

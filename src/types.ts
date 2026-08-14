@@ -1,4 +1,4 @@
-export type TabId = 'home' | 'missions' | 'wallet' | 'shop' | 'my'
+export type TabId = 'home' | 'booths' | 'missions' | 'wallet' | 'shop' | 'my'
 
 export type MissionId = 1 | 2 | 3 | 4
 

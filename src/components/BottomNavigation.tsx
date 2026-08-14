@@ -3,6 +3,7 @@ import type { TabId } from '../types'
 
 const navigationItems: ReadonlyArray<{ id: TabId; label: string }> = [
   { id: 'home', label: '홈' },
+  { id: 'booths', label: '부스' },
   { id: 'missions', label: '미션' },
   { id: 'wallet', label: '포인트' },
   { id: 'shop', label: '굿즈 숍' },

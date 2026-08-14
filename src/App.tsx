@@ -4,6 +4,7 @@ import { AcademyMissions } from './components/AcademyMissions'
 import { AppHeader } from './components/AppHeader'
 import { AuthScreen } from './components/AuthScreen'
 import { BottomNavigation } from './components/BottomNavigation'
+import { BoothGuide } from './components/BoothGuide'
 import { EcoWallet } from './components/EcoWallet'
 import { HomeDashboard } from './components/HomeDashboard'
 import { Icon } from './components/Icon'
@@ -179,6 +180,8 @@ function App() {
       {isDataLoading && !dataError ? <div className="data-sync-status" role="status"><span className="status-dot" /> Supabase 활동 기록 동기화 중</div> : null}
       {activeTab === 'home' ? (
         <HomeDashboard participantName={currentParticipant.name} balance={balance} completedMissions={completedMissions} onOpenMissions={() => navigateTo('missions')} />
+      ) : activeTab === 'booths' ? (
+        <BoothGuide completedMissions={completedMissions} onOpenMissions={() => navigateTo('missions')} onOpenShop={() => navigateTo('shop')} />
       ) : activeTab === 'missions' ? (
         <AcademyMissions completedMissions={completedMissions} onMissionComplete={completeMission} />
       ) : activeTab === 'wallet' ? (
