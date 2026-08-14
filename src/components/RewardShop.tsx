@@ -75,7 +75,7 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
       <section className="reward-shop-hero" aria-labelledby="reward-shop-title">
         <div className="reward-shop-hero__copy">
           <h1 id="reward-shop-title">지구를 위한 마음을<br /><em>일상의 리워드로</em></h1>
-          <p>여덟 가지 프로그램 굿즈를 현금 또는 ECO POINT로 선택할 수 있습니다. 결제와 수령은 현장 리워드 스테이션에서 진행합니다.</p>
+          <p>굿즈를 현금 또는 포인트로 선택할 수 있습니다.<br />결제와 수령은 현장 리워드 스테이션에서 진행합니다.</p>
           <div className="shop-wallet-chip">
             <span><Icon name="wallet" /></span>
             <small>MY ECO POINT</small>
@@ -86,8 +86,10 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
           <span className="shop-sun" />
           <span className="shop-cloud shop-cloud--one" />
           <span className="shop-cloud shop-cloud--two" />
-          <div className="reward-station"><span className="reward-station__sign">ECO REWARD</span><i /><i /><i /><Icon name="shop" /></div>
-          <div className="shop-track"><Icon name="train" /></div>
+          <div className="reward-shop-hero__art">
+            <div className="reward-station"><span className="reward-station__sign">ECO REWARD</span><i /><i /><i /><Icon name="shop" /></div>
+            <div className="shop-track"><Icon name="train" /></div>
+          </div>
         </div>
       </section>
 

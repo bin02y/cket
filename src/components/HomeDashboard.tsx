@@ -29,16 +29,18 @@ export function HomeDashboard({ balance, completedBooths, onOpenBooths }: HomeDa
           <div className="cloud cloud--two" />
           <div className="hill hill--back" />
           <div className="hill hill--front" />
-          <div className="train">
-            <span className="train__light" />
-            <span className="train__window train__window--one" />
-            <span className="train__window train__window--two" />
-            <span className="train__window train__window--three" />
-            <span className="train__stripe" />
+          <div className="hero__art">
+            <div className="train">
+              <span className="train__light" />
+              <span className="train__window train__window--one" />
+              <span className="train__window train__window--two" />
+              <span className="train__window train__window--three" />
+              <span className="train__stripe" />
+            </div>
+            <div className="rail" />
+            <div className="speed-line speed-line--one" />
+            <div className="speed-line speed-line--two" />
           </div>
-          <div className="rail" />
-          <div className="speed-line speed-line--one" />
-          <div className="speed-line speed-line--two" />
         </div>
       </section>
 
