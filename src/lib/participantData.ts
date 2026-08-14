@@ -8,15 +8,13 @@ type TransactionRow = Tables<'point_transactions'>
 
 const rewardIds = new Set<RewardId>([
   'cycle-parts-keyring',
-  'mini-thermometer-keyring',
   'thermo-sticker',
   'eco-tumbler',
-  'acrylic-cycle-keyring',
-  'esg-photo-cards',
   'recycled-plastic-pen',
   'mini-eco-pouch',
-  'cooling-character-badges',
-  'cooling-master-medal',
+  'cooling-keycap',
+  'eco-power-bank',
+  'mini-fan',
 ])
 const joinedAtFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' })
 const transactionTimeFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })

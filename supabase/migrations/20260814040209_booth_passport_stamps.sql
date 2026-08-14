@@ -1,3 +1,4 @@
+-- 파일 시간 번호는 원격 마이그레이션 기록과 일치합니다.
 alter table public.missions drop constraint if exists missions_id_check;
 alter table public.missions add constraint missions_id_check check (id between 1 and 5);
 

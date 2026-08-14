@@ -6,5 +6,6 @@ dist/
 .env.local
 .env.*.local
 .supabase/
+supabase/.temp/
 .agent-browser/
 phase*-*.png

@@ -1,3 +1,4 @@
+-- 파일 시간 번호는 원격 마이그레이션 기록과 일치합니다.
 alter table public.rewards
   add column if not exists cash_price integer not null default 0;
 

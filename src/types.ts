@@ -25,15 +25,13 @@ export type AuthActionResult = {
 
 export type RewardId =
   | 'cycle-parts-keyring'
-  | 'mini-thermometer-keyring'
   | 'thermo-sticker'
   | 'eco-tumbler'
-  | 'acrylic-cycle-keyring'
-  | 'esg-photo-cards'
   | 'recycled-plastic-pen'
   | 'mini-eco-pouch'
-  | 'cooling-character-badges'
-  | 'cooling-master-medal'
+  | 'cooling-keycap'
+  | 'eco-power-bank'
+  | 'mini-fan'
 
 export type RewardPaymentMethod = 'points' | 'cash' | 'free'
 

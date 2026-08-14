@@ -12,10 +12,9 @@ type RewardShopProps = {
 }
 
 const filters: readonly { id: RewardFilter; label: string }[] = [
-  { id: 'all', label: '전체 10종' },
+  { id: 'all', label: '전체 8종' },
   { id: 'tech', label: '공조 기술' },
   { id: 'lifestyle', label: '생활·ESG' },
-  { id: 'limited', label: '무료·한정' },
 ]
 
 function defaultPaymentMethod(reward: RewardProduct): RewardPaymentMethod {
@@ -76,7 +75,7 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
       <section className="reward-shop-hero" aria-labelledby="reward-shop-title">
         <div className="reward-shop-hero__copy">
           <h1 id="reward-shop-title">지구를 위한 마음을<br /><em>일상의 리워드로</em></h1>
-          <p>열 가지 프로그램 굿즈를 현금 또는 ECO POINT로 선택할 수 있습니다. 결제와 수령은 현장 리워드 스테이션에서 진행합니다.</p>
+          <p>여덟 가지 프로그램 굿즈를 현금 또는 ECO POINT로 선택할 수 있습니다. 결제와 수령은 현장 리워드 스테이션에서 진행합니다.</p>
           <div className="shop-wallet-chip">
             <span><Icon name="wallet" /></span>
             <small>MY ECO POINT</small>
