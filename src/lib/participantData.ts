@@ -64,20 +64,17 @@ export async function loadParticipantData(user: User) {
   if (!supabase) throw new Error('Supabase 연결 정보가 없습니다.')
 
   const fallbackProfile = profileFromAuthUser(user)
-  const [profileResult, transactionResult, rewardOrderResult] = await Promise.all([
+  const [profileResult, transactionResult] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-    supabase.from('reward_orders').select('id').eq('user_id', user.id),
   ])
 
   if (profileResult.error) throw profileResult.error
   if (transactionResult.error) throw transactionResult.error
-  if (rewardOrderResult.error) throw rewardOrderResult.error
 
   return {
     profile: toParticipantProfile(profileResult.data, fallbackProfile),
     transactions: transactionResult.data.map(toPointTransaction),
-    rewardOrderCount: rewardOrderResult.data.length,
   }
 }
 

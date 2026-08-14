@@ -16,7 +16,6 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
-  const [rewardOrderCount, setRewardOrderCount] = useState(0)
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
   const [isDataLoading, setIsDataLoading] = useState(false)
   const [dataError, setDataError] = useState('')
@@ -33,7 +32,6 @@ function App() {
       if (dataRequestId.current !== requestId) return null
       setCurrentParticipant(data.profile)
       setTransactions(data.transactions)
-      setRewardOrderCount(data.rewardOrderCount)
       return null
     } catch (error) {
       if (dataRequestId.current !== requestId) return null
@@ -59,7 +57,6 @@ function App() {
         dataRequestId.current += 1
         setCurrentParticipant(null)
         setTransactions([])
-        setRewardOrderCount(0)
         setDataError('')
         setIsAuthLoading(false)
         return
@@ -115,7 +112,6 @@ function App() {
     if (supabase) await supabase.auth.signOut()
     setCurrentParticipant(null)
     setTransactions([])
-    setRewardOrderCount(0)
     setDataError('')
     setActiveTab('home')
   }
@@ -129,7 +125,6 @@ function App() {
     dataRequestId.current += 1
     setCurrentParticipant(null)
     setTransactions([])
-    setRewardOrderCount(0)
     setDataError('')
     setActiveTab('home')
     return null
@@ -187,7 +182,7 @@ function App() {
       ) : activeTab === 'shop' ? (
         <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} balance={balance} transactions={transactions} completedBooths={completedBooths} rewardOrderCount={rewardOrderCount} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
+        <MyProfile profile={currentParticipant} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

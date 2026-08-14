@@ -19,7 +19,7 @@ export function HomeDashboard({ balance, completedBooths, onOpenBooths }: HomeDa
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero__copy">
           <h1 id="hero-title">지구의 내일로 향하는<br /><em>에코 익스프레스</em></h1>
-          <p className="hero__description">KTX 초고속 공조 기술을 배우고 다섯 부스를 체험하며 더 시원한 지구를 만들어 보세요.</p>
+          <p className="hero__description">KTX 초고속 냉동 공조 기술을 배우고<br />전시관에서 체험활동을 통해 더 시원한 지구를 만들어 보세요.</p>
           <button className="primary-button" type="button" onClick={onOpenBooths}>부스 체험 시작하기 <Icon name="arrow" /></button>
         </div>
 
