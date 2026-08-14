@@ -10,12 +10,13 @@ import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
 import { loadParticipantData, saveBoothCompletion, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
+  const [rewardOrderCount, setRewardOrderCount] = useState(0)
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
   const [isDataLoading, setIsDataLoading] = useState(false)
   const [dataError, setDataError] = useState('')
@@ -32,6 +33,7 @@ function App() {
       if (dataRequestId.current !== requestId) return null
       setCurrentParticipant(data.profile)
       setTransactions(data.transactions)
+      setRewardOrderCount(data.rewardOrderCount)
       return null
     } catch (error) {
       if (dataRequestId.current !== requestId) return null
@@ -57,6 +59,7 @@ function App() {
         dataRequestId.current += 1
         setCurrentParticipant(null)
         setTransactions([])
+        setRewardOrderCount(0)
         setDataError('')
         setIsAuthLoading(false)
         return
@@ -112,6 +115,7 @@ function App() {
     if (supabase) await supabase.auth.signOut()
     setCurrentParticipant(null)
     setTransactions([])
+    setRewardOrderCount(0)
     setDataError('')
     setActiveTab('home')
   }
@@ -125,6 +129,7 @@ function App() {
     dataRequestId.current += 1
     setCurrentParticipant(null)
     setTransactions([])
+    setRewardOrderCount(0)
     setDataError('')
     setActiveTab('home')
     return null
@@ -147,9 +152,9 @@ function App() {
     }
   }
 
-  async function redeemReward(rewardId: RewardId): Promise<RewardRedemptionResult> {
+  async function redeemReward(rewardId: RewardId, paymentMethod: RewardPaymentMethod): Promise<RewardRedemptionResult> {
     try {
-      const result = await saveRewardRedemption(rewardId)
+      const result = await saveRewardRedemption(rewardId, paymentMethod)
       if (result.status === 'success') await refreshCurrentParticipant()
       return result
     } catch (error) {
@@ -180,9 +185,9 @@ function App() {
       ) : activeTab === 'booths' ? (
         <BoothGuide completedBooths={completedBooths} onBoothComplete={completeBooth} onOpenShop={() => navigateTo('shop')} />
       ) : activeTab === 'shop' ? (
-        <RewardShop balance={balance} onRedeem={redeemReward} />
+        <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} balance={balance} transactions={transactions} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
+        <MyProfile profile={currentParticipant} balance={balance} transactions={transactions} completedBooths={completedBooths} rewardOrderCount={rewardOrderCount} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

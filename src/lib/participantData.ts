@@ -1,12 +1,23 @@
 import type { User } from '@supabase/supabase-js'
-import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult } from '../types'
+import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
 type ProfileRow = Tables<'profiles'>
 type TransactionRow = Tables<'point_transactions'>
 
-const rewardIds = new Set<RewardId>(['seed-ticket', 'reusable-kit', 'ktx-pouch', 'eco-tumbler'])
+const rewardIds = new Set<RewardId>([
+  'cycle-parts-keyring',
+  'mini-thermometer-keyring',
+  'thermo-sticker',
+  'eco-tumbler',
+  'acrylic-cycle-keyring',
+  'esg-photo-cards',
+  'recycled-plastic-pen',
+  'mini-eco-pouch',
+  'cooling-character-badges',
+  'cooling-master-medal',
+])
 const joinedAtFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' })
 const transactionTimeFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -53,17 +64,20 @@ export async function loadParticipantData(user: User) {
   if (!supabase) throw new Error('Supabase 연결 정보가 없습니다.')
 
   const fallbackProfile = profileFromAuthUser(user)
-  const [profileResult, transactionResult] = await Promise.all([
+  const [profileResult, transactionResult, rewardOrderResult] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('reward_orders').select('id').eq('user_id', user.id),
   ])
 
   if (profileResult.error) throw profileResult.error
   if (transactionResult.error) throw transactionResult.error
+  if (rewardOrderResult.error) throw rewardOrderResult.error
 
   return {
     profile: toParticipantProfile(profileResult.data, fallbackProfile),
     transactions: transactionResult.data.map(toPointTransaction),
+    rewardOrderCount: rewardOrderResult.data.length,
   }
 }
 
@@ -78,19 +92,23 @@ export async function saveBoothCompletion(missionId: MissionId, bonusPoints: num
   return data.status === 'completed' || data.status === 'already_completed'
 }
 
-export async function saveRewardRedemption(rewardId: RewardId): Promise<RewardRedemptionResult> {
+export async function saveRewardRedemption(rewardId: RewardId, paymentMethod: RewardPaymentMethod): Promise<RewardRedemptionResult> {
   if (!supabase) return { status: 'error', message: 'Supabase 연결 정보가 없습니다.' }
 
-  const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: rewardId })
+  const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: rewardId, p_payment_method: paymentMethod })
   if (error) throw error
   if (!isJsonObject(data)) return { status: 'error', message: '굿즈 교환 응답을 확인하지 못했습니다.' }
 
   if (data.status === 'success' && typeof data.pickup_code === 'string') {
-    return { status: 'success', orderCode: data.pickup_code }
+    return { status: 'success', orderCode: data.pickup_code, paymentMethod }
   }
   if (data.status === 'insufficient' && typeof data.shortage === 'number') {
     return { status: 'insufficient', shortage: data.shortage }
   }
+  if (data.status === 'locked' && typeof data.required_stamps === 'number') {
+    return { status: 'locked', requiredStamps: data.required_stamps }
+  }
+  if (data.status === 'already_claimed') return { status: 'already_claimed' }
   return { status: 'error', message: '굿즈 교환 결과를 확인하지 못했습니다.' }
 }
 

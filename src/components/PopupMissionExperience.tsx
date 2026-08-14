@@ -157,7 +157,7 @@ function ResultModal({ mission, score, maxScore, success, isCompleted, isSaving,
         </div>
         <div className="reward-preview">
           <Icon name="shop" />
-          <p><strong>포인트를 모아 리워드 스테이션으로!</strong><br />하단 굿즈 숍에서 친환경 리워드를 바로 확인할 수 있어요.</p>
+          <p><strong>포인트를 모아 리워드 스테이션으로!</strong><br />하단 리워드 탭에서 친환경 굿즈를 바로 확인할 수 있어요.</p>
         </div>
         {saveError ? <p className="mission-save-error" role="alert">{saveError}</p> : null}
         <div className="mission-result-actions">

@@ -156,8 +156,10 @@ export type Database = {
       }
       reward_orders: {
         Row: {
+          cash_paid: number
           created_at: string
           id: string
+          payment_method: string
           picked_up_at: string | null
           pickup_code: string
           points_spent: number
@@ -166,18 +168,22 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cash_paid?: number
           created_at?: string
           id?: string
+          payment_method?: string
           picked_up_at?: string | null
           pickup_code: string
-          points_spent: number
+          points_spent?: number
           reward_id: string
           status?: string
           user_id: string
         }
         Update: {
+          cash_paid?: number
           created_at?: string
           id?: string
+          payment_method?: string
           picked_up_at?: string | null
           pickup_code?: string
           points_spent?: number
@@ -204,6 +210,7 @@ export type Database = {
       }
       rewards: {
         Row: {
+          cash_price: number
           category: string
           created_at: string
           description: string
@@ -216,6 +223,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cash_price?: number
           category: string
           created_at?: string
           description?: string
@@ -228,6 +236,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cash_price?: number
           category?: string
           created_at?: string
           description?: string
@@ -295,7 +304,10 @@ export type Database = {
         Args: { p_bonus_points?: number; p_mission_id: number }
         Returns: Json
       }
-      redeem_reward: { Args: { p_reward_id: string }; Returns: Json }
+      redeem_reward: {
+        Args: { p_payment_method: string; p_reward_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

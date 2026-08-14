@@ -4,7 +4,7 @@ import type { TabId } from '../types'
 const navigationItems: ReadonlyArray<{ id: TabId; label: string }> = [
   { id: 'home', label: '홈' },
   { id: 'booths', label: '부스' },
-  { id: 'shop', label: '굿즈 숍' },
+  { id: 'shop', label: '리워드' },
   { id: 'my', label: 'MY' },
 ]
 

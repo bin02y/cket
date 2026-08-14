@@ -23,25 +23,40 @@ export type AuthActionResult = {
   notice?: string
 }
 
-export type RewardId = 'seed-ticket' | 'reusable-kit' | 'ktx-pouch' | 'eco-tumbler'
+export type RewardId =
+  | 'cycle-parts-keyring'
+  | 'mini-thermometer-keyring'
+  | 'thermo-sticker'
+  | 'eco-tumbler'
+  | 'acrylic-cycle-keyring'
+  | 'esg-photo-cards'
+  | 'recycled-plastic-pen'
+  | 'mini-eco-pouch'
+  | 'cooling-character-badges'
+  | 'cooling-master-medal'
+
+export type RewardPaymentMethod = 'points' | 'cash' | 'free'
 
 export type RewardProduct = {
   id: RewardId
   name: string
   subtitle: string
-  description: string
+  descriptions: readonly string[]
   impact: string
-  points: number
-  category: 'event' | 'lifestyle' | 'upcycle'
-  categoryLabel: string
-  icon: 'leaf' | 'recycle' | 'train' | 'cup'
+  cashPrice: number
+  points: number | null
+  category: 'tech' | 'lifestyle' | 'limited'
+  icon: 'leaf' | 'recycle' | 'train' | 'cup' | 'snowflake' | 'thermometer' | 'sparkle' | 'wind'
   theme: 'mint' | 'sky' | 'navy' | 'aqua'
   pickupNote: string
+  requirement?: 'participant' | 'one-stamp' | 'passport'
 }
 
 export type RewardRedemptionResult =
-  | { status: 'success'; orderCode: string }
+  | { status: 'success'; orderCode: string; paymentMethod: RewardPaymentMethod }
   | { status: 'insufficient'; shortage: number }
+  | { status: 'locked'; requiredStamps: number }
+  | { status: 'already_claimed' }
   | { status: 'error'; message: string }
 
 export type PointTransaction = {

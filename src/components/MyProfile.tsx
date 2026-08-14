@@ -7,6 +7,7 @@ type MyProfileProps = {
   transactions: readonly PointTransaction[]
   completedBooths: ReadonlySet<MissionId>
   balance: number
+  rewardOrderCount: number
   onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
   onOpenBooths: () => void
@@ -27,12 +28,11 @@ const stampBooths: readonly { id: MissionId; number: string; hall: string; title
   { id: 4, number: '05', hall: '환경 부스 4', title: '나비효과', icon: 'butterfly' },
 ]
 
-export function MyProfile({ profile, transactions, completedBooths, balance, onLogout, onDeleteAccount, onOpenBooths }: MyProfileProps) {
+export function MyProfile({ profile, transactions, completedBooths, balance, rewardOrderCount, onLogout, onDeleteAccount, onOpenBooths }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const earnedPoints = transactions.reduce((total, transaction) => transaction.type === 'earn' ? total + transaction.amount : total, 0)
-  const rewardCount = transactions.filter((transaction) => transaction.type === 'spend').length
   const ecoActions = completedBooths.size
   const energySaved = completedBooths.size * 1.08
   const carbonSaved = energySaved * 0.46
@@ -67,7 +67,7 @@ export function MyProfile({ profile, transactions, completedBooths, balance, onL
           <div className="level-progress"><i style={{ width: `${Math.min(levelProgress, 100)}%` }} /></div>
         </div>
         <div className="level-orbit" aria-hidden="true"><i /><i /><i /><span><Icon name={currentLevel.level >= 3 ? 'train' : 'leaf'} /></span></div>
-        <div className="level-stats"><div><small>보유 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div><div><small>완료 부스</small><strong>{completedBooths.size} / 5</strong></div><div><small>굿즈 교환</small><strong>{rewardCount}회</strong></div></div>
+        <div className="level-stats"><div><small>보유 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div><div><small>완료 부스</small><strong>{completedBooths.size} / 5</strong></div><div><small>리워드 수령</small><strong>{rewardOrderCount}회</strong></div></div>
       </section>
 
       <section className={`eco-passport${passportReady ? ' eco-passport--issued' : ''}`} aria-labelledby="eco-passport-title">
