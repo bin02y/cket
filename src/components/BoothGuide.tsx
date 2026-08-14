@@ -59,7 +59,7 @@ export function BoothGuide({ completedBooths, onBoothComplete, onOpenShop }: Boo
   const [activeBooth, setActiveBooth] = useState<MissionId | null>(null)
 
   if (activeBooth === 1) {
-    return <MissionExperience mission={1} isCompleted={completedBooths.has(1)} onComplete={() => onBoothComplete(1)} onBack={() => setActiveBooth(null)} />
+    return <MissionExperience isCompleted={completedBooths.has(1)} onComplete={() => onBoothComplete(1)} onBack={() => setActiveBooth(null)} />
   }
 
   if (activeBooth === 2 || activeBooth === 5) {

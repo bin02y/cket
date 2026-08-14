@@ -1,7 +1,6 @@
 import { Icon } from './Icon'
 
 type KtxDataPanelProps = {
-  mission: 1 | 2
   progress: number
 }
 
@@ -12,12 +11,9 @@ const cycleReadings = [
   { label: '증발 구간', temperature: '12.0°C', pressure: '3.1 bar', airflow: '4.4 m/s' },
 ]
 
-export function KtxDataPanel({ mission, progress }: KtxDataPanelProps) {
+export function KtxDataPanel({ progress }: KtxDataPanelProps) {
   const stageIndex = Math.min(Math.floor(progress / 25), 3)
   const cycleReading = cycleReadings[stageIndex]
-  const cabinTemperature = Math.max(24, 29.8 - progress * 0.065).toFixed(1)
-  const energySaving = Math.round(progress * 0.18)
-  const controlError = Math.max(0.2, 2.4 - progress * 0.023).toFixed(1)
 
   return (
     <aside className="ktx-data-panel" aria-label="KTX 초고속 환경 가상 데이터">
@@ -37,45 +33,24 @@ export function KtxDataPanel({ mission, progress }: KtxDataPanelProps) {
         <p>초고속 주행 모드</p>
       </div>
 
-      {mission === 1 ? (
-        <div className="sensor-grid">
-          <article>
-            <span>현재 구간</span>
-            <strong>{cycleReading.label}</strong>
-          </article>
-          <article>
-            <span>냉매 온도</span>
-            <strong>{cycleReading.temperature}</strong>
-          </article>
-          <article>
-            <span>배관 압력</span>
-            <strong>{cycleReading.pressure}</strong>
-          </article>
-          <article>
-            <span>토출 풍속</span>
-            <strong>{cycleReading.airflow}</strong>
-          </article>
-        </div>
-      ) : (
-        <div className="sensor-grid">
-          <article>
-            <span>현재 객실</span>
-            <strong>{cabinTemperature}°C</strong>
-          </article>
-          <article>
-            <span>목표 온도</span>
-            <strong>24.0°C</strong>
-          </article>
-          <article>
-            <span>제어 오차</span>
-            <strong>±{controlError}°C</strong>
-          </article>
-          <article>
-            <span>에너지 절감</span>
-            <strong>{energySaving}%</strong>
-          </article>
-        </div>
-      )}
+      <div className="sensor-grid">
+        <article>
+          <span>현재 구간</span>
+          <strong>{cycleReading.label}</strong>
+        </article>
+        <article>
+          <span>냉매 온도</span>
+          <strong>{cycleReading.temperature}</strong>
+        </article>
+        <article>
+          <span>배관 압력</span>
+          <strong>{cycleReading.pressure}</strong>
+        </article>
+        <article>
+          <span>토출 풍속</span>
+          <strong>{cycleReading.airflow}</strong>
+        </article>
+      </div>
 
       <div className="data-source-note">
         <Icon name="gauge" />

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { MissionId } from '../types'
 import { Icon } from './Icon'
 
 type QuickBoothExperienceProps = {

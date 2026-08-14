@@ -175,7 +175,3 @@ export const rewardProducts: readonly RewardProduct[] = [
     requirement: 'passport',
   },
 ]
-
-export const rewardsById = Object.fromEntries(
-  rewardProducts.map((reward) => [reward.id, reward]),
-) as Record<RewardProduct['id'], RewardProduct>

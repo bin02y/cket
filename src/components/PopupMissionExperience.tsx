@@ -125,7 +125,6 @@ function ButterflyRooms({ step, answers }: { step: number; answers: readonly boo
 }
 
 type ResultModalProps = {
-  mission: 3 | 4
   score: number
   maxScore: number
   success: boolean
@@ -137,7 +136,7 @@ type ResultModalProps = {
   onBack: () => void
 }
 
-function ResultModal({ mission, score, maxScore, success, isCompleted, isSaving, saveError, onClaim, onRetry, onBack }: ResultModalProps) {
+function ResultModal({ score, maxScore, success, isCompleted, isSaving, saveError, onClaim, onRetry, onBack }: ResultModalProps) {
   const modalRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -291,7 +290,7 @@ export function PopupMissionExperience({ mission, isCompleted, onComplete, onBac
         <em>{correctCount} / {scenarios.length}</em>
       </section>
 
-      {showResult ? <ResultModal mission={mission} score={score} maxScore={maxScore} success={correctCount === scenarios.length} isCompleted={isCompleted} isSaving={isSaving} saveError={saveError} onClaim={claimMission} onRetry={retryMission} onBack={onBack} /> : null}
+      {showResult ? <ResultModal score={score} maxScore={maxScore} success={correctCount === scenarios.length} isCompleted={isCompleted} isSaving={isSaving} saveError={saveError} onClaim={claimMission} onRetry={retryMission} onBack={onBack} /> : null}
     </main>
   )
 }

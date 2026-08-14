@@ -4,7 +4,6 @@ import { KtxDataPanel } from './KtxDataPanel'
 import { useSimulationPlayback } from '../hooks/useSimulationPlayback'
 
 type MissionExperienceProps = {
-  mission: 1
   isCompleted: boolean
   onComplete: () => Promise<string | null>
   onBack: () => void
@@ -46,7 +45,7 @@ function RefrigerationFilm({ activeStage, isPlaying }: { activeStage: number; is
   )
 }
 
-export function MissionExperience({ mission, isCompleted, onComplete, onBack }: MissionExperienceProps) {
+export function MissionExperience({ isCompleted, onComplete, onBack }: MissionExperienceProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const { progress, isPlaying, togglePlayback, reset, seek } = useSimulationPlayback()
@@ -129,7 +128,7 @@ export function MissionExperience({ mission, isCompleted, onComplete, onBack }: 
           </div>
         </section>
 
-        <KtxDataPanel mission={mission} progress={progress} />
+        <KtxDataPanel progress={progress} />
       </div>
 
       <section className="chapter-panel" aria-labelledby="chapter-title">
