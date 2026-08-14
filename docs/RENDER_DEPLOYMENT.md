@@ -54,3 +54,13 @@ Blueprint는 다음 설정을 적용한다.
 - 환경 보호 실천 리포트가 사용자 데이터와 일치하는지 확인
 - 로그아웃과 회원탈퇴가 정상 동작하는지 확인
 - 브라우저 콘솔과 Render 배포 로그에 오류가 없는지 확인
+
+## 5. 운영 배포 결과
+
+- 운영 URL: `https://eco-express.onrender.com`
+- Render 서비스: `eco-express` Static Site
+- Git 저장소: `https://github.com/bin02y/eco-express` (`main`, private)
+- 빌드 명령: `npm ci && npm run build`
+- Publish Directory: `dist`
+
+2026-08-14 운영 환경에서 PC 1280×900과 모바일 390×844 접속, Supabase 즉시 가입, 미션 1~4, 친환경 선택 보너스, 640P 적립, 80P 굿즈 교환, 560P 잔액 복원, LEVEL 4 실천 리포트, 로그아웃·재로그인, 회원탈퇴 cascade 삭제를 확인했다. 테스트 계정과 연결 데이터는 검증 후 모두 삭제했다.
