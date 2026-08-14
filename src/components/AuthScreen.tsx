@@ -7,11 +7,9 @@ type AuthMode = 'login' | 'signup'
 type AuthScreenProps = {
   onLogin: (credentials: AuthCredentials) => Promise<AuthActionResult>
   onSignUp: (details: SignUpDetails) => Promise<AuthActionResult>
-  onStartDemo: () => void
-  isSupabaseEnabled: boolean
 }
 
-export function AuthScreen({ onLogin, onSignUp, onStartDemo, isSupabaseEnabled }: AuthScreenProps) {
+export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>('signup')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -40,13 +38,8 @@ export function AuthScreen({ onLogin, onSignUp, onStartDemo, isSupabaseEnabled }
 
     if (mode === 'signup') {
       const name = String(formData.get('name')).trim()
-      const agreed = formData.get('agreement') === 'on'
       if (!name) {
         setError('참가자 이름을 입력해 주세요.')
-        return
-      }
-      if (!agreed) {
-        setError('체험 데이터 이용 안내에 동의해 주세요.')
         return
       }
       setIsSubmitting(true)
@@ -108,17 +101,10 @@ export function AuthScreen({ onLogin, onSignUp, onStartDemo, isSupabaseEnabled }
           {mode === 'signup' ? <label><span>참가자 이름</span><input name="name" type="text" autoComplete="name" placeholder="이름을 입력해 주세요" /></label> : null}
           <label><span>이메일</span><input name="email" type="email" autoComplete="email" placeholder="eco@example.com" /></label>
           <label><span>비밀번호</span><input name="password" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} placeholder="6자 이상 입력해 주세요" /></label>
-          {mode === 'signup' ? (
-            <label className="auth-agreement"><input name="agreement" type="checkbox" /><span><strong>체험 데이터 이용 안내에 동의합니다.</strong>{isSupabaseEnabled ? '계정과 활동 기록은 사용자별로 Supabase에 안전하게 저장됩니다.' : '체험 계정의 활동 기록은 브라우저를 닫으면 초기화됩니다.'}</span></label>
-          ) : null}
           <p className="auth-error" role="alert" aria-live="polite">{error}</p>
           {notice ? <p className="auth-notice" role="status">{notice}</p> : null}
           <button className="auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? '연결 중...' : mode === 'signup' ? '가입하고 출발하기' : '로그인하기'} {!isSubmitting ? <Icon name="arrow" /> : null}</button>
         </form>
-
-        <div className="auth-divider"><span>또는</span></div>
-        <button className="auth-demo-button" type="button" onClick={onStartDemo}><Icon name="train" /> 체험 계정으로 바로 둘러보기</button>
-        <p className={`auth-phase-note${isSupabaseEnabled ? ' is-connected' : ''}`}><Icon name={isSupabaseEnabled ? 'check' : 'lock'} /> {isSupabaseEnabled ? 'Supabase Auth 보안 연결 활성화' : '환경변수 미설정 · 브라우저 체험 인증 모드'}</p>
       </section>
     </main>
   )

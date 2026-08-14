@@ -8,7 +8,6 @@ type MyProfileProps = {
   transactions: readonly PointTransaction[]
   completedMissions: ReadonlySet<MissionId>
   balance: number
-  isDemo: boolean
   onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
   onOpenMissions: () => void
@@ -21,7 +20,7 @@ const levelSteps = [
   { level: 4, min: 500, max: 640, name: 'ECO FOREST', label: '에코 숲' },
 ] as const
 
-export function MyProfile({ profile, transactions, completedMissions, balance, isDemo, onLogout, onDeleteAccount, onOpenMissions }: MyProfileProps) {
+export function MyProfile({ profile, transactions, completedMissions, balance, onLogout, onDeleteAccount, onOpenMissions }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -93,7 +92,7 @@ export function MyProfile({ profile, transactions, completedMissions, balance, i
 
       <section className="profile-account-card" aria-label="계정 정보">
         <div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div>
-        <span className="profile-mode-chip"><Icon name="lock" /> {isDemo ? '브라우저 체험 계정' : 'Supabase 보호 계정'}</span>
+        <span className="profile-mode-chip"><Icon name="lock" /> Supabase 보호 계정</span>
       </section>
 
       {showDeleteDialog ? (

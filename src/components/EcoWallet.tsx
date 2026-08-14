@@ -9,7 +9,6 @@ type EcoWalletProps = {
   balance: number
   transactions: readonly PointTransaction[]
   completedMissions: ReadonlySet<MissionId>
-  isDemo: boolean
   onOpenMissions: () => void
 }
 
@@ -19,7 +18,7 @@ const filterLabels: Record<TransactionFilter, string> = {
   spend: '사용',
 }
 
-export function EcoWallet({ balance, transactions, completedMissions, isDemo, onOpenMissions }: EcoWalletProps) {
+export function EcoWallet({ balance, transactions, completedMissions, onOpenMissions }: EcoWalletProps) {
   const [filter, setFilter] = useState<TransactionFilter>('all')
   const earnedPoints = transactions.reduce((total, transaction) => transaction.type === 'earn' ? total + transaction.amount : total, 0)
   const spentPoints = transactions.reduce((total, transaction) => transaction.type === 'spend' ? total + Math.abs(transaction.amount) : total, 0)
@@ -34,7 +33,7 @@ export function EcoWallet({ balance, transactions, completedMissions, isDemo, on
           <h1>나의 에코 포인트</h1>
           <p>미션으로 만든 변화를 포인트와 활동 기록으로 확인하세요.</p>
         </div>
-        <span className="wallet-security-chip"><Icon name="lock" /> {isDemo ? '체험 모드' : 'Supabase 저장'}</span>
+        <span className="wallet-security-chip"><Icon name="lock" /> Supabase 저장</span>
       </header>
 
       <section className="wallet-balance-card" aria-label={`현재 보유 포인트 ${balance}점`}>
