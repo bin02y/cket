@@ -8,16 +8,15 @@ import { HomeDashboard } from './components/HomeDashboard'
 import { Icon } from './components/Icon'
 import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
-import { loadParticipantData, saveBoothCompletion, saveRewardRedemption, translateDataError } from './lib/participantData'
+import { loadParticipantData, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
-  const [isDataLoading, setIsDataLoading] = useState(false)
   const [dataError, setDataError] = useState('')
   const dataRequestId = useRef(0)
   const completedBooths = new Set(transactions.flatMap((transaction) => transaction.missionId ? [transaction.missionId] : []))
@@ -25,7 +24,6 @@ function App() {
 
   const loadRemoteState = useCallback(async (user: User) => {
     const requestId = ++dataRequestId.current
-    setIsDataLoading(true)
     setDataError('')
     try {
       const data = await loadParticipantData(user)
@@ -38,8 +36,6 @@ function App() {
       const message = translateDataError(error)
       setDataError(message)
       return message
-    } finally {
-      if (dataRequestId.current === requestId) setIsDataLoading(false)
     }
   }, [])
 
@@ -137,16 +133,6 @@ function App() {
     return loadRemoteState(data.session.user)
   }
 
-  async function completeBooth(boothId: MissionId, bonusPoints = 0) {
-    try {
-      await saveBoothCompletion(boothId, bonusPoints)
-      await refreshCurrentParticipant()
-      return null
-    } catch (error) {
-      return translateDataError(error)
-    }
-  }
-
   async function redeemReward(rewardId: RewardId, paymentMethod: RewardPaymentMethod): Promise<RewardRedemptionResult> {
     try {
       const result = await saveRewardRedemption(rewardId, paymentMethod)
@@ -174,11 +160,10 @@ function App() {
       <a className="skip-link" href="#main-content">본문 바로가기</a>
       <AppHeader balance={balance} />
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
-      {isDataLoading && !dataError ? <div className="data-sync-status" role="status"><span className="status-dot" /> Supabase 활동 기록 동기화 중</div> : null}
       {activeTab === 'home' ? (
         <HomeDashboard balance={balance} completedBooths={completedBooths} onOpenBooths={() => navigateTo('booths')} />
       ) : activeTab === 'booths' ? (
-        <BoothGuide completedBooths={completedBooths} onBoothComplete={completeBooth} onOpenShop={() => navigateTo('shop')} />
+        <BoothGuide completedBooths={completedBooths} onOpenShop={() => navigateTo('shop')} />
       ) : activeTab === 'shop' ? (
         <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (

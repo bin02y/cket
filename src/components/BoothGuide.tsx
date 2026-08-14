@@ -1,13 +1,8 @@
-import { useState } from 'react'
 import type { MissionId } from '../types'
 import { Icon } from './Icon'
-import { MissionExperience } from './MissionExperience'
-import { PopupMissionExperience } from './PopupMissionExperience'
-import { QuickBoothExperience } from './QuickBoothExperience'
 
 type BoothGuideProps = {
   completedBooths: ReadonlySet<MissionId>
-  onBoothComplete: (boothId: MissionId, bonusPoints?: number) => Promise<string | null>
   onOpenShop: () => void
 }
 
@@ -17,7 +12,7 @@ type EnvironmentBooth = {
   title: string
   description: string
   icon: 'snowflake' | 'wind' | 'paw' | 'butterfly'
-  theme: 'ice' | 'summer' | 'nature' | 'butterfly'
+  theme: 'blue' | 'red' | 'green' | 'yellow'
 }
 
 const environmentBooths: readonly EnvironmentBooth[] = [
@@ -27,7 +22,7 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     title: '녹는 빙하 위에서 펭귄을 구해내라!',
     description: '점점 높아지는 수면과 갈라지는 빙하를 살피며 펭귄이 안전한 곳으로 이동하도록 도와주세요.',
     icon: 'snowflake',
-    theme: 'ice',
+    theme: 'blue',
   },
   {
     id: 2,
@@ -35,7 +30,7 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     title: '무더운 여름에서 살아남기',
     description: '더운 방에서 에어컨과 부채 중 상황에 맞는 냉방 방법을 선택해 에너지를 아껴보세요.',
     icon: 'wind',
-    theme: 'summer',
+    theme: 'red',
   },
   {
     id: 3,
@@ -43,7 +38,7 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     title: '기후 위기에서 동물들을 구하라',
     description: '에어컨 끄고 나가기, 쓰레기 분리수거 같은 선택으로 빙하와 동물들을 지켜주세요.',
     icon: 'paw',
-    theme: 'nature',
+    theme: 'green',
   },
   {
     id: 4,
@@ -51,25 +46,11 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     title: '나비효과로부터 지구를 지켜라',
     description: '두 개의 방을 살펴보고 에어컨 온도와 생활 습관이 만든 서로 다른 미래를 확인하세요.',
     icon: 'butterfly',
-    theme: 'butterfly',
+    theme: 'yellow',
   },
 ]
 
-export function BoothGuide({ completedBooths, onBoothComplete, onOpenShop }: BoothGuideProps) {
-  const [activeBooth, setActiveBooth] = useState<MissionId | null>(null)
-
-  if (activeBooth === 1) {
-    return <MissionExperience isCompleted={completedBooths.has(1)} onComplete={() => onBoothComplete(1)} onBack={() => setActiveBooth(null)} />
-  }
-
-  if (activeBooth === 2 || activeBooth === 5) {
-    return <QuickBoothExperience boothId={activeBooth} isCompleted={completedBooths.has(activeBooth)} onComplete={() => onBoothComplete(activeBooth)} onBack={() => setActiveBooth(null)} />
-  }
-
-  if (activeBooth === 3 || activeBooth === 4) {
-    return <PopupMissionExperience mission={activeBooth} isCompleted={completedBooths.has(activeBooth)} onComplete={(bonus) => onBoothComplete(activeBooth, bonus)} onBack={() => setActiveBooth(null)} />
-  }
-
+export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
   return (
     <main id="main-content" className="page booth-page">
       <section className="booth-hero" aria-labelledby="booth-hero-title">
@@ -109,7 +90,7 @@ export function BoothGuide({ completedBooths, onBoothComplete, onOpenShop }: Boo
             <span><Icon name="snowflake" /> 냉동 사이클 핵심 원리</span>
             <span><Icon name="train" /> KTX 초고속 환경</span>
           </div>
-          <button className="primary-button" type="button" onClick={() => setActiveBooth(1)}>{completedBooths.has(1) ? '체험 다시 보기' : '체험 시작하기'} <Icon name="arrow" /></button>
+          <span className="environment-booth__onsite"><span className="status-dot" /> 현장 체험 프로그램</span>
         </div>
       </section>
 
@@ -127,7 +108,7 @@ export function BoothGuide({ completedBooths, onBoothComplete, onOpenShop }: Boo
                 <span className="environment-booth__icon"><Icon name={booth.icon} /></span>
                 <h3>{booth.title}</h3>
                 <p>{booth.description}</p>
-                <button type="button" onClick={() => setActiveBooth(booth.id)}>{isCompleted ? '체험 다시 보기' : '체험 시작하기'} <Icon name="arrow" /></button>
+                <span className="environment-booth__onsite"><span className="status-dot" /> 현장 체험 부스</span>
               </article>
             )
           })}
