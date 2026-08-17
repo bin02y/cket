@@ -39,6 +39,8 @@ export type RewardProduct = {
   id: RewardId
   name: string
   subtitle: string
+  image: string
+  imageAlt: string
   descriptions: readonly string[]
   impact: string
   cashPrice: number

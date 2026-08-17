@@ -109,7 +109,7 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
             return (
               <article className={`reward-product-card${unlocked ? '' : ' is-locked'}`} key={reward.id}>
                 <div className={`reward-product-card__visual reward-product-card__visual--${reward.theme}`}>
-                  <div className="reward-product-object"><Icon name={reward.icon} /><i /><i /></div>
+                  <img className="reward-product-image" src={reward.image} alt={reward.imageAlt} loading="lazy" decoding="async" />
                 </div>
                 <div className="reward-product-card__body">
                   <p>{reward.subtitle}</p>
@@ -180,7 +180,7 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
               </div>
             ) : (
               <>
-                <div className={`reward-dialog__visual reward-product-card__visual--${selectedReward.theme}`}><div className="reward-product-object"><Icon name={selectedReward.icon} /><i /><i /></div></div>
+                <div className={`reward-dialog__visual reward-product-card__visual--${selectedReward.theme}`}><img className="reward-product-image" src={selectedReward.image} alt={selectedReward.imageAlt} decoding="async" /></div>
                 <div className="reward-dialog__content">
                   <h2 id="reward-dialog-title">{selectedReward.name}</h2>
                   <p className="reward-dialog__subtitle">{selectedReward.subtitle}</p>

@@ -1,10 +1,20 @@
 import type { RewardProduct } from '../types'
+import coolingKeycapImage from '../assets/rewards/cooling-keycap.png'
+import cyclePartsKeyringImage from '../assets/rewards/cycle-parts-keyring.png'
+import ecoPowerBankImage from '../assets/rewards/eco-power-bank.png'
+import ecoTumblerImage from '../assets/rewards/eco-tumbler.png'
+import miniEcoPouchImage from '../assets/rewards/mini-eco-pouch.png'
+import miniFanImage from '../assets/rewards/mini-fan.png'
+import recycledPlasticPenImage from '../assets/rewards/recycled-plastic-pen.png'
+import thermoStickerImage from '../assets/rewards/thermo-sticker.png'
 
 export const rewardProducts: readonly RewardProduct[] = [
   {
     id: 'cycle-parts-keyring',
     name: '냉동사이클 부품 키링',
     subtitle: '네 가지 공조 부품을 모으는 컬렉션',
+    image: cyclePartsKeyringImage,
+    imageAlt: '냉동공조 캐릭터로 디자인한 메탈 키링 세트',
     descriptions: [
       '압축기, 응축기, 팽창밸브, 증발기를 캐릭터처럼 디자인했습니다.',
       '4종 컬렉션으로 구성해 하나씩 모으는 재미를 더했습니다.',
@@ -22,6 +32,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'thermo-sticker',
     name: '변온 스티커',
     subtitle: '온도에 따라 색이 변하는 체험 굿즈',
+    image: thermoStickerImage,
+    imageAlt: '온도와 환경 메시지를 담은 Green Rail 변온 스티커 모음',
     descriptions: [
       '주변 온도에 따라 색이 변하는 스티커입니다.',
       '냉장고, 텀블러, 휴대폰 등에 붙일 수 있도록 제작했습니다.',
@@ -39,6 +51,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'eco-tumbler',
     name: '친환경 텀블러 또는 리유저블 컵',
     subtitle: '시원함은 오래, 일회용품은 적게',
+    image: ecoTumblerImage,
+    imageAlt: '화이트, 하늘색, 베이지, 네이비 색상의 친환경 텀블러',
     descriptions: [
       'ESG 이미지와 가장 쉽게 연결되는 실용적인 다회용 굿즈입니다.',
       'KTX나 냉동사이클 그래픽을 적용해 일반적인 행사 텀블러와 차별화했습니다.',
@@ -56,6 +70,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'recycled-plastic-pen',
     name: '재생 플라스틱 볼펜',
     subtitle: '학교와 일상에서 이어가는 ESG 습관',
+    image: recycledPlasticPenImage,
+    imageAlt: '재생 플라스틱 소재로 만든 Green Rail 볼펜 네 종류',
     descriptions: [
       '폐플라스틱과 재생 소재를 활용해 만든 볼펜입니다.',
       '학교와 직장에서 자주 사용할 수 있는 실용적인 굿즈입니다.',
@@ -73,6 +89,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'mini-eco-pouch',
     name: '미니 에코백 / 파우치',
     subtitle: '냉동사이클 회로도를 담은 데일리 파우치',
+    image: miniEcoPouchImage,
+    imageAlt: 'Green Rail 캐릭터와 냉동공조 그래픽을 적용한 미니 에코백과 파우치',
     descriptions: [
       '문구류와 충전기 등을 넣을 수 있는 작은 파우치입니다.',
       '냉동사이클 회로도를 세련된 그래픽 패턴으로 디자인했습니다.',
@@ -90,6 +108,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'cooling-keycap',
     name: '냉동공조 키캡',
     subtitle: '냉동사이클 요소를 담은 컬렉션 키캡',
+    image: coolingKeycapImage,
+    imageAlt: '압축기, 응축기, 팽창밸브, 증발기 캐릭터를 담은 키캡 키링',
     descriptions: [
       '압축기, 응축기, 팽창밸브, 증발기 등의 냉동사이클 요소를 작은 키캡에 디자인했습니다.',
       '눈꽃, 바람, 온도계, 친환경 마크 등 다양한 디자인으로 컬렉션화할 수 있습니다.',
@@ -107,6 +127,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'eco-power-bank',
     name: '친환경 보조배터리',
     subtitle: '일상에서 오래 사용하는 상위 등급 리워드',
+    image: ecoPowerBankImage,
+    imageAlt: 'Green Rail 냉동공조 그래픽을 적용한 흰색 친환경 보조배터리',
     descriptions: [
       'Green Rail, 에너지 절약, 지구 등의 친환경 디자인을 적용했습니다.',
       '일상생활에서 자주 사용할 수 있어 실용성이 높은 굿즈입니다.',
@@ -124,6 +146,8 @@ export const rewardProducts: readonly RewardProduct[] = [
     id: 'mini-fan',
     name: '미니 선풍기',
     subtitle: '냉방과 바람을 손안에서 느끼는 실용 굿즈',
+    image: miniFanImage,
+    imageAlt: 'Green Rail 로고가 적용된 흰색 접이식 미니 선풍기',
     descriptions: [
       '냉방과 바람이라는 프로그램의 핵심 주제와 직접 연결되는 굿즈입니다.',
       '휴대용 또는 탁상용으로 사용할 수 있는 작은 선풍기 형태입니다.',
