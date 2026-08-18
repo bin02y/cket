@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react'
 import type { MissionId } from '../types'
+import boothOneImage from '../assets/booths/booth-1.png'
+import boothTwoImage from '../assets/booths/booth-2.png'
+import boothThreeImage from '../assets/booths/booth-3.png'
+import boothFourImage from '../assets/booths/booth-4.png'
 import { Icon } from './Icon'
 
 type BoothGuideProps = {
@@ -11,6 +16,8 @@ type EnvironmentBooth = {
   number: string
   title: string
   description: string
+  image: string
+  imageAlt: string
   icon: 'snowflake' | 'wind' | 'paw' | 'butterfly'
   theme: 'blue' | 'red' | 'green' | 'yellow'
 }
@@ -21,6 +28,8 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     number: '01',
     title: '녹는 빙하 위에서 펭귄을 구해내라!',
     description: '점점 높아지는 수면과 갈라지는 빙하를 살피며 펭귄이 안전한 곳으로 이동하도록 도와주세요.',
+    image: boothOneImage,
+    imageAlt: '녹는 빙하 위 펭귄을 구조하는 환경 부스 안내 이미지',
     icon: 'snowflake',
     theme: 'blue',
   },
@@ -29,6 +38,8 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     number: '02',
     title: '무더운 여름에서 살아남기',
     description: '더운 방에서 에어컨과 부채 중 상황에 맞는 냉방 방법을 선택해 에너지를 아껴보세요.',
+    image: boothTwoImage,
+    imageAlt: '무더운 방에서 에어컨과 부채 중 냉방 방법을 선택하는 환경 부스 안내 이미지',
     icon: 'wind',
     theme: 'red',
   },
@@ -37,6 +48,8 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     number: '03',
     title: '기후 위기에서 동물들을 구하라',
     description: '에어컨 끄고 나가기, 쓰레기 분리수거 같은 선택으로 빙하와 동물들을 지켜주세요.',
+    image: boothThreeImage,
+    imageAlt: '기후 위기 속 북극곰과 빙하를 지키는 환경 부스 안내 이미지',
     icon: 'paw',
     theme: 'green',
   },
@@ -45,12 +58,33 @@ const environmentBooths: readonly EnvironmentBooth[] = [
     number: '04',
     title: '나비효과로부터 지구를 지켜라',
     description: '두 개의 방을 살펴보고 에어컨 온도와 생활 습관이 만든 서로 다른 미래를 확인하세요.',
+    image: boothFourImage,
+    imageAlt: '생활 습관 선택에 따른 지구의 서로 다른 미래를 비교하는 환경 부스 안내 이미지',
     icon: 'butterfly',
     theme: 'yellow',
   },
 ]
 
 export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
+  const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
+
+  useEffect(() => {
+    if (!selectedBooth) return
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedBooth(null)
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedBooth])
+
   return (
     <main id="main-content" className="page booth-page">
       <section className="booth-hero" aria-labelledby="booth-hero-title">
@@ -105,13 +139,19 @@ export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
           {environmentBooths.map((booth) => {
             const isCompleted = completedBooths.has(booth.id)
             return (
-              <article className={`environment-booth environment-booth--${booth.theme}`} key={booth.id}>
+              <button
+                className={`environment-booth environment-booth--${booth.theme}`}
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => setSelectedBooth(booth)}
+                key={booth.id}
+              >
                 <div className="environment-booth__topline"><span>BOOTH {booth.number}</span><em>{isCompleted ? <><Icon name="check" /> 스탬프 완료</> : '체험 가능'}</em></div>
                 <span className="environment-booth__icon"><Icon name={booth.icon} /></span>
-                <h3>{booth.title}</h3>
-                <p>{booth.description}</p>
-                <span className="environment-booth__onsite"><span className="status-dot" /> 현장 체험 부스</span>
-              </article>
+                <span className="environment-booth__title">{booth.title}</span>
+                <span className="environment-booth__description">{booth.description}</span>
+                <span className="environment-booth__onsite"><span className="status-dot" /> 부스 이미지 보기 <Icon name="arrow" /></span>
+              </button>
             )
           })}
         </div>
@@ -122,6 +162,21 @@ export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
         <div><h2 id="reward-hall-title">체험 포인트를 원하는 굿즈로</h2><p>부스에서 모은 ECO POINT를 확인하고 일상 속 친환경 실천을 돕는 굿즈로 교환하세요.</p></div>
         <button className="primary-button" type="button" onClick={onOpenShop}>리워드관 입장 <Icon name="arrow" /></button>
       </section>
+
+      {selectedBooth ? (
+        <div className="booth-image-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}>
+          <section className="booth-image-dialog" role="dialog" aria-modal="true" aria-labelledby="booth-image-dialog-title">
+            <header>
+              <div>
+                <span>BOOTH {selectedBooth.number}</span>
+                <h2 id="booth-image-dialog-title">{selectedBooth.title}</h2>
+              </div>
+              <button type="button" aria-label="부스 이미지 닫기" onClick={() => setSelectedBooth(null)} autoFocus>×</button>
+            </header>
+            <img src={selectedBooth.image} alt={selectedBooth.imageAlt} decoding="async" />
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }
