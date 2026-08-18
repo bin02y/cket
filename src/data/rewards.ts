@@ -14,7 +14,7 @@ export const rewardProducts: readonly RewardProduct[] = [
     name: '냉동사이클 부품 키링',
     subtitle: '네 가지 공조 부품을 모으는 컬렉션',
     image: cyclePartsKeyringImage,
-    imageAlt: '냉동공조 캐릭터로 디자인한 메탈 키링 세트',
+    imageAlt: '압축기, 응축기, 팽창밸브, 증발기 모양의 냉동사이클 부품 키링 4종',
     descriptions: [
       '압축기, 응축기, 팽창밸브, 증발기를 캐릭터처럼 디자인했습니다.',
       '4종 컬렉션으로 구성해 하나씩 모으는 재미를 더했습니다.',
