@@ -610,7 +610,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .booth-route strong { color: var(--blue-950); font-size: 12px; }
 .booth-route small { margin-top: 2px; color: var(--muted); font-size: 9px; }
 .booth-route > svg { width: 17px; height: 17px; color: #9eb3c1; }
-.booth-hall { display: grid; grid-template-columns: .92fr 1.08fr; min-height: 360px; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 30px; box-shadow: var(--shadow); }
+.booth-hall { position: relative; display: grid; grid-template-columns: .92fr 1.08fr; min-height: 360px; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 30px; box-shadow: var(--shadow); transition: transform 180ms ease,box-shadow 180ms ease; }
+.booth-hall:hover { transform: translateY(-3px); box-shadow: 0 22px 48px rgba(20,82,117,.13); }
+.booth-hall__trigger { position: absolute; z-index: 10; inset: 0; width: 100%; height: 100%; padding: 0; background: transparent; border: 0; border-radius: inherit; cursor: pointer; }
+.booth-hall__trigger:focus-visible { outline: 4px solid rgba(8,121,219,.38); outline-offset: -5px; }
 .booth-hall__visual { position: relative; min-height: 360px; overflow: hidden; background: linear-gradient(155deg,#dff5ff,#ccecff 55%,#dff8eb); }
 .booth-hall__visual::before,.booth-hall__visual::after { content: ''; position: absolute; bottom: 0; border-radius: 50% 50% 0 0; }
 .booth-hall__visual::before { left: -15%; width: 75%; height: 32%; background: #72d19b; transform: rotate(4deg); }
@@ -665,6 +668,35 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .booth-image-dialog header button { display: grid; flex: 0 0 auto; place-items: center; width: 39px; height: 39px; color: #657b89; background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: 50%; font: inherit; font-size: 25px; line-height: 1; cursor: pointer; }
 .booth-image-dialog header button:focus-visible { outline: 3px solid var(--blue-200); outline-offset: 2px; }
 .booth-image-dialog > img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; background: #f5f9fb; border-radius: 0 0 27px 27px; }
+.academy-dialog-backdrop { position: fixed; z-index: 82; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(3,24,41,.76); backdrop-filter: blur(11px); }
+.academy-dialog { display: grid; grid-template-rows: auto minmax(0,auto) auto; width: min(1000px,100%); max-height: calc(100vh - 48px); overflow: hidden; background: white; border: 1px solid rgba(255,255,255,.8); border-radius: 28px; box-shadow: 0 32px 95px rgba(1,26,42,.42); }
+.academy-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 17px 19px 16px 24px; }
+.academy-dialog > header > div { min-width: 0; }
+.academy-dialog > header span { color: var(--green-700); font-size: 8px; font-weight: 900; letter-spacing: .11em; }
+.academy-dialog > header h2 { margin: 3px 0 0; overflow: hidden; color: var(--blue-950); font-size: 20px; letter-spacing: -.035em; text-overflow: ellipsis; white-space: nowrap; }
+.academy-dialog > header button { display: grid; flex: 0 0 auto; place-items: center; width: 39px; height: 39px; color: #657b89; background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: 50%; font: inherit; font-size: 25px; line-height: 1; cursor: pointer; }
+.academy-dialog > header button:focus-visible { outline: 3px solid var(--blue-200); outline-offset: 2px; }
+.academy-dialog__stage { min-height: 0; overflow: hidden; background: #061d31; }
+.academy-dialog__stage--video { aspect-ratio: 16 / 9; max-height: calc(100vh - 190px); }
+.academy-dialog__stage video { display: block; width: 100%; height: 100%; background: #020b12; object-fit: contain; }
+.academy-dialog__stage--image { aspect-ratio: 3 / 2; max-height: calc(100vh - 190px); background: #f4f7f8; }
+.academy-dialog__stage figure { display: grid; grid-template-rows: minmax(0,1fr) auto; width: 100%; height: 100%; margin: 0; }
+.academy-dialog__stage figure img { display: block; min-width: 0; width: 100%; height: 100%; object-fit: contain; }
+.academy-dialog__stage figcaption { padding: 11px 18px; color: var(--muted); background: white; border-top: 1px solid var(--line); font-size: 10px; line-height: 1.55; text-align: center; word-break: keep-all; }
+.academy-dialog > footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 15px 19px 16px 23px; background: white; }
+.academy-dialog__progress { display: flex; align-items: center; gap: 6px; }
+.academy-dialog__progress span { display: flex; align-items: center; gap: 5px; color: #9aabb5; font-size: 8px; font-weight: 800; }
+.academy-dialog__progress i { display: grid; place-items: center; width: 23px; height: 23px; color: #8498a5; background: #edf3f6; border-radius: 8px; font-style: normal; }
+.academy-dialog__progress span.is-current { color: var(--blue-700); }
+.academy-dialog__progress span.is-current i { color: white; background: var(--blue-600); box-shadow: 0 5px 13px rgba(8,121,219,.22); }
+.academy-dialog__progress span.is-complete { color: var(--green-700); }
+.academy-dialog__progress span.is-complete i { color: white; background: var(--green-500); }
+.academy-dialog__notice { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--muted); font-size: 9px; }
+.academy-dialog__notice svg { width: 14px; height: 14px; color: var(--green-700); }
+.academy-dialog__actions { display: flex; gap: 8px; }
+.academy-dialog__actions button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 39px; padding: 0 13px; color: var(--blue-700); background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: 11px; font: inherit; font-size: 9px; font-weight: 800; cursor: pointer; }
+.academy-dialog__actions button.primary-button { color: white; background: linear-gradient(135deg,var(--blue-600),var(--green-500)); border: 0; box-shadow: 0 8px 17px rgba(8,121,219,.18); }
+.academy-dialog__actions button svg { width: 13px; height: 13px; }
 .reward-hall { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; overflow: hidden; margin-top: 22px; padding: 34px 38px; color: white; background: radial-gradient(circle at 82% 5%,rgba(123,238,203,.2),transparent 14rem),linear-gradient(130deg,#082e5c,#076c94 63%,#08806d); border-radius: 27px; box-shadow: 0 18px 45px rgba(8,46,92,.15); }
 .reward-hall::before { content: ''; position: absolute; right: -75px; bottom: -130px; width: 250px; height: 250px; border: 22px solid rgba(255,255,255,.06); border-radius: 50%; }
 .reward-hall__icon { position: relative; display: grid; place-items: center; width: 75px; height: 75px; color: #9bf0d6; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; }
@@ -718,6 +750,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .booth-image-dialog h2 { font-size: 16px; }
   .booth-image-dialog header button { width: 36px; height: 36px; }
   .booth-image-dialog > img { border-radius: 0 0 21px 21px; }
+  .academy-dialog-backdrop { padding: 14px; }
+  .academy-dialog { max-height: calc(100vh - 28px); border-radius: 22px; }
+  .academy-dialog > header { padding: 14px 14px 13px 18px; }
+  .academy-dialog > header h2 { font-size: 16px; }
+  .academy-dialog > header button { width: 36px; height: 36px; }
+  .academy-dialog__stage--video,.academy-dialog__stage--image { max-height: calc(100vh - 255px); }
+  .academy-dialog__stage figcaption { padding: 9px 12px; font-size: 8px; }
+  .academy-dialog > footer { align-items: stretch; flex-direction: column; gap: 11px; padding: 13px 15px 15px; }
+  .academy-dialog__progress { justify-content: space-between; }
+  .academy-dialog__progress span { flex-direction: column; gap: 3px; }
+  .academy-dialog__notice { justify-content: center; min-height: 38px; text-align: center; }
+  .academy-dialog__actions { display: grid; grid-template-columns: .75fr 1.25fr; }
+  .academy-dialog__actions button { min-height: 42px; }
   .reward-hall { grid-template-columns: 1fr; gap: 16px; padding: 29px 24px; text-align: left; }
   .reward-hall__icon { width: 62px; height: 62px; }
   .reward-hall .primary-button { grid-column: auto; justify-self: stretch; }
