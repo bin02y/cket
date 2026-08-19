@@ -1231,7 +1231,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .roadview__map-legend i,.roadview__map-legend b { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; }
 .roadview__map-legend i { background: white; }
 .roadview__map-legend b { background: #62dfbf; }
-.roadview__booth-info { overflow: hidden; border-top: 3px solid var(--roadview-accent); }
+.roadview__booth-info { max-height: min(90vh,760px); overflow: auto; border-top: 3px solid var(--roadview-accent); }
+.roadview__booth-image { overflow: hidden; margin: 20px 0 16px; background: #edf4f7; border: 1px solid color-mix(in srgb,var(--roadview-accent) 34%,transparent); border-radius: 18px; box-shadow: 0 14px 34px rgba(4,25,38,.14); }
+.roadview__booth-image img { display: block; width: 100%; max-height: 320px; object-fit: contain; }
 .roadview__booth-symbol { display: grid; place-items: center; width: 120px; height: 120px; margin: 26px auto 20px; color: var(--roadview-accent); background: color-mix(in srgb,var(--roadview-accent) 12%,transparent); border: 1px solid color-mix(in srgb,var(--roadview-accent) 40%,transparent); border-radius: 32px; box-shadow: 0 0 44px color-mix(in srgb,var(--roadview-accent) 15%,transparent); }
 .roadview__booth-symbol span,.roadview__booth-symbol small { display: block; text-align: center; }
 .roadview__booth-symbol span { font-size: 31px; font-weight: 950; letter-spacing: -.05em; }
@@ -1259,6 +1261,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .roadview__mobile-gate-guide span,.roadview__mobile-gate-guide strong,.roadview__mobile-gate-guide small { display: block; }
   .roadview__mobile-gate-guide strong { color: #62e7b4; font-size: 8px; }
   .roadview__mobile-gate-guide small { margin-top: 2px; font-size: 6px; line-height: 1.35; }
+  .roadview__booth-image { margin: 15px 0 13px; border-radius: 14px; }
+  .roadview__booth-image img { max-height: 230px; }
   .roadview__overlay { align-items: center; padding: max(72px,env(safe-area-inset-top)) 15px max(24px,env(safe-area-inset-bottom)); }
   .roadview__intro { padding: 31px 20px 22px; border-radius: 24px; }
   .roadview__intro h2 { font-size: clamp(29px,9vw,40px); }

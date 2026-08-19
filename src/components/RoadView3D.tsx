@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import boothOneImage from '../assets/roadview/booth-1.png'
+import boothTwoImage from '../assets/roadview/booth-2.png'
+import boothThreeImage from '../assets/roadview/booth-3.png'
+import boothFourImage from '../assets/roadview/booth-4.png'
 import { Icon } from './Icon'
 
 type RoadView3DProps = { onClose: () => void }
@@ -32,6 +36,12 @@ const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 18, z: 15, gate: { x: 15.3, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
+const BOOTH_IMAGES: Readonly<Partial<Record<number, { src: string; alt: string }>>> = {
+  1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
+  3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
+  4: { src: boothThreeImage, alt: '기후 위기에서 동물을 구하는 3번 부스 안내 이미지' },
+  6: { src: boothFourImage, alt: '생활 속 선택으로 지구를 지키는 4번 부스 안내 이미지' },
+}
 
 function zoneSize(zone: RoadViewBooth | StationFacility) {
   if (zone.trainCar) return { width: 9.2, depth: 5.6 }
@@ -67,20 +77,6 @@ function isWalkable(x: number, z: number) {
   const radius = 0.32
   if (x < -21.8 || x > 21.8 || z < -21.8 || z > 21.8) return false
   return !COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)
-}
-
-function nearestGate(player: Player) {
-  let result: RoadViewBooth | null = null
-  let nearestDistance = 10
-  for (const booth of BOOTHS) {
-    const dx = booth.gate.x - player.x
-    const dz = booth.gate.z - player.z
-    const distance = Math.hypot(dx, dz)
-    const lookingTowardGate = (dx / distance) * -Math.sin(player.yaw) + (dz / distance) * -Math.cos(player.yaw)
-    if (lookingTowardGate < 0.58) continue
-    if (distance < nearestDistance) { result = booth; nearestDistance = distance }
-  }
-  return result
 }
 
 function crossedGate(player: Player) {
@@ -122,7 +118,9 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
 function createGate(zone: RoadViewBooth | StationFacility) {
   const group = new THREE.Group()
   group.position.set(zone.gate.x, 0, zone.gate.z)
-  if (zone.gate.side === 'east' || zone.gate.side === 'west') group.rotation.y = Math.PI / 2
+  if (zone.gate.side === 'north') group.rotation.y = Math.PI
+  else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   const accent = new THREE.Color(zone.color)
   const darkMaterial = new THREE.MeshStandardMaterial({ color: '#d7e1e7', metalness: 0.72, roughness: 0.2 })
   const glowMaterial = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.72, metalness: 0.35, roughness: 0.25 })
@@ -138,9 +136,13 @@ function createGate(zone: RoadViewBooth | StationFacility) {
   const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
   addRoundedBox(group, [3.65, 0.2, 0.24], [0, 2.55, 0], glowMaterial, 0.08)
-  const gateLabel = zone.trainCar ? `${zone.gateCode} · TRAIN DOOR` : `${zone.gateCode} · SMART GATE`
-  const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(zone.title, gateLabel, zone.color, zone.trainCar ? 'BOARD THROUGH THE TRAIN DOOR' : undefined), transparent: true, depthWrite: false }))
-  sign.scale.set(zone.trainCar ? 2.75 : 3.9, zone.trainCar ? 0.97 : 1.37, 1); sign.position.set(0, 3.35, 0); group.add(sign)
+  if (zone.trainCar) {
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.75, 0.97),
+      new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, `${zone.gateCode} · TRAIN DOOR`, zone.color, 'BOARD THROUGH THE TRAIN DOOR'), transparent: true, side: THREE.DoubleSide }),
+    )
+    sign.position.set(0, 3.35, 0); group.add(sign)
+  }
   const gateLight = new THREE.PointLight(accent, 3.2, 8, 2)
   gateLight.position.set(0, 2.25, zone.gate.side === 'south' ? 0.6 : -0.6); group.add(gateLight); group.userData.light = gateLight
   return group
@@ -181,13 +183,6 @@ function createTrainCarBooth(zone: RoadViewBooth | StationFacility) {
     addRoundedBox(group, [1.15, 0.48, 0.72], [1.05, 0.62, z], seatMaterial, 0.14)
   }
   addRoundedBox(group, [0.1, 0.12, 7.8], [0, 0.36, 0], accentMaterial, 0.03)
-  const display = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.35, 0.82),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.gateCode, 'EXHIBITION CAR', zone.color, 'WELCOME ABOARD'), transparent: true, side: THREE.DoubleSide }),
-  )
-  display.rotation.y = Math.PI / 2
-  display.position.set(-halfWidth + 0.14, 3.1, 0)
-  group.add(display)
   return group
 }
 
@@ -210,12 +205,11 @@ function createBooth(zone: RoadViewBooth | StationFacility) {
   addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
   for (const x of [-3.2, -1.6, 0, 1.6, 3.2]) addRoundedBox(group, [0.08, 0.1, BOOTH_DEPTH - 0.5], [x, 4.84, 0], glow, 0.025)
   addRoundedBox(group, [BOOTH_WIDTH - 0.7, 0.08, 1.25], [0, 0.34, backLocalZ * 0.58], glow, 0.03)
-  const portal = new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.055, 12, 72), new THREE.MeshBasicMaterial({ color: accent }))
-  portal.position.set(0, 2.45, backLocalZ * 0.78); portal.userData.spin = 1; group.add(portal)
-  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.48, 1), new THREE.MeshStandardMaterial({ color: '#dffffa', emissive: accent, emissiveIntensity: 1.25, metalness: 0.65, roughness: 0.18 }))
-  core.position.copy(portal.position); core.userData.float = true; core.userData.baseY = core.position.y; group.add(core)
-  const name = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, depthWrite: false }))
-  name.scale.set(4.4, 1.55, 1); name.position.set(0, 3.4, backLocalZ * 0.91); group.add(name)
+  const name = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.4, 1.55),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
+  )
+  name.position.set(0, 3.4, backLocalZ * 0.91); group.add(name)
   return group
 }
 
@@ -230,6 +224,18 @@ function buildMetaverseStation(scene: THREE.Scene) {
   for (const x of [-7.1, 7.1]) addRoundedBox(scene, [0.08, 0.035, 46], [x, 0.045, 0], x < 0 ? blueLine : greenLine, 0.02)
   const structure = new THREE.MeshStandardMaterial({ color: '#f4f7f8', metalness: 0.58, roughness: 0.24 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
+  addRoundedBox(scene, [2.5, 0.035, 30.5], [0, 0.045, 3.7], blueLine, 0.02)
+  for (const x of [-3.25, 3.25]) {
+    addRoundedBox(scene, [0.42, 4.4, 0.58], [x, 2.2, 16.3], structure, 0.12)
+    const entranceGlass = new THREE.Mesh(new THREE.PlaneGeometry(4, 2.95), glass)
+    entranceGlass.rotation.y = Math.PI / 2; entranceGlass.position.set(x, 2.35, 18.3); scene.add(entranceGlass)
+  }
+  addRoundedBox(scene, [7.1, 0.38, 0.62], [0, 4.25, 16.3], structure, 0.12)
+  const entranceSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.4, 1.55),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture('에코 익스프레스 입구', 'STATION ENTRANCE', '#1780ad', 'E01 전시 객차 방향'), transparent: true, side: THREE.DoubleSide }),
+  )
+  entranceSign.name = 'station-entrance-sign'; entranceSign.position.set(0, 3.25, 15.96); scene.add(entranceSign)
   for (const x of [-21, 21]) for (let z = -21; z <= 21; z += 7) addRoundedBox(scene, [0.38, 8.8, 0.48], [x, 4.4, z], structure, 0.1)
   for (let z = -21; z <= 21; z += 7) {
     addRoundedBox(scene, [44, 0.3, 0.38], [0, 8.7, z], structure, 0.1)
@@ -282,6 +288,11 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
     else context.fillRect(worldToMap(zone.gate.x) - width * 0.14, worldToMap(zone.gate.z) - 2, width * 0.28, 4)
   }
+  const entranceX = worldToMap(-3.55); const entranceY = worldToMap(15.85)
+  const entranceWidth = worldToMap(3.55) - entranceX; const entranceHeight = worldToMap(20.8) - entranceY
+  context.fillStyle = '#eaf7fb'; context.strokeStyle = '#1676ad'; context.lineWidth = 1.5
+  context.beginPath(); context.roundRect(entranceX, entranceY, entranceWidth, entranceHeight, Math.max(4, size * 0.01)); context.fill(); context.stroke()
+  context.fillStyle = '#145371'; context.textAlign = 'center'; context.font = `900 ${Math.max(6, size * 0.016)}px system-ui, sans-serif`; context.fillText('입구 · ENTRANCE', entranceX + entranceWidth / 2, entranceY + entranceHeight * 0.62)
   const x = worldToMap(player.x); const y = worldToMap(player.z)
   context.fillStyle = '#fff'; context.shadowColor = '#17c9ff'; context.shadowBlur = 10; context.beginPath(); context.arc(x, y, Math.max(4, size * 0.012), 0, Math.PI * 2); context.fill()
   context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x - Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
@@ -289,10 +300,10 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 
 export default function RoadView3D({ onClose }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
-  const playerRef = useRef<Player>({ x: 0, z: -7.5, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
+  const playerRef = useRef<Player>({ x: 0, z: 20.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
-  const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [nearGate, setNearGate] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
+  const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
   overlayRef.current = { mapOpen, selectedBooth }
 
   useEffect(() => { const previousOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = previousOverflow } }, [])
@@ -312,10 +323,12 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       const light = new THREE.PointLight(color, 3.2, 22, 2); light.position.set(x, 4.8, z); scene.add(light)
     }
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
-    let animationFrame = 0; let previousNearGateId: number | null = null; let dragging = false; let pointerX = 0; let pointerY = 0
+    let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const resize = () => {
       const width = canvas.clientWidth; const height = canvas.clientHeight
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 720 ? 1.4 : 1.8)); renderer.setSize(width, height, false)
+      const entranceSign = scene.getObjectByName('station-entrance-sign')
+      if (entranceSign) entranceSign.scale.setScalar(width < 600 && height > width ? 0.5 : 1)
       camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix()
     }
     const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(canvas); resize()
@@ -365,12 +378,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
           const light = object.userData.light as THREE.PointLight; light.intensity = 2.7 + Math.sin(elapsed * 3.2) * 0.5
         }
       }
-      scene.traverse((object) => {
-        if (object.userData.spin) object.rotation.z += delta * 0.28 * object.userData.spin
-        if (object.userData.float) object.position.y = object.userData.baseY + Math.sin(elapsed * 1.7 + object.position.x) * 0.12
-      })
-      const gate = nearestGate(player); const nearGateId = gate?.id ?? null
-      if (nearGateId !== previousNearGateId) { previousNearGateId = nearGateId; setNearGate(gate) }
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
         if (!passedBooth) lastGateRef.current = null
@@ -403,7 +410,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
         <div className="roadview__brand"><button type="button" className="roadview__brand-mark" onClick={() => setMapOpen(true)} aria-label="역사 지도 열기"><Icon name="map" /></button></div>
         <div className="roadview__top-actions"><button type="button" className="roadview__close" onClick={onClose} aria-label="3D 로드뷰 닫기">×</button></div>
       </header>
-      {nearGate && !mapOpen && !selectedBooth ? <div className="roadview__gate-notice" role="status"><span><Icon name="train" /></span><p><strong>{nearGate.label}</strong><small>{nearGate.gateCode} {nearGate.trainCar ? '객차 출입문' : '스마트 개찰구'}을 통과하면 안내가 자동으로 열립니다.</small></p></div> : null}
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
         <div className="roadview__dpad">
@@ -412,7 +418,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
           <button type="button" aria-label="뒤로 이동" onPointerDown={() => setMovement('backward', true)} onPointerUp={() => setMovement('backward', false)} onPointerCancel={() => setMovement('backward', false)}>▼</button>
           <button type="button" aria-label="오른쪽으로 회전" onPointerDown={() => setMovement('turnRight', true)} onPointerUp={() => setMovement('turnRight', false)} onPointerCancel={() => setMovement('turnRight', false)}>▶</button>
         </div>
-        <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>{nearGate ? nearGate.gateCode : 'AUTO GATE'}</strong><small>개찰구 통과 시 자동 안내</small></span></div>
+        <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>AUTO GATE</strong><small>개찰구 통과 시 자동 안내</small></span></div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel" role="dialog" aria-modal="true" aria-labelledby="roadview-map-title">
         <header><div><span>METAVERSE STATION DIRECTORY</span><h2 id="roadview-map-title">에코 익스프레스 역사 지도</h2></div><button type="button" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button></header>
@@ -420,7 +426,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
-        <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div><p>{selectedBooth.description}</p>
+        {BOOTH_IMAGES[selectedBooth.id] ? <figure className="roadview__booth-image"><img src={BOOTH_IMAGES[selectedBooth.id]?.src} alt={BOOTH_IMAGES[selectedBooth.id]?.alt} /></figure> : <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div>}<p>{selectedBooth.description}</p>
         <button type="button" className="roadview__panel-action" onClick={() => setSelectedBooth(null)}>메타버스 역사로 돌아가기</button>
       </section></div> : null}
     </section>
