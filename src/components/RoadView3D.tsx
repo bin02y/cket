@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import ecoExpressLogo from '../assets/eco-express-logo-transparent.png'
 
 type RoadView3DProps = {
   onClose: () => void
@@ -420,8 +419,8 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
 
       <header className="roadview__topbar">
         <div className="roadview__brand">
-          <img src={ecoExpressLogo} alt="에코 익스프레스" />
-          <span><strong>3D ROADVIEW</strong><small>INTERACTIVE EXHIBITION</small></span>
+          <span className="roadview__brand-mark" aria-hidden="true"><i /><i /><i /></span>
+          <span className="roadview__brand-copy"><strong>3D ROADVIEW</strong><small>INTERACTIVE EXHIBITION</small></span>
         </div>
         <div className="roadview__top-actions">
           <button type="button" onClick={() => setMapOpen(true)} aria-label="전시장 지도 열기">지도</button>
@@ -430,7 +429,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       </header>
 
       <div className="roadview__crosshair" aria-hidden="true"><i /><i /></div>
-      <p className="roadview__location"><span /> ECO EXPRESS EXHIBITION · 6 ZONES</p>
+      <p className="roadview__location"><span /> INTERACTIVE EXHIBITION · 6 ZONES</p>
 
       {nearBooth && !introOpen && !mapOpen && !selectedBooth ? (
         <button type="button" className="roadview__prompt" onClick={() => setSelectedBooth(nearBooth)}>
@@ -455,7 +454,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       {introOpen ? (
         <div className="roadview__overlay">
           <section className="roadview__intro" aria-labelledby="roadview-intro-title">
-            <span className="roadview__eyebrow">ECO EXPRESS · DIGITAL TWIN</span>
+            <span className="roadview__eyebrow">CLIMATE TECH · DIGITAL TWIN</span>
             <h2 id="roadview-intro-title">전시장을 자유롭게<br /><em>3D로 걸어보세요</em></h2>
             <p>냉동공조 기술부터 환경 체험, 굿즈샵까지 6개 공간을 로드뷰로 먼저 둘러볼 수 있습니다.</p>
             <div className="roadview__intro-controls">

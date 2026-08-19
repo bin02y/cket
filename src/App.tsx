@@ -158,12 +158,16 @@ function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
-      <AppHeader />
+      <AppHeader activeTab={activeTab} />
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'home' ? (
         <HomeDashboard balance={balance} completedBooths={completedBooths} />
+      ) : activeTab === 'education' ? (
+        <BoothGuide section="education" completedBooths={completedBooths} />
+      ) : activeTab === 'experiment' ? (
+        <BoothGuide section="experiment" completedBooths={completedBooths} />
       ) : activeTab === 'booths' ? (
-        <BoothGuide completedBooths={completedBooths} />
+        <BoothGuide section="booths" completedBooths={completedBooths} />
       ) : activeTab === 'shop' ? (
         <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (

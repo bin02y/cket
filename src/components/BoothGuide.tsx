@@ -16,7 +16,10 @@ const RoadView3D = lazy(() => import('./RoadView3D'))
 
 type BoothGuideProps = {
   completedBooths: ReadonlySet<MissionId>
+  section: BoothSection
 }
+
+type BoothSection = 'education' | 'experiment' | 'booths'
 
 type EnvironmentBooth = {
   id: MissionId
@@ -36,13 +39,11 @@ type AcademySlide = {
   imageAlt: string
 }
 
-type ExperienceTab = 'education' | 'experiment' | 'booths'
-
-const experienceTabs: readonly { id: ExperienceTab; label: string; description: string }[] = [
-  { id: 'education', label: '교육', description: '영상과 키트 학습' },
-  { id: 'experiment', label: '실험', description: '냉동사이클 가상 실험' },
-  { id: 'booths', label: '부스', description: '3D 로드뷰와 환경 체험' },
-]
+const sectionHeaders: Record<BoothSection, { lead: string; accent: string; description: string }> = {
+  education: { lead: '기술을 이해하고', accent: '원리를 배우는 교육', description: '영상과 냉동사이클 키트 제작 과정을 따라 초고속 열차의 냉방 기술을 배워보세요.' },
+  experiment: { lead: '직접 눌러 확인하는', accent: '냉동공조 가상 실험', description: '압축·응축·팽창·증발 단계에 따라 달라지는 냉매의 온도와 압력을 관찰해 보세요.' },
+  booths: { lead: '전시장을 걸으며', accent: '지구를 만나는 부스', description: '3D 로드뷰로 전시장을 둘러보고 네 가지 환경 체험 부스를 확인해 보세요.' },
+}
 
 const academySlides: readonly AcademySlide[] = [
   {
@@ -108,12 +109,12 @@ const environmentBooths: readonly EnvironmentBooth[] = [
   },
 ]
 
-export function BoothGuide({ completedBooths }: BoothGuideProps) {
+export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
   const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
-  const [activeExperienceTab, setActiveExperienceTab] = useState<ExperienceTab>('education')
   const currentAcademySlide = academyStep ? academySlides[academyStep - 1] : null
+  const sectionHeader = sectionHeaders[section]
 
   useEffect(() => {
     if (!selectedBooth && academyStep === null) return
@@ -139,30 +140,13 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
     <main id="main-content" className="page booth-page">
       <section className="booth-hero" aria-labelledby="booth-hero-title">
         <div className="booth-hero__copy">
-          <h1 id="booth-hero-title">배우고 선택하며<br /><em>지구를 지키는 여정</em></h1>
-          <p className="booth-hero__description">냉동공조 교육과 가상 실험, 환경 부스를 원하는 순서로 둘러보세요.</p>
+          <h1 id="booth-hero-title">{sectionHeader.lead}<br /><em>{sectionHeader.accent}</em></h1>
+          <p className="booth-hero__description">{sectionHeader.description}</p>
         </div>
       </section>
 
-      <nav className="experience-section-tabs" role="tablist" aria-label="체험 콘텐츠 구분">
-        {experienceTabs.map((tab) => (
-          <button
-            className={activeExperienceTab === tab.id ? 'is-active' : ''}
-            type="button"
-            role="tab"
-            aria-selected={activeExperienceTab === tab.id}
-            aria-controls={`experience-panel-${tab.id}`}
-            onClick={() => setActiveExperienceTab(tab.id)}
-            key={tab.id}
-          >
-            <strong>{tab.label}</strong>
-            <small>{tab.description}</small>
-          </button>
-        ))}
-      </nav>
-
-      {activeExperienceTab === 'education' ? (
-        <div id="experience-panel-education" className="experience-section-panel" role="tabpanel">
+      {section === 'education' ? (
+        <div id="experience-panel-education" className="experience-section-panel" role="region" aria-label="교육 콘텐츠">
           <section className="booth-hall booth-hall--train" aria-labelledby="hall-one-title">
             <button className="booth-hall__trigger" type="button" aria-haspopup="dialog" aria-label="초고속 냉동사이클 영상과 키트 제작 과정 보기" onClick={() => setAcademyStep(0)} />
             <div className="booth-hall__visual" aria-hidden="true">
@@ -183,12 +167,12 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
             </div>
           </section>
         </div>
-      ) : activeExperienceTab === 'experiment' ? (
-        <div id="experience-panel-experiment" className="experience-section-panel" role="tabpanel">
+      ) : section === 'experiment' ? (
+        <div id="experience-panel-experiment" className="experience-section-panel" role="region" aria-label="실험 콘텐츠">
           <RefrigerationExperiment />
         </div>
       ) : (
-        <div id="experience-panel-booths" className="experience-section-panel" role="tabpanel">
+        <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <section className="roadview-entry" aria-labelledby="roadview-entry-title">
             <div className="roadview-entry__copy">
               <span>VIRTUAL EXHIBITION</span>
