@@ -161,7 +161,7 @@ function App() {
       <AppHeader />
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'home' ? (
-        <HomeDashboard balance={balance} completedBooths={completedBooths} onOpenBooths={() => navigateTo('booths')} />
+        <HomeDashboard balance={balance} completedBooths={completedBooths} />
       ) : activeTab === 'booths' ? (
         <BoothGuide completedBooths={completedBooths} />
       ) : activeTab === 'shop' ? (

@@ -2,7 +2,7 @@ import type { SVGProps } from 'react'
 import type { TabId } from '../types'
 
 type IconProps = SVGProps<SVGSVGElement> & {
-  name: TabId | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup'
+  name: TabId | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup' | 'stamp'
 }
 
 export function Icon({ name, ...props }: IconProps) {
@@ -44,6 +44,7 @@ export function Icon({ name, ...props }: IconProps) {
     warning: <><path d="M10.3 3.6 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></>,
     car: <><path d="m5 16-1 3M19 16l1 3M3 13l2-6h14l2 6v5H3z" /><path d="M6 13h12M7 17h.01M17 17h.01" /></>,
     cup: <><path d="M6 3h11l-1 18H8zM17 6h2a2 2 0 0 1 0 4h-2" /><path d="M8 7h8" /></>,
+    stamp: <><path d="M9.5 3.5h5l.8 4.1a2.8 2.8 0 0 0 1.2 1.8l1.5 1V14H6v-3.6l1.5-1a2.8 2.8 0 0 0 1.2-1.8z" /><path d="M5 14h14v3H5zM4 21h16M6 17l-1 4M18 17l1 4" /></>,
   }
 
   return <svg {...commonProps}>{paths[name]}</svg>

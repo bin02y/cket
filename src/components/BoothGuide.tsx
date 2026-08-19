@@ -10,6 +10,7 @@ import boothTwoImage from '../assets/booths/booth-2.png'
 import boothThreeImage from '../assets/booths/booth-3.png'
 import boothFourImage from '../assets/booths/booth-4.png'
 import { Icon } from './Icon'
+import { RefrigerationExperiment } from './RefrigerationExperiment'
 
 const RoadView3D = lazy(() => import('./RoadView3D'))
 
@@ -34,6 +35,14 @@ type AcademySlide = {
   image: string
   imageAlt: string
 }
+
+type ExperienceTab = 'education' | 'experiment' | 'booths'
+
+const experienceTabs: readonly { id: ExperienceTab; label: string; description: string }[] = [
+  { id: 'education', label: '교육', description: '영상과 키트 학습' },
+  { id: 'experiment', label: '실험', description: '냉동사이클 가상 실험' },
+  { id: 'booths', label: '부스', description: '3D 로드뷰와 환경 체험' },
+]
 
 const academySlides: readonly AcademySlide[] = [
   {
@@ -103,6 +112,7 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
   const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
+  const [activeExperienceTab, setActiveExperienceTab] = useState<ExperienceTab>('education')
   const currentAcademySlide = academyStep ? academySlides[academyStep - 1] : null
 
   useEffect(() => {
@@ -130,64 +140,99 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
       <section className="booth-hero" aria-labelledby="booth-hero-title">
         <div className="booth-hero__copy">
           <h1 id="booth-hero-title">배우고 선택하며<br /><em>지구를 지키는 여정</em></h1>
-          <p className="booth-hero__description">달리는 열차 속 공조 기술부터 환경 부스, 리워드관까지 순서대로 즐겨보세요.</p>
-          <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
-            <span><Icon name="sparkle" /></span>
-            <span><strong>3D 로드뷰</strong><small>전시장을 먼저 걸어보세요</small></span>
-            <Icon name="arrow" />
+          <p className="booth-hero__description">냉동공조 교육과 가상 실험, 환경 부스를 원하는 순서로 둘러보세요.</p>
+        </div>
+      </section>
+
+      <nav className="experience-section-tabs" role="tablist" aria-label="체험 콘텐츠 구분">
+        {experienceTabs.map((tab) => (
+          <button
+            className={activeExperienceTab === tab.id ? 'is-active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={activeExperienceTab === tab.id}
+            aria-controls={`experience-panel-${tab.id}`}
+            onClick={() => setActiveExperienceTab(tab.id)}
+            key={tab.id}
+          >
+            <strong>{tab.label}</strong>
+            <small>{tab.description}</small>
           </button>
-        </div>
-      </section>
+        ))}
+      </nav>
 
-      <section className="booth-hall booth-hall--train" aria-labelledby="hall-one-title">
-        <button className="booth-hall__trigger" type="button" aria-haspopup="dialog" aria-label="초고속 냉동사이클 영상과 키트 제작 과정 보기" onClick={() => setAcademyStep(0)} />
-        <div className="booth-hall__visual" aria-hidden="true">
-          <span className="booth-hall__number">01</span>
-          <div className="booth-mini-train"><i /><i /><i /></div>
-          <div className="booth-mini-rail" />
-          <span className="booth-speed-chip"><Icon name="gauge" /> 350 km/h</span>
+      {activeExperienceTab === 'education' ? (
+        <div id="experience-panel-education" className="experience-section-panel" role="tabpanel">
+          <section className="booth-hall booth-hall--train" aria-labelledby="hall-one-title">
+            <button className="booth-hall__trigger" type="button" aria-haspopup="dialog" aria-label="초고속 냉동사이클 영상과 키트 제작 과정 보기" onClick={() => setAcademyStep(0)} />
+            <div className="booth-hall__visual" aria-hidden="true">
+              <span className="booth-hall__number">01</span>
+              <div className="booth-mini-train"><i /><i /><i /></div>
+              <div className="booth-mini-rail" />
+              <span className="booth-speed-chip"><Icon name="gauge" /> 350 km/h</span>
+            </div>
+            <div className="booth-hall__content">
+              <h2 id="hall-one-title">달리는 열차 속에서 장비를 조정하여 살아남아라!</h2>
+              <strong>초고속 냉동사이클 체험</strong>
+              <p>초고속 환경에서 냉방이 유지되는 원리를 냉동 사이클 키트를 직접 제작하며 배우는 교육 프로그램입니다.</p>
+              <div className="booth-hall__meta">
+                <span><Icon name="snowflake" /> 냉동 사이클 핵심 원리</span>
+                <span><Icon name="train" /> KTX 초고속 환경</span>
+              </div>
+              <span className="environment-booth__onsite"><span className="status-dot" /> 영상과 키트 제작 과정 보기 <Icon name="arrow" /></span>
+            </div>
+          </section>
         </div>
-        <div className="booth-hall__content">
-          <h2 id="hall-one-title">달리는 열차 속에서 장비를 조정하여 살아남아라!</h2>
-          <strong>초고속 냉동사이클 체험</strong>
-          <p>초고속 환경에서 냉방이 유지되는 원리를 냉동 사이클 키트를 직접 제작하며 배우는 교육 프로그램입니다.</p>
-          <div className="booth-hall__meta">
-            <span><Icon name="snowflake" /> 냉동 사이클 핵심 원리</span>
-            <span><Icon name="train" /> KTX 초고속 환경</span>
-          </div>
-          <span className="environment-booth__onsite"><span className="status-dot" /> 영상과 키트 제작 과정 보기 <Icon name="arrow" /></span>
+      ) : activeExperienceTab === 'experiment' ? (
+        <div id="experience-panel-experiment" className="experience-section-panel" role="tabpanel">
+          <RefrigerationExperiment />
         </div>
-      </section>
+      ) : (
+        <div id="experience-panel-booths" className="experience-section-panel" role="tabpanel">
+          <section className="roadview-entry" aria-labelledby="roadview-entry-title">
+            <div className="roadview-entry__copy">
+              <span>VIRTUAL EXHIBITION</span>
+              <h2 id="roadview-entry-title">3D 전시장 로드뷰</h2>
+              <p>전시장을 자유롭게 걸으며 여섯 개 체험 구역의 위치와 안내를 먼저 확인해 보세요.</p>
+            </div>
+            <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
+              <span><Icon name="sparkle" /></span>
+              <span><strong>3D 로드뷰</strong><small>전시장을 먼저 걸어보세요</small></span>
+              <Icon name="arrow" />
+            </button>
+          </section>
 
-      <section className="environment-hall" aria-labelledby="environment-hall-title">
-        <header className="environment-hall__heading">
-          <div><h2 id="environment-hall-title">환경 부스 체험관</h2><p>네 가지 상황에서 나의 선택이 환경과 동물에게 어떤 변화를 만드는지 확인해 보세요.</p></div>
-          <span className="environment-hall__count"><strong>4</strong> BOOTHS</span>
-        </header>
-        <div className="environment-booth-grid">
-          {environmentBooths.map((booth) => {
-            const isCompleted = completedBooths.has(booth.id)
-            return (
-              <button
-                className={`environment-booth environment-booth--${booth.theme}`}
-                type="button"
-                aria-haspopup="dialog"
-                onClick={() => {
-                  setAcademyStep(null)
-                  setSelectedBooth(booth)
-                }}
-                key={booth.id}
-              >
-                <div className="environment-booth__topline"><span>BOOTH {booth.number}</span><em>{isCompleted ? <><Icon name="check" /> 스탬프 완료</> : '체험 가능'}</em></div>
-                <span className="environment-booth__icon"><Icon name={booth.icon} /></span>
-                <span className="environment-booth__title">{booth.title}</span>
-                <span className="environment-booth__description">{booth.description}</span>
-                <span className="environment-booth__onsite"><span className="status-dot" /> 부스 이미지 보기 <Icon name="arrow" /></span>
-              </button>
-            )
-          })}
+          <section className="environment-hall" aria-labelledby="environment-hall-title">
+            <header className="environment-hall__heading">
+              <div><h2 id="environment-hall-title">환경 부스 체험관</h2><p>네 가지 상황에서 나의 선택이 환경과 동물에게 어떤 변화를 만드는지 확인해 보세요.</p></div>
+              <span className="environment-hall__count"><strong>4</strong> BOOTHS</span>
+            </header>
+            <div className="environment-booth-grid">
+              {environmentBooths.map((booth) => {
+                const isCompleted = completedBooths.has(booth.id)
+                return (
+                  <button
+                    className={`environment-booth environment-booth--${booth.theme}`}
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      setAcademyStep(null)
+                      setSelectedBooth(booth)
+                    }}
+                    key={booth.id}
+                  >
+                    <div className="environment-booth__topline"><span>BOOTH {booth.number}</span><em>{isCompleted ? <><Icon name="check" /> 스탬프 완료</> : '체험 가능'}</em></div>
+                    <span className="environment-booth__icon"><Icon name={booth.icon} /></span>
+                    <span className="environment-booth__title">{booth.title}</span>
+                    <span className="environment-booth__description">{booth.description}</span>
+                    <span className="environment-booth__onsite"><span className="status-dot" /> 부스 이미지 보기 <Icon name="arrow" /></span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
         </div>
-      </section>
+      )}
 
       {selectedBooth ? (
         <div className="booth-image-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}>
