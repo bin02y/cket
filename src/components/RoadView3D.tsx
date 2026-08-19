@@ -18,18 +18,18 @@ const BOOTH_DEPTH = 5.4
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -18, z: -12, gate: { x: -15.3, z: -12, side: 'east' } },
-  { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: 0, gate: { x: -9.4, z: 3, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 18, z: -12, gate: { x: 15.3, z: -12, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -18, z: 0, gate: { x: -15.3, z: 0, side: 'east' } },
-  { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: 0, gate: { x: 0, z: 3, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 18, z: 0, gate: { x: 15.3, z: 0, side: 'west' } },
-  { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: 0, gate: { x: 9.4, z: 3, side: 'south' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -18, z: -5, gate: { x: -15.3, z: -5, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 18, z: -5, gate: { x: 15.3, z: -5, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -18, z: 5, gate: { x: -15.3, z: 5, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 18, z: 5, gate: { x: 15.3, z: 5, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
-  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -18, z: 12, gate: { x: -15.3, z: 12, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 18, z: 12, gate: { x: 15.3, z: 12, side: 'west' } },
+  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -18, z: 15, gate: { x: -15.3, z: 15, side: 'east' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 18, z: 15, gate: { x: 15.3, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 
@@ -238,9 +238,9 @@ function buildMetaverseStation(scene: THREE.Scene) {
   }
   for (const zone of ZONES) { scene.add(createBooth(zone)); const gate = createGate(zone); scene.add(gate); animated.push(gate) }
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -2.3], rail, 0.03)
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, 2.3], rail, 0.03)
-  for (const x of [-4.7, 4.7]) addRoundedBox(scene, [1.7, 3.4, 5.1], [x, 2.15, 0], structure, 0.34)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
+  for (const x of [-4.7, 4.7]) addRoundedBox(scene, [1.7, 3.4, 5.1], [x, 2.15, -15], structure, 0.34)
   const positions = new Float32Array(130 * 3)
   for (let index = 0; index < 130; index += 1) {
     positions[index * 3] = (Math.random() - 0.5) * 43; positions[index * 3 + 1] = 1.1 + Math.random() * 7; positions[index * 3 + 2] = (Math.random() - 0.5) * 45
@@ -263,8 +263,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.beginPath(); context.moveTo(point, padding); context.lineTo(point, size - padding); context.stroke()
     context.beginPath(); context.moveTo(padding, point); context.lineTo(size - padding, point); context.stroke()
   }
-  const trainX = worldToMap(-14.1); const trainY = worldToMap(-3.15)
-  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(3.15) - trainY
+  const trainX = worldToMap(-14.1); const trainY = worldToMap(-18.15)
+  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-11.85) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainHeight * 0.34); context.fill(); context.stroke()
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
@@ -289,7 +289,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 
 export default function RoadView3D({ onClose }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
-  const playerRef = useRef<Player>({ x: 0, z: 8.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
+  const playerRef = useRef<Player>({ x: 0, z: -7.5, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [nearGate, setNearGate] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
@@ -400,10 +400,9 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
       <header className="roadview__topbar">
-        <div className="roadview__brand"><span className="roadview__brand-mark" aria-hidden="true"><Icon name="map" /></span><span className="roadview__brand-copy"><strong>ECO METAVERSE</strong><small>IMMERSIVE STATION 01</small></span></div>
-        <div className="roadview__top-actions"><button type="button" onClick={() => setMapOpen(true)} aria-label="전시장 지도 열기">역사 지도</button><button type="button" className="roadview__close" onClick={onClose} aria-label="3D 로드뷰 닫기">×</button></div>
+        <div className="roadview__brand"><button type="button" className="roadview__brand-mark" onClick={() => setMapOpen(true)} aria-label="역사 지도 열기"><Icon name="map" /></button></div>
+        <div className="roadview__top-actions"><button type="button" className="roadview__close" onClick={onClose} aria-label="3D 로드뷰 닫기">×</button></div>
       </header>
-      <div className="roadview__crosshair" aria-hidden="true"><i /><i /></div>
       {nearGate && !mapOpen && !selectedBooth ? <div className="roadview__gate-notice" role="status"><span><Icon name="train" /></span><p><strong>{nearGate.label}</strong><small>{nearGate.gateCode} {nearGate.trainCar ? '객차 출입문' : '스마트 개찰구'}을 통과하면 안내가 자동으로 열립니다.</small></p></div> : null}
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
@@ -417,7 +416,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel" role="dialog" aria-modal="true" aria-labelledby="roadview-map-title">
         <header><div><span>METAVERSE STATION DIRECTORY</span><h2 id="roadview-map-title">에코 익스프레스 역사 지도</h2></div><button type="button" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button></header>
-        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 중앙 가로 3칸 전시 열차가 표시된 역사 지도" /><p className="roadview__map-legend"><i /> 현재 위치 <b /> 객차 출입문</p>
+        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" /><p className="roadview__map-legend"><i /> 현재 위치 <b /> 객차 출입문</p>
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>

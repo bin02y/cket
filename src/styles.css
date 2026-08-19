@@ -1174,9 +1174,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .roadview__scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 .roadview__scene:active { cursor: grabbing; }
 .roadview__topbar { position: absolute; z-index: 5; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: max(15px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 15px max(18px,env(safe-area-inset-left)); background: linear-gradient(180deg,rgba(2,12,21,.88),rgba(2,12,21,0)); pointer-events: none; }
-.roadview__brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.roadview__brand-mark { display: grid; flex: 0 0 auto; place-items: center; width: 43px; height: 36px; color: #62e7b4; background: rgba(98,231,180,.09); border: 1px solid rgba(98,231,180,.25); border-radius: 11px; box-shadow: 0 0 18px rgba(98,231,180,.1); }
+.roadview__brand { display: flex; align-items: center; gap: 12px; min-width: 0; pointer-events: auto; }
+.roadview__brand-mark { display: grid; flex: 0 0 auto; place-items: center; width: 43px; height: 36px; padding: 0; color: #62e7b4; background: rgba(98,231,180,.09); border: 1px solid rgba(98,231,180,.25); border-radius: 11px; box-shadow: 0 0 18px rgba(98,231,180,.1); font: inherit; cursor: pointer; }
 .roadview__brand-mark svg { width: 23px; height: 23px; }
+.roadview__brand-mark:focus-visible { outline: 2px solid #67d9f4; outline-offset: 2px; }
 .roadview__brand-copy,.roadview__brand-copy strong,.roadview__brand-copy small { display: block; }
 .roadview__brand-copy { padding-left: 12px; border-left: 1px solid rgba(255,255,255,.22); }
 .roadview__brand strong { font-size: 11px; letter-spacing: .15em; }
