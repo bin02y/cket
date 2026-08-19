@@ -21,6 +21,17 @@ type Collider = { x1: number; x2: number; z1: number; z2: number }
 const BOOTH_WIDTH = 8.4
 const BOOTH_DEPTH = 5.4
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
+const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
+  w: 'forward',
+  arrowup: 'forward',
+  s: 'backward',
+  arrowdown: 'backward',
+  a: 'left',
+  d: 'right',
+  arrowleft: 'turnLeft',
+  arrowright: 'turnRight',
+  shift: 'sprint',
+}
 
 const BOOTHS: readonly RoadViewBooth[] = [
   { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
@@ -427,7 +438,22 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
   overlayRef.current = { mapOpen, selectedBooth }
 
-  useEffect(() => { const previousOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = previousOverflow } }, [])
+  useEffect(() => {
+    const root = document.documentElement
+    const previousBodyOverflow = document.body.style.overflow
+    const previousRootOverflow = root.style.overflow
+    const previousScrollbarGutter = root.style.scrollbarGutter
+
+    document.body.style.overflow = 'hidden'
+    root.style.overflow = 'hidden'
+    root.style.scrollbarGutter = 'auto'
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow
+      root.style.overflow = previousRootOverflow
+      root.style.scrollbarGutter = previousScrollbarGutter
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = sceneRef.current; if (!canvas) return
@@ -443,11 +469,16 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const resize = () => {
-      const width = canvas.clientWidth; const height = canvas.clientHeight
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 720 ? 1.4 : 1.8)); renderer.setSize(width, height, false)
+      const bounds = canvas.getBoundingClientRect()
+      const width = Math.max(1, Math.round(bounds.width))
+      const height = Math.max(1, Math.round(bounds.height))
+      const pixelRatioLimit = width < 720 ? 1.35 : 1.65
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioLimit))
+      renderer.setSize(width, height, false)
       camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix()
     }
-    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(canvas); resize()
+    const resizeTarget = canvas.parentElement ?? canvas
+    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(resizeTarget); resize()
     const stopMovement = () => { movementRef.current = { ...EMPTY_MOVEMENT } }
     const handleKey = (event: KeyboardEvent, pressed: boolean) => {
       const key = event.key.toLowerCase(); const overlay = overlayRef.current
@@ -458,8 +489,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       if (pressed && key === ' ' && !event.repeat && !overlay.mapOpen && !overlay.selectedBooth && jump.height === 0) {
         event.preventDefault(); jump.velocity = 6.2; return
       }
-      const keyMap: Record<string, keyof Movement> = { w: 'forward', arrowup: 'forward', s: 'backward', arrowdown: 'backward', a: 'left', d: 'right', arrowleft: 'turnLeft', arrowright: 'turnRight', shift: 'sprint' }
-      const movementKey = keyMap[key]; if (movementKey) { event.preventDefault(); movementRef.current[movementKey] = pressed }
+      const movementKey = KEY_TO_MOVEMENT[key]; if (movementKey) { event.preventDefault(); movementRef.current[movementKey] = pressed }
     }
     const handleKeyDown = (event: KeyboardEvent) => handleKey(event, true); const handleKeyUp = (event: KeyboardEvent) => handleKey(event, false)
     const handlePointerDown = (event: PointerEvent) => { if (event.pointerType === 'mouse' && event.button !== 0) return; dragging = true; pointerX = event.clientX; pointerY = event.clientY; canvas.setPointerCapture(event.pointerId) }
@@ -486,7 +516,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       camera.position.set(player.x, 1.68 + jump.height + bob, player.z); camera.rotation.set(player.pitch, player.yaw, 0)
       for (const object of animated) {
         if (object.type === 'Points') object.rotation.y = elapsed * 0.012
-        if (object.children.some((child) => child.userData.ring)) { object.rotation.y = elapsed * 0.25; object.children.forEach((child, index) => { child.rotation.z = elapsed * (0.2 + index * 0.12) }) }
         const wings = object.userData.wings as THREE.Mesh[] | undefined
         if (wings) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.25
@@ -517,12 +546,23 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     return () => {
       cancelAnimationFrame(animationFrame); resizeObserver.disconnect(); window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('keyup', handleKeyUp); window.removeEventListener('blur', stopMovement)
       canvas.removeEventListener('pointerdown', handlePointerDown); canvas.removeEventListener('pointermove', handlePointerMove); canvas.removeEventListener('pointerup', handlePointerUp); canvas.removeEventListener('pointercancel', handlePointerUp)
+      const geometries = new Set<THREE.BufferGeometry>()
+      const materials = new Set<THREE.Material>()
+      const textures = new Set<THREE.Texture>()
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh || object instanceof THREE.Points || object instanceof THREE.Sprite) {
-          object.geometry?.dispose(); const materials = Array.isArray(object.material) ? object.material : [object.material]
-          materials.forEach((material) => { if ('map' in material && material.map instanceof THREE.Texture) material.map.dispose(); material.dispose() })
+          if (object.geometry) geometries.add(object.geometry)
+          const objectMaterials = Array.isArray(object.material) ? object.material : [object.material]
+          objectMaterials.forEach((material) => {
+            materials.add(material)
+            if ('map' in material && material.map instanceof THREE.Texture) textures.add(material.map)
+          })
         }
-      }); renderer.dispose()
+      })
+      textures.forEach((texture) => texture.dispose())
+      materials.forEach((material) => material.dispose())
+      geometries.forEach((geometry) => geometry.dispose())
+      renderer.dispose()
     }
   }, [onClose])
 
@@ -531,10 +571,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     <section className="roadview" role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
-      <header className="roadview__topbar">
-        <div className="roadview__brand"><button type="button" className="roadview__brand-mark" onClick={() => setMapOpen(true)} aria-label="역사 지도 열기"><Icon name="map" /></button></div>
-        <div className="roadview__top-actions"><button type="button" className="roadview__close" onClick={onClose} aria-label="3D 로드뷰 닫기">×</button></div>
-      </header>
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
         <div className="roadview__dpad">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
@@ -56,7 +56,24 @@ const academyContents: readonly AcademyContent[] = [
 export function BoothGuide({ section }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
+  const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
+
+  const openRoadView = useCallback(() => {
+    if (roadViewOpen) return
+    window.history.pushState({ ...window.history.state, cketRoadView: true }, '')
+    roadViewHistoryEntry.current = true
+    setRoadViewOpen(true)
+  }, [roadViewOpen])
+
+  const closeRoadView = useCallback(() => {
+    if (roadViewHistoryEntry.current) {
+      roadViewHistoryEntry.current = false
+      window.history.back()
+      return
+    }
+    setRoadViewOpen(false)
+  }, [])
 
   useEffect(() => {
     if (academyStep === null) return
@@ -76,6 +93,18 @@ export function BoothGuide({ section }: BoothGuideProps) {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [academyStep])
+
+  useEffect(() => {
+    if (!roadViewOpen) return
+
+    const handlePopState = () => {
+      roadViewHistoryEntry.current = false
+      setRoadViewOpen(false)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [roadViewOpen])
 
   return (
     <main id="main-content" className="page booth-page">
@@ -104,7 +133,7 @@ export function BoothGuide({ section }: BoothGuideProps) {
             <div className="roadview-entry__copy">
               <h1 id="roadview-entry-title">3D 전시장 로드뷰</h1>
             </div>
-            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시장 로드뷰 열기" onClick={() => setRoadViewOpen(true)}>
+            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시장 로드뷰 열기" onClick={openRoadView}>
               <span><Icon name="arrow" /></span>
             </button>
           </section>
@@ -128,7 +157,7 @@ export function BoothGuide({ section }: BoothGuideProps) {
 
       {roadViewOpen ? createPortal(
         <Suspense fallback={<div className="roadview-loading" role="status">3D 전시장을 준비하고 있습니다…</div>}>
-          <RoadView3D onClose={() => setRoadViewOpen(false)} />
+          <RoadView3D onClose={closeRoadView} />
         </Suspense>,
         document.body,
       ) : null}
