@@ -1670,3 +1670,55 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .order-history__image { width: 65px; height: 62px; }
   .order-history dl { grid-column: 1 / -1; padding: 10px 4px 2px; border-top: 1px solid #e2eaee; }
 }
+
+/* Simulated online checkout and five-item navigation */
+.bottom-navigation { grid-template-columns: repeat(5,minmax(0,52px)); width: min(330px,calc(100vw - 28px)); }
+.reward-dialog:not(.reward-dialog--result) { grid-template-columns: minmax(260px,.72fr) minmax(420px,1.28fr); width: min(940px,100%); }
+.reward-dialog__content { justify-content: flex-start; padding: 44px 42px 35px; }
+.reward-dialog__content h2 { margin-bottom: 18px; }
+.reward-checkout-form { display: grid; gap: 14px; }
+.reward-checkout-section { min-width: 0; margin: 0; padding: 0; border: 0; }
+.reward-checkout-section legend { width: 100%; margin-bottom: 9px; color: var(--blue-950); font-size: 11px; font-weight: 900; }
+.reward-checkout-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.reward-checkout-fields label { display: grid; gap: 5px; min-width: 0; color: #536b7a; font-size: 9px; font-weight: 800; }
+.reward-checkout-fields label > span small { color: var(--muted); font-size: 7px; font-weight: 600; }
+.reward-checkout-fields input { width: 100%; min-width: 0; height: 40px; padding: 0 11px; color: var(--ink); background: white; border: 1px solid #cfdee5; border-radius: 0; outline: 0; font: inherit; font-size: 11px; }
+.reward-checkout-fields input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(22,151,239,.09); }
+.reward-checkout-field--postal { grid-column: 1 / -1; width: min(180px,100%); }
+.reward-checkout-field--wide { grid-column: 1 / -1; }
+.reward-payment-methods > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.reward-payment-methods label { display: flex; align-items: center; min-height: 40px; padding: 0 11px; color: #607987; background: white; border: 1px solid #d3e0e6; font-size: 9px; font-weight: 800; cursor: pointer; }
+.reward-payment-methods label.is-selected { color: var(--blue-950); background: var(--blue-50); border-color: var(--blue-700); }
+.reward-payment-methods input { width: 14px; height: 14px; margin: 0 8px 0 0; accent-color: var(--blue-950); }
+.reward-checkout-form .point-discount-option { min-height: 56px; }
+.reward-checkout-form .reward-payment-breakdown { margin-top: -5px; }
+.reward-checkout-simulation { display: flex; align-items: flex-start; gap: 7px; margin: -2px 0 0; padding: 9px 10px; color: #5d7280; background: #f5f8fa; border-left: 3px solid var(--blue-700); font-size: 8px; line-height: 1.5; }
+.reward-checkout-simulation svg { flex: 0 0 auto; width: 14px; height: 14px; color: var(--blue-700); }
+.reward-checkout-error { margin: -4px 0 0; color: var(--danger-700); font-size: 9px; font-weight: 700; }
+.reward-checkout-form .reward-dialog__checkout { margin-top: 0; }
+.reward-result__delivery { display: grid; gap: 8px; margin: 18px 0 0; padding: 15px 17px; background: #f6f9fb; text-align: left; }
+.reward-result__delivery div { display: grid; grid-template-columns: 62px minmax(0,1fr); gap: 10px; }
+.reward-result__delivery dt { color: var(--muted); font-size: 8px; }
+.reward-result__delivery dd { margin: 0; color: var(--blue-950); font-size: 9px; font-weight: 800; line-height: 1.5; word-break: keep-all; }
+.order-status--preparing,.order-status--shipped,.order-status--delivered { color: var(--green-700); background: var(--green-50); }
+.order-history__list article { grid-template-columns: 82px minmax(0,1fr) minmax(300px,1.25fr); }
+.order-history dd { max-width: 340px; line-height: 1.45; white-space: normal; }
+.order-history dl div:first-child dd { letter-spacing: normal; }
+
+@media (max-width: 760px) {
+  .reward-dialog:not(.reward-dialog--result) { grid-template-columns: 1fr; max-width: 520px; }
+  .reward-dialog__visual { min-height: 190px; }
+  .reward-dialog__content { padding: 27px 20px 23px; }
+  .reward-checkout-fields { grid-template-columns: 1fr; }
+  .reward-checkout-field--postal,.reward-checkout-field--wide { grid-column: auto; width: 100%; }
+  .reward-payment-methods > div { grid-template-columns: 1fr 1fr; }
+  .order-history__list article { grid-template-columns: 65px minmax(0,1fr); }
+  .order-history dl { grid-column: 1 / -1; padding: 10px 4px 2px; border-top: 1px solid #e2eaee; }
+  .order-history dd { max-width: min(70vw,320px); }
+}
+
+@media (max-width: 390px) {
+  .bottom-navigation { width: min(326px,calc(100vw - 20px)); }
+  .reward-payment-methods > div { grid-template-columns: 1fr; }
+  .reward-result__delivery div { grid-template-columns: 54px minmax(0,1fr); }
+}

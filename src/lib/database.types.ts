@@ -160,10 +160,16 @@ export type Database = {
           created_at: string
           id: string
           payment_method: string
+          payment_status: string
           picked_up_at: string | null
           pickup_code: string
           points_spent: number
+          postal_code: string | null
+          recipient_name: string | null
+          recipient_phone: string | null
           reward_id: string
+          shipping_address: string | null
+          shipping_address_detail: string | null
           status: string
           user_id: string
         }
@@ -172,10 +178,16 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string
+          payment_status?: string
           picked_up_at?: string | null
           pickup_code: string
           points_spent?: number
+          postal_code?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
           reward_id: string
+          shipping_address?: string | null
+          shipping_address_detail?: string | null
           status?: string
           user_id: string
         }
@@ -184,10 +196,16 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string
+          payment_status?: string
           picked_up_at?: string | null
           pickup_code?: string
           points_spent?: number
+          postal_code?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
           reward_id?: string
+          shipping_address?: string | null
+          shipping_address_detail?: string | null
           status?: string
           user_id?: string
         }
@@ -305,7 +323,16 @@ export type Database = {
         Returns: Json
       }
       redeem_reward: {
-        Args: { p_points_to_use?: number; p_reward_id: string }
+        Args: {
+          p_payment_method: string
+          p_points_to_use: number
+          p_postal_code: string
+          p_recipient_name: string
+          p_recipient_phone: string
+          p_reward_id: string
+          p_shipping_address: string
+          p_shipping_address_detail: string
+        }
         Returns: Json
       }
     }

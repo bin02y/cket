@@ -3,16 +3,15 @@ import type { Session, User } from '@supabase/supabase-js'
 import { AuthScreen } from './components/AuthScreen'
 import { BottomNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
-import { HomeDashboard } from './components/HomeDashboard'
 import { Icon } from './components/Icon'
 import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
 import { loadParticipantData, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('home')
+  const [activeTab, setActiveTab] = useState<TabId>('booths')
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
   const [orders, setOrders] = useState<RewardOrder[]>([])
@@ -90,7 +89,7 @@ function App() {
     if (!data.session) return { error: '가입 세션을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.' }
 
     setCurrentParticipant(profileFromAuthUser(data.session.user))
-    setActiveTab('home')
+    setActiveTab('booths')
     return {}
   }
 
@@ -101,7 +100,7 @@ function App() {
     if (error) return { error: translateAuthError(error.message) }
 
     setCurrentParticipant(profileFromAuthUser(data.user))
-    setActiveTab('home')
+    setActiveTab('booths')
     return {}
   }
 
@@ -112,7 +111,7 @@ function App() {
     setTransactions([])
     setOrders([])
     setDataError('')
-    setActiveTab('home')
+    setActiveTab('booths')
   }
 
   async function deleteAccount() {
@@ -127,7 +126,7 @@ function App() {
     setTransactions([])
     setOrders([])
     setDataError('')
-    setActiveTab('home')
+    setActiveTab('booths')
     if (participantId) {
       try {
         window.localStorage.removeItem(`eco-express-shop:${participantId}:v1`)
@@ -145,9 +144,9 @@ function App() {
     return loadRemoteState(data.session.user)
   }
 
-  async function redeemReward(rewardId: RewardId, pointsToUse: number): Promise<RewardRedemptionResult> {
+  async function redeemReward(rewardId: RewardId, pointsToUse: number, checkout: CheckoutDetails): Promise<RewardRedemptionResult> {
     try {
-      const result = await saveRewardRedemption(rewardId, pointsToUse)
+      const result = await saveRewardRedemption(rewardId, pointsToUse, checkout)
       if (result.status === 'success' || result.status === 'insufficient') await refreshCurrentParticipant()
       return result
     } catch (error) {
@@ -171,16 +170,14 @@ function App() {
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
-      {activeTab === 'home' ? (
-        <HomeDashboard />
-      ) : activeTab === 'education' ? (
+      {activeTab === 'education' ? (
         <BoothGuide section="education" />
       ) : activeTab === 'experiment' ? (
         <main id="main-content" className="page empty-tab-page" aria-label="실험" />
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" />
       ) : activeTab === 'shop' ? (
-        <RewardShop participantId={currentParticipant.id} balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
+        <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
         <MyProfile profile={currentParticipant} completedBooths={completedBooths} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
       )}

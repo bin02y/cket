@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js'
-import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult } from '../types'
+import type { CheckoutDetails, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SimulatedPaymentMethod } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
@@ -60,17 +60,35 @@ function toPointTransaction(row: TransactionRow): PointTransaction {
 }
 
 function toRewardOrder(row: RewardOrderRow): RewardOrder {
-  const knownStatus = row.status === 'ready' || row.status === 'picked_up' || row.status === 'cancelled'
-    ? row.status
-    : 'requested'
+  const knownStatus: RewardOrder['status'] = row.status === 'cancelled'
+    ? 'cancelled'
+    : row.status === 'delivered' || row.status === 'picked_up'
+      ? 'delivered'
+      : row.status === 'shipped'
+        ? 'shipped'
+        : row.status === 'preparing' || row.status === 'ready'
+          ? 'preparing'
+          : 'paid'
+  const knownPaymentMethod: RewardOrder['paymentMethod'] = row.payment_method === 'kakao_pay'
+    || row.payment_method === 'naver_pay'
+    || row.payment_method === 'bank_transfer'
+    || row.payment_method === 'free'
+    || row.payment_method === 'cash'
+    ? row.payment_method
+    : 'card'
 
   return {
     id: row.id,
     rewardId: row.reward_id,
-    orderCode: row.pickup_code,
     pointsSpent: row.points_spent,
     cashPaid: row.cash_paid,
     status: knownStatus,
+    recipientName: row.recipient_name ?? '',
+    recipientPhone: row.recipient_phone ?? '',
+    postalCode: row.postal_code ?? '',
+    address: row.shipping_address ?? '',
+    addressDetail: row.shipping_address_detail ?? '',
+    paymentMethod: knownPaymentMethod,
     createdAt: transactionTimeFormatter.format(new Date(row.created_at)),
   }
 }
@@ -107,24 +125,33 @@ export async function saveBoothCompletion(missionId: MissionId, bonusPoints: num
   return data.status === 'completed' || data.status === 'already_completed'
 }
 
-export async function saveRewardRedemption(rewardId: RewardId, pointsToUse: number): Promise<RewardRedemptionResult> {
+export async function saveRewardRedemption(rewardId: RewardId, pointsToUse: number, checkout: CheckoutDetails): Promise<RewardRedemptionResult> {
   if (!supabase) return { status: 'error', message: 'Supabase 연결 정보가 없습니다.' }
 
-  const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: rewardId, p_points_to_use: pointsToUse })
+  const { data, error } = await supabase.rpc('redeem_reward', {
+    p_payment_method: checkout.paymentMethod,
+    p_points_to_use: pointsToUse,
+    p_postal_code: checkout.postalCode,
+    p_recipient_name: checkout.recipientName,
+    p_recipient_phone: checkout.recipientPhone,
+    p_reward_id: rewardId,
+    p_shipping_address: checkout.address,
+    p_shipping_address_detail: checkout.addressDetail,
+  })
   if (error) throw error
   if (!isJsonObject(data)) return { status: 'error', message: '굿즈 교환 응답을 확인하지 못했습니다.' }
 
   if (
     data.status === 'success'
-    && typeof data.pickup_code === 'string'
     && typeof data.points_spent === 'number'
     && typeof data.cash_paid === 'number'
+    && (data.payment_method === 'card' || data.payment_method === 'kakao_pay' || data.payment_method === 'naver_pay' || data.payment_method === 'bank_transfer' || data.payment_method === 'free')
   ) {
     return {
       status: 'success',
-      orderCode: data.pickup_code,
       pointsSpent: data.points_spent,
       cashPaid: data.cash_paid,
+      paymentMethod: data.payment_method as SimulatedPaymentMethod | 'free',
     }
   }
   if (data.status === 'insufficient' && typeof data.shortage === 'number') {
@@ -141,6 +168,8 @@ export function translateDataError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error)
   if (message.includes('Invalid mission bonus')) return '체험 보너스 점수를 확인해 주세요.'
   if (message.includes('Invalid point discount') || message.includes('Point discount unavailable')) return '사용할 포인트를 다시 확인해 주세요.'
+  if (message.includes('Invalid shipping details')) return '배송 정보를 다시 확인해 주세요.'
+  if (message.includes('Invalid payment method')) return '결제수단을 다시 선택해 주세요.'
   if (message.includes('Reward out of stock')) return '현재 굿즈 재고가 모두 소진됐어요.'
   if (message.includes('Authentication required') || message.includes('JWT')) return '로그인 세션이 만료됐습니다. 다시 로그인해 주세요.'
   return '데이터를 저장하지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도해 주세요.'

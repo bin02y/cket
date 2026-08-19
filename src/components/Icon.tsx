@@ -2,7 +2,7 @@ import type { SVGProps } from 'react'
 import type { TabId } from '../types'
 
 type IconProps = SVGProps<SVGSVGElement> & {
-  name: TabId | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup' | 'stamp' | 'map' | 'search' | 'heart' | 'cart'
+  name: TabId | 'home' | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup' | 'stamp' | 'map' | 'search' | 'heart' | 'cart'
 }
 
 export function Icon({ name, ...props }: IconProps) {

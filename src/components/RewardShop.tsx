@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { rewardProducts } from '../data/rewards'
-import type { RewardProduct, RewardRedemptionResult } from '../types'
+import type { CheckoutDetails, RewardProduct, RewardRedemptionResult, SimulatedPaymentMethod } from '../types'
 import { Icon } from './Icon'
 
 const WON_PER_POINT = 1
 
 type RewardShopProps = {
   participantId: string
+  participantName: string
   balance: number
   completedStamps: number
-  onRedeem: (rewardId: RewardProduct['id'], pointsToUse: number) => Promise<RewardRedemptionResult>
+  onRedeem: (rewardId: RewardProduct['id'], pointsToUse: number, checkout: CheckoutDetails) => Promise<RewardRedemptionResult>
 }
 
 type ShopCollection = 'wishlist' | 'cart'
@@ -21,6 +23,14 @@ type ShopPreferences = {
 }
 
 const rewardById = new Map<string, RewardProduct>(rewardProducts.map((reward) => [reward.id, reward]))
+
+const paymentMethodLabels: Record<SimulatedPaymentMethod | 'free', string> = {
+  card: '신용·체크카드',
+  kakao_pay: '카카오페이',
+  naver_pay: '네이버페이',
+  bank_transfer: '무통장입금',
+  free: '무료 지급',
+}
 
 function loadShopPreferences(storageKey: string): ShopPreferences {
   const emptyPreferences: ShopPreferences = { version: 1, wishlist: [], cart: [] }
@@ -43,7 +53,7 @@ function requiredStampCount(reward: RewardProduct) {
   return 0
 }
 
-export function RewardShop({ participantId, balance, completedStamps, onRedeem }: RewardShopProps) {
+export function RewardShop({ participantId, participantName, balance, completedStamps, onRedeem }: RewardShopProps) {
   const storageKey = `eco-express-shop:${participantId}:v1`
   const [selectedReward, setSelectedReward] = useState<RewardProduct | null>(null)
   const [usePoints, setUsePoints] = useState(true)
@@ -53,6 +63,15 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
   const [activeCollection, setActiveCollection] = useState<ShopCollection | null>(null)
   const [shopNotice, setShopNotice] = useState('')
   const [preferences, setPreferences] = useState<ShopPreferences>(() => loadShopPreferences(storageKey))
+  const [checkoutError, setCheckoutError] = useState('')
+  const [checkoutDetails, setCheckoutDetails] = useState<CheckoutDetails>({
+    recipientName: participantName,
+    recipientPhone: '',
+    postalCode: '',
+    address: '',
+    addressDetail: '',
+    paymentMethod: 'card',
+  })
 
   useEffect(() => {
     try {
@@ -81,6 +100,8 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
     setUsePoints(balance > 0 && reward.cashPrice > 0)
     setRedemption(null)
     setIsRedeeming(false)
+    setCheckoutError('')
+    setCheckoutDetails({ recipientName: participantName, recipientPhone: '', postalCode: '', address: '', addressDetail: '', paymentMethod: 'card' })
   }
 
   function closeDialog() {
@@ -109,11 +130,33 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
     setActiveCollection((current) => current === collection ? null : collection)
   }
 
-  async function redeemSelectedReward() {
+  function updateCheckoutField<Field extends keyof CheckoutDetails>(field: Field, value: CheckoutDetails[Field]) {
+    setCheckoutDetails((current) => ({ ...current, [field]: value }))
+  }
+
+  async function redeemSelectedReward(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     if (!selectedReward) return
+    const normalizedCheckout = {
+      ...checkoutDetails,
+      recipientName: checkoutDetails.recipientName.trim(),
+      recipientPhone: checkoutDetails.recipientPhone.trim(),
+      postalCode: checkoutDetails.postalCode.trim(),
+      address: checkoutDetails.address.trim(),
+      addressDetail: checkoutDetails.addressDetail.trim(),
+    }
+    if (!normalizedCheckout.recipientName || !normalizedCheckout.recipientPhone || !normalizedCheckout.postalCode || !normalizedCheckout.address) {
+      setCheckoutError('받는 분, 연락처, 우편번호와 주소를 모두 입력해 주세요.')
+      return
+    }
+    if (!/^[0-9+() -]{9,20}$/.test(normalizedCheckout.recipientPhone)) {
+      setCheckoutError('연락처를 올바르게 입력해 주세요.')
+      return
+    }
+    setCheckoutError('')
     setIsRedeeming(true)
     setRedemption(null)
-    const result = await onRedeem(selectedReward.id, pointsToUse)
+    const result = await onRedeem(selectedReward.id, pointsToUse, normalizedCheckout)
     setRedemption(result)
     if (result.status === 'success') {
       setPreferences((current) => ({ ...current, cart: current.cart.filter((id) => id !== selectedReward.id) }))
@@ -146,11 +189,11 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
               <div className="shop-collection-list">
                 {collectionProducts.map((reward) => {
                   const unlocked = completedStamps >= requiredStampCount(reward)
-                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" disabled={!unlocked} onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" disabled={!unlocked} onClick={() => { openReward(reward); setActiveCollection(null) }}>온라인 주문</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
+                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" disabled={!unlocked} onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" disabled={!unlocked} onClick={() => { openReward(reward); setActiveCollection(null) }}>구매</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
                 })}
               </div>
             ) : <p className="shop-collection-empty">{activeCollection === 'wishlist' ? '찜한 굿즈가 아직 없어요.' : '장바구니가 비어 있어요.'}</p>}
-            {activeCollection === 'cart' && cartProducts.length > 0 ? <footer><span>총 상품 금액</span><strong>{cartProducts.reduce((total, reward) => total + reward.cashPrice, 0).toLocaleString('ko-KR')}원</strong><small>상품별 온라인 주문 시 포인트 할인을 선택할 수 있어요.</small></footer> : null}
+            {activeCollection === 'cart' && cartProducts.length > 0 ? <footer><span>총 상품 금액</span><strong>{cartProducts.reduce((total, reward) => total + reward.cashPrice, 0).toLocaleString('ko-KR')}원</strong><small>상품별 구매 시 포인트 할인을 선택할 수 있어요.</small></footer> : null}
           </aside>
         ) : null}
 
@@ -190,11 +233,15 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
             {redemption?.status === 'success' ? (() => {
               return <div className="reward-result reward-result--success">
                 <span className="reward-result__icon"><Icon name="check" /></span>
-                <h2 id="reward-dialog-title">{selectedReward.cashPrice === 0 ? '무료 굿즈가 준비됐어요!' : '온라인 주문이 완료됐어요!'}</h2>
-                <p><strong>{selectedReward.name}</strong>을 준비하고 있습니다.<br />아래 코드를 현장 스태프에게 보여주세요.</p>
-                <div className="pickup-code"><small>PICK-UP CODE</small><strong>{redemption.orderCode}</strong></div>
-                <div className="reward-result__summary"><div><span>주문 금액</span>{redemption.pointsSpent > 0 ? <small>{redemption.pointsSpent.toLocaleString('ko-KR')} P 사용</small> : null}</div><strong>{redemption.cashPaid.toLocaleString('ko-KR')}원</strong></div>
-                <p className="reward-result__note"><Icon name="shop" /> 온라인 주문이 접수됐어요. 수령 시 주문 코드를 제시해 주세요.</p>
+                <h2 id="reward-dialog-title">{selectedReward.cashPrice === 0 ? '신청이 완료됐어요!' : '구매가 완료됐어요!'}</h2>
+                <p><strong>{selectedReward.name}</strong>의 주문을 접수했습니다.<br />입력한 배송지로 안전하게 보내드릴게요.</p>
+                <dl className="reward-result__delivery">
+                  <div><dt>받는 분</dt><dd>{checkoutDetails.recipientName} · {checkoutDetails.recipientPhone}</dd></div>
+                  <div><dt>배송지</dt><dd>({checkoutDetails.postalCode}) {checkoutDetails.address} {checkoutDetails.addressDetail}</dd></div>
+                  <div><dt>결제수단</dt><dd>{redemption.cashPaid === 0 && redemption.pointsSpent > 0 ? 'ECO POINT 전액' : paymentMethodLabels[redemption.paymentMethod]}</dd></div>
+                </dl>
+                <div className="reward-result__summary"><div><span>결제 금액</span>{redemption.pointsSpent > 0 ? <small>{redemption.pointsSpent.toLocaleString('ko-KR')} P 사용</small> : null}</div><strong>{redemption.cashPaid.toLocaleString('ko-KR')}원</strong></div>
+                <p className="reward-result__note"><Icon name="shop" /> 모의 결제로 진행되어 실제 금액은 청구되지 않았습니다.</p>
                 <div className="reward-result__actions"><button type="button" className="secondary-button" onClick={closeDialog}>계속 둘러보기</button><button type="button" className="primary-button" onClick={closeDialog}>확인 <Icon name="arrow" /></button></div>
               </div>
             })() : redemption?.status === 'insufficient' ? (
@@ -202,7 +249,7 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
                 <span className="reward-result__icon"><Icon name="warning" /></span>
                 <h2 id="reward-dialog-title">포인트 잔액이 변경됐어요</h2>
                 <p>결제 중 잔액이 바뀌어 선택한 포인트보다<br /><em>{redemption.shortage.toLocaleString('ko-KR')} P</em>가 부족합니다.</p>
-                <p className="reward-result__note"><Icon name="shop" /> 상품으로 돌아가 최신 잔액에 맞춰 다시 신청해 주세요.</p>
+                <p className="reward-result__note"><Icon name="shop" /> 상품으로 돌아가 최신 잔액에 맞춰 다시 구매해 주세요.</p>
                 <div className="reward-result__actions"><button type="button" className="primary-button" onClick={returnToReward}>상품으로 돌아가기</button></div>
               </div>
             ) : redemption?.status === 'locked' ? (
@@ -222,7 +269,7 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
             ) : redemption?.status === 'error' ? (
               <div className="reward-result reward-result--notice">
                 <span className="reward-result__icon"><Icon name="lock" /></span>
-                <h2 id="reward-dialog-title">신청을 완료하지 못했어요</h2>
+                <h2 id="reward-dialog-title">구매를 완료하지 못했어요</h2>
                 <p>{redemption.message}</p>
                 <div className="reward-result__actions"><button type="button" className="secondary-button" onClick={returnToReward}>상품으로 돌아가기</button><button type="button" className="primary-button" onClick={closeDialog}>확인</button></div>
               </div>
@@ -231,12 +278,34 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
                 <div className={`reward-dialog__visual reward-product-card__visual--${selectedReward.theme}`}><img className="reward-product-image" src={selectedReward.image} alt={selectedReward.imageAlt} decoding="async" /></div>
                 <div className="reward-dialog__content">
                   <h2 id="reward-dialog-title">{selectedReward.name}</h2>
-                  {selectedReward.cashPrice > 0 ? <label className={`point-discount-option${usePoints ? ' is-selected' : ''}`}><input type="checkbox" checked={usePoints} disabled={availableDiscountPoints === 0} onChange={(event) => setUsePoints(event.target.checked)} /><span className="point-discount-option__icon"><Icon name="wallet" /></span><span><small>ECO POINT 할인</small><strong>{availableDiscountPoints > 0 ? `${availableDiscountPoints.toLocaleString('ko-KR')} P 사용 · ${(availableDiscountPoints * WON_PER_POINT).toLocaleString('ko-KR')}원 할인` : '사용 가능한 포인트가 없어요'}</strong></span></label> : null}
-                  {selectedReward.cashPrice > 0 ? <div className="reward-payment-breakdown"><span><small>상품 금액</small><strong>{selectedReward.cashPrice.toLocaleString('ko-KR')}원</strong></span><span><small>포인트 할인</small><strong>-{(pointsToUse * WON_PER_POINT).toLocaleString('ko-KR')}원</strong></span></div> : null}
-                  <div className="reward-dialog__checkout">
-                    <div><small>{cashToPay > 0 ? '온라인 주문 금액' : selectedReward.cashPrice > 0 ? '포인트 전액 결제' : '무료 지급'}</small><strong>{cashToPay.toLocaleString('ko-KR')}원</strong></div>
-                    <button type="button" onClick={redeemSelectedReward} disabled={isRedeeming}>{isRedeeming ? '처리 중...' : selectedReward.cashPrice === 0 ? '받기' : '온라인 주문'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
-                  </div>
+                  <form className="reward-checkout-form" onSubmit={redeemSelectedReward}>
+                    <fieldset className="reward-checkout-section">
+                      <legend>배송 정보</legend>
+                      <div className="reward-checkout-fields">
+                        <label><span>받는 분</span><input type="text" autoComplete="name" maxLength={50} required value={checkoutDetails.recipientName} onChange={(event) => updateCheckoutField('recipientName', event.target.value)} /></label>
+                        <label><span>연락처</span><input type="tel" inputMode="tel" autoComplete="tel" maxLength={20} required placeholder="010-1234-5678" value={checkoutDetails.recipientPhone} onChange={(event) => updateCheckoutField('recipientPhone', event.target.value)} /></label>
+                        <label className="reward-checkout-field--postal"><span>우편번호</span><input type="text" inputMode="numeric" autoComplete="postal-code" maxLength={20} required placeholder="우편번호" value={checkoutDetails.postalCode} onChange={(event) => updateCheckoutField('postalCode', event.target.value)} /></label>
+                        <label className="reward-checkout-field--wide"><span>주소</span><input type="text" autoComplete="street-address" maxLength={200} required placeholder="도로명 주소" value={checkoutDetails.address} onChange={(event) => updateCheckoutField('address', event.target.value)} /></label>
+                        <label className="reward-checkout-field--wide"><span>상세 주소 <small>(선택)</small></span><input type="text" maxLength={200} placeholder="동·호수 등" value={checkoutDetails.addressDetail} onChange={(event) => updateCheckoutField('addressDetail', event.target.value)} /></label>
+                      </div>
+                    </fieldset>
+
+                    {cashToPay > 0 ? <fieldset className="reward-checkout-section reward-payment-methods">
+                      <legend>결제수단</legend>
+                      <div>
+                        {(Object.entries(paymentMethodLabels) as Array<[SimulatedPaymentMethod | 'free', string]>).filter(([method]) => method !== 'free').map(([method, label]) => <label className={checkoutDetails.paymentMethod === method ? 'is-selected' : ''} key={method}><input type="radio" name="payment-method" value={method} checked={checkoutDetails.paymentMethod === method} onChange={() => updateCheckoutField('paymentMethod', method as SimulatedPaymentMethod)} /><span>{label}</span></label>)}
+                      </div>
+                    </fieldset> : null}
+
+                    {selectedReward.cashPrice > 0 ? <label className={`point-discount-option${usePoints ? ' is-selected' : ''}`}><input type="checkbox" checked={usePoints} disabled={availableDiscountPoints === 0} onChange={(event) => setUsePoints(event.target.checked)} /><span className="point-discount-option__icon"><Icon name="wallet" /></span><span><small>ECO POINT 할인</small><strong>{availableDiscountPoints > 0 ? `${availableDiscountPoints.toLocaleString('ko-KR')} P 사용 · ${(availableDiscountPoints * WON_PER_POINT).toLocaleString('ko-KR')}원 할인` : '사용 가능한 포인트가 없어요'}</strong></span></label> : null}
+                    {selectedReward.cashPrice > 0 ? <div className="reward-payment-breakdown"><span><small>상품 금액</small><strong>{selectedReward.cashPrice.toLocaleString('ko-KR')}원</strong></span><span><small>포인트 할인</small><strong>-{(pointsToUse * WON_PER_POINT).toLocaleString('ko-KR')}원</strong></span></div> : null}
+                    <p className="reward-checkout-simulation"><Icon name="warning" /> 실제 결제사와 연결되지 않는 모의 결제입니다. 실제 금액은 청구되지 않습니다.</p>
+                    {checkoutError ? <p className="reward-checkout-error" role="alert">{checkoutError}</p> : null}
+                    <div className="reward-dialog__checkout">
+                      <div><small>{cashToPay > 0 ? '최종 결제 금액' : selectedReward.cashPrice > 0 ? '포인트 전액 결제' : '무료 지급'}</small><strong>{cashToPay.toLocaleString('ko-KR')}원</strong></div>
+                      <button type="submit" disabled={isRedeeming}>{isRedeeming ? '결제 중...' : '구매'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
+                    </div>
+                  </form>
                 </div>
               </>
             )}

@@ -13,10 +13,19 @@ type MyProfileProps = {
 
 const rewardById = new Map<string, RewardProduct>(rewardProducts.map((reward) => [reward.id, reward]))
 const orderStatusLabels: Record<RewardOrder['status'], string> = {
-  requested: '주문 접수',
-  ready: '수령 준비',
-  picked_up: '수령 완료',
+  paid: '결제 완료',
+  preparing: '상품 준비중',
+  shipped: '배송중',
+  delivered: '배송 완료',
   cancelled: '주문 취소',
+}
+const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
+  card: '신용·체크카드',
+  kakao_pay: '카카오페이',
+  naver_pay: '네이버페이',
+  bank_transfer: '무통장입금',
+  free: '무료 지급',
+  cash: '현금',
 }
 
 const stampBooths: readonly { id: MissionId; number: string; hall: string; title: string; icon: 'train' | 'snowflake' | 'wind' | 'paw' | 'butterfly' }[] = [
@@ -64,7 +73,7 @@ export function MyProfile({ profile, completedBooths, orders, onLogout, onDelete
       </section>
 
       <section className="order-history" aria-labelledby="order-history-title">
-        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>굿즈 온라인 주문과 수령 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
+        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>쇼핑 구매와 배송 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
         {orders.length > 0 ? (
           <div className="order-history__list">
             {orders.map((order) => {
@@ -72,16 +81,16 @@ export function MyProfile({ profile, completedBooths, orders, onLogout, onDelete
               return <article key={order.id}>
                 <div className="order-history__image">{reward ? <img src={reward.image} alt="" loading="lazy" decoding="async" /> : <Icon name="shop" />}</div>
                 <div className="order-history__info"><span className={`order-status order-status--${order.status}`}>{orderStatusLabels[order.status]}</span><h3>{reward?.name ?? '굿즈 주문'}</h3><p>{order.createdAt}</p></div>
-                <dl><div><dt>수령 코드</dt><dd>{order.orderCode}</dd></div><div><dt>결제</dt><dd>{order.cashPaid.toLocaleString('ko-KR')}원{order.pointsSpent > 0 ? ` · ${order.pointsSpent.toLocaleString('ko-KR')} P` : ''}</dd></div></dl>
+                <dl><div><dt>받는 분</dt><dd>{order.recipientName || '이전 주문'}</dd></div><div><dt>배송지</dt><dd>{order.address ? `(${order.postalCode}) ${order.address} ${order.addressDetail}` : '이전 현장 수령 주문'}</dd></div><div><dt>결제</dt><dd>{order.cashPaid === 0 && order.pointsSpent > 0 ? 'ECO POINT 전액' : orderPaymentLabels[order.paymentMethod]} · {order.cashPaid.toLocaleString('ko-KR')}원{order.pointsSpent > 0 ? ` · ${order.pointsSpent.toLocaleString('ko-KR')} P` : ''}</dd></div></dl>
               </article>
             })}
           </div>
-        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>굿즈를 온라인으로 주문하면 이곳에서 수령 상태를 확인할 수 있어요.</p></div>}
+        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>쇼핑에서 굿즈를 구매하면 이곳에서 배송 상태를 확인할 수 있어요.</p></div>}
       </section>
 
       <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>
 
-      {showDeleteDialog ? <div className="account-dialog-backdrop" role="presentation"><section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-account-title"><span className="account-dialog__icon"><Icon name="my" /></span><h2 id="delete-account-title">정말 회원탈퇴할까요?</h2><p>현재 참가자의 부스 스탬프, ECO POINT, 굿즈 교환 내역이 모두 삭제됩니다. 이 작업은 되돌릴 수 없어요.</p>{deleteError ? <p className="account-dialog__error" role="alert">{deleteError}</p> : null}<div><button type="button" className="secondary-button" autoFocus onClick={() => setShowDeleteDialog(false)}>계속 이용하기</button><button type="button" className="account-delete-button" disabled={isDeleting} onClick={deleteAccount}>{isDeleting ? '삭제 중...' : '모든 데이터 삭제'}</button></div></section></div> : null}
+      {showDeleteDialog ? <div className="account-dialog-backdrop" role="presentation"><section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-account-title"><span className="account-dialog__icon"><Icon name="my" /></span><h2 id="delete-account-title">정말 회원탈퇴할까요?</h2><p>현재 참가자의 부스 스탬프, ECO POINT, 굿즈 구매 내역이 모두 삭제됩니다. 이 작업은 되돌릴 수 없어요.</p>{deleteError ? <p className="account-dialog__error" role="alert">{deleteError}</p> : null}<div><button type="button" className="secondary-button" autoFocus onClick={() => setShowDeleteDialog(false)}>계속 이용하기</button><button type="button" className="account-delete-button" disabled={isDeleting} onClick={deleteAccount}>{isDeleting ? '삭제 중...' : '모든 데이터 삭제'}</button></div></section></div> : null}
     </main>
   )
 }

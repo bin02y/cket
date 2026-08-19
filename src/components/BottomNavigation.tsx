@@ -1,13 +1,12 @@
 import { Icon } from './Icon'
 import type { TabId } from '../types'
 
-const navigationItems: ReadonlyArray<{ id: TabId; label: string }> = [
-  { id: 'home', label: '홈' },
-  { id: 'education', label: '교육' },
-  { id: 'experiment', label: '실험' },
-  { id: 'booths', label: '부스' },
-  { id: 'shop', label: '굿즈' },
-  { id: 'my', label: 'MY' },
+const navigationItems: ReadonlyArray<{ id: TabId; label: string; icon: 'home' | TabId }> = [
+  { id: 'education', label: '교육', icon: 'education' },
+  { id: 'experiment', label: '실험', icon: 'experiment' },
+  { id: 'booths', label: '홈', icon: 'home' },
+  { id: 'shop', label: '쇼핑', icon: 'shop' },
+  { id: 'my', label: 'MY', icon: 'my' },
 ]
 
 type BottomNavigationProps = {
@@ -26,7 +25,7 @@ export function BottomNavigation({ activeTab, onChange }: BottomNavigationProps)
           aria-current={activeTab === item.id ? 'page' : undefined}
           onClick={() => onChange(item.id)}
         >
-          <Icon name={item.id} />
+          <Icon name={item.icon} />
           <span>{item.label}</span>
         </button>
       ))}

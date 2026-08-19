@@ -1,4 +1,4 @@
-export type TabId = 'home' | 'education' | 'experiment' | 'booths' | 'shop' | 'my'
+export type TabId = 'education' | 'experiment' | 'booths' | 'shop' | 'my'
 
 export type MissionId = 1 | 2 | 3 | 4 | 5
 
@@ -48,7 +48,7 @@ export type RewardProduct = {
 }
 
 export type RewardRedemptionResult =
-  | { status: 'success'; orderCode: string; pointsSpent: number; cashPaid: number }
+  | { status: 'success'; pointsSpent: number; cashPaid: number; paymentMethod: SimulatedPaymentMethod | 'free' }
   | { status: 'insufficient'; shortage: number }
   | { status: 'locked'; requiredStamps: number }
   | { status: 'already_claimed' }
@@ -57,11 +57,27 @@ export type RewardRedemptionResult =
 export type RewardOrder = {
   id: string
   rewardId: string
-  orderCode: string
   pointsSpent: number
   cashPaid: number
-  status: 'requested' | 'ready' | 'picked_up' | 'cancelled'
+  status: 'paid' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
+  recipientName: string
+  recipientPhone: string
+  postalCode: string
+  address: string
+  addressDetail: string
+  paymentMethod: SimulatedPaymentMethod | 'free' | 'cash'
   createdAt: string
+}
+
+export type SimulatedPaymentMethod = 'card' | 'kakao_pay' | 'naver_pay' | 'bank_transfer'
+
+export type CheckoutDetails = {
+  recipientName: string
+  recipientPhone: string
+  postalCode: string
+  address: string
+  addressDetail: string
+  paymentMethod: SimulatedPaymentMethod
 }
 
 export type PointTransaction = {
