@@ -22,18 +22,18 @@ const BOOTH_DEPTH = 5.4
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -18, z: -5, gate: { x: -15.3, z: -5, side: 'east' } },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
   { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 18, z: -5, gate: { x: 15.3, z: -5, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -18, z: 5, gate: { x: -15.3, z: 5, side: 'east' } },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 19.1, z: -5, gate: { x: 16.4, z: -5, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -19.1, z: 5, gate: { x: -16.4, z: 5, side: 'east' } },
   { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 18, z: 5, gate: { x: 15.3, z: 5, side: 'west' } },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 19.1, z: 5, gate: { x: 16.4, z: 5, side: 'west' } },
   { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
-  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -18, z: 15, gate: { x: -15.3, z: 15, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 18, z: 15, gate: { x: 15.3, z: 15, side: 'west' } },
+  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -19.1, z: 15, gate: { x: -16.4, z: 15, side: 'east' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 19.1, z: 15, gate: { x: 16.4, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const BOOTH_IMAGES: Readonly<Partial<Record<number, { src: string; alt: string }>>> = {
@@ -135,28 +135,55 @@ function createGate(zone: RoadViewBooth) {
   leftWing.position.set(-0.66, 0.8, 0)
   const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
-  if (zone.trainCar) {
-    const sign = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.75, 0.97),
-      new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, `${zone.gateCode} · TRAIN DOOR`, zone.color, 'BOARD THROUGH THE TRAIN DOOR'), transparent: true, side: THREE.DoubleSide }),
-    )
-    sign.position.set(0, 3.35, 0); group.add(sign)
-  }
   const gateLight = new THREE.PointLight(accent, 3.2, 8, 2)
   gateLight.position.set(0, 2.25, zone.gate.side === 'south' ? 0.6 : -0.6); group.add(gateLight); group.userData.light = gateLight
   return group
 }
 
+function createTrainDoor(zone: RoadViewBooth) {
+  const group = new THREE.Group(); group.position.set(zone.gate.x, 0, zone.gate.z)
+  if (zone.gate.side === 'north') group.rotation.y = Math.PI
+  else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
+  const accent = new THREE.Color(zone.color)
+  const frame = new THREE.MeshStandardMaterial({ color: '#e8eff2', metalness: 0.68, roughness: 0.22 })
+  const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.38, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
+  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#83c6df', transparent: true, opacity: 0.58, metalness: 0.2, roughness: 0.08, side: THREE.DoubleSide })
+  addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
+  addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
+  addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
+  const leftDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [-0.7, 1.66, 0], doorMaterial, 0.05)
+  const rightDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [0.7, 1.66, 0], doorMaterial, 0.05)
+  for (const [x, door] of [[-0.7, leftDoor], [0.7, rightDoor]] as const) {
+    addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
+    door.userData.closedX = x
+  }
+  group.userData.slidingDoors = [leftDoor, rightDoor]
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.75, 0.97),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, `${zone.gateCode} · TRAIN DOOR`, zone.color, 'AUTOMATIC SLIDING DOOR'), transparent: true, side: THREE.DoubleSide }),
+  )
+  sign.position.set(0, 4.15, 0); group.add(sign)
+  const doorLight = new THREE.PointLight(accent, 2.5, 7, 2); doorLight.position.set(0, 3.15, 0.5); group.add(doorLight); group.userData.light = doorLight
+  return group
+}
+
+function addTrainSeat(parent: THREE.Object3D, x: number, z: number, backDirection: number, seatMaterial: THREE.Material, trimMaterial: THREE.Material) {
+  addRoundedBox(parent, [0.22, 0.5, 0.22], [x, 0.4, z], trimMaterial, 0.05)
+  addRoundedBox(parent, [1.04, 0.2, 0.8], [x, 0.68, z], seatMaterial, 0.12)
+  addRoundedBox(parent, [1.04, 1.08, 0.18], [x, 1.18, z + backDirection * 0.34], seatMaterial, 0.12)
+  for (const armX of [x - 0.58, x + 0.58]) addRoundedBox(parent, [0.12, 0.5, 0.7], [armX, 0.92, z], trimMaterial, 0.05)
+}
+
 function createTrainCarBooth(zone: RoadViewBooth) {
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
   group.rotation.y = -Math.PI / 2
-  const accent = new THREE.Color(zone.color)
   const white = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
   const silver = new THREE.MeshStandardMaterial({ color: '#b8c7d0', metalness: 0.8, roughness: 0.2 })
   const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#9dd8ee', transparent: true, opacity: 0.58, roughness: 0.08, metalness: 0.22, side: THREE.DoubleSide })
-  const accentMaterial = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.42, metalness: 0.2, roughness: 0.34 })
   const seatMaterial = new THREE.MeshStandardMaterial({ color: '#244f70', metalness: 0.15, roughness: 0.55 })
+  const seatTrim = new THREE.MeshStandardMaterial({ color: '#c8d5dc', metalness: 0.62, roughness: 0.24 })
   const halfWidth = 2.8; const halfDepth = 4.6
 
   addRoundedBox(group, [5.8, 0.3, 9.4], [0, 0.16, 0], silver, 0.14)
@@ -178,10 +205,10 @@ function createTrainCarBooth(zone: RoadViewBooth) {
     addRoundedBox(group, [0.06, 1.0, 0.86], [halfWidth + 0.13, 2.55, z], windowMaterial, 0.08)
   }
   for (const z of [-2.9, -1.45, 1.45, 2.9]) {
-    addRoundedBox(group, [1.15, 0.48, 0.72], [-1.38, 0.62, z], seatMaterial, 0.14)
-    addRoundedBox(group, [1.15, 0.48, 0.72], [1.05, 0.62, z], seatMaterial, 0.14)
+    const backDirection = z < 0 ? -1 : 1
+    addTrainSeat(group, -1.38, z, backDirection, seatMaterial, seatTrim)
+    addTrainSeat(group, 1.05, z, backDirection, seatMaterial, seatTrim)
   }
-  addRoundedBox(group, [0.1, 0.12, 7.8], [0, 0.36, 0], accentMaterial, 0.03)
   return group
 }
 
@@ -214,28 +241,46 @@ function createFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
   const accent = new THREE.Color(facility.color)
-  const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.18, roughness: 0.34, clearcoat: 0.6, clearcoatRoughness: 0.24 })
+  const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.2, roughness: 0.3, clearcoat: 0.65, clearcoatRoughness: 0.22 })
   const wall = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.84), metalness: 0.08, roughness: 0.48 })
   const fixture = new THREE.MeshStandardMaterial({ color: '#dbe5e9', metalness: 0.36, roughness: 0.3 })
   const dark = new THREE.MeshStandardMaterial({ color: '#21465a', metalness: 0.18, roughness: 0.42 })
+  const ceramic = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.04, roughness: 0.18, clearcoat: 0.82, clearcoatRoughness: 0.16 })
   const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
-  addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.24, BOOTH_DEPTH + 0.3], [0, 0.1, 0], shell, 0.12)
-  addRoundedBox(group, [BOOTH_WIDTH, 4.4, 0.3], [0, 2.25, backLocalZ], wall, 0.1)
-  addRoundedBox(group, [0.3, 4.4, BOOTH_DEPTH], [-halfWidth, 2.25, 0], shell, 0.1)
-  addRoundedBox(group, [0.3, 4.4, BOOTH_DEPTH], [halfWidth, 2.25, 0], shell, 0.1)
-  addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.28, BOOTH_DEPTH + 0.2], [0, 4.52, 0], shell, 0.1)
+  addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
+  addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], wall, 0.1)
+  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
+  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
+  addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
   const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'ECO EXPRESS STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
   )
-  sign.position.set(0, 3.42, backLocalZ * 0.91); group.add(sign)
   if (facility.gateCode === 'F01') {
-    for (const x of [-2.25, 0, 2.25]) {
-      addRoundedBox(group, [1.68, 2.55, 0.18], [x, 1.46, backLocalZ + 0.25], fixture, 0.08)
-      addRoundedBox(group, [0.12, 0.12, 0.08], [x + 0.58, 1.46, backLocalZ + 0.37], dark, 0.03)
-    }
+    addRoundedBox(group, [3.18, 4.55, 0.3], [-2.61, 2.34, halfDepth], wall, 0.1)
+    addRoundedBox(group, [3.18, 4.55, 0.3], [2.61, 2.34, halfDepth], wall, 0.1)
+    addRoundedBox(group, [2.04, 1.15, 0.3], [0, 4.12, halfDepth], wall, 0.08)
+    sign.position.set(0, 4.0, halfDepth + 0.18); sign.scale.setScalar(0.7); group.add(sign)
+    const doorPivot = new THREE.Group(); doorPivot.position.set(-0.92, 0, halfDepth - 0.08); doorPivot.rotation.y = -1.02; group.add(doorPivot)
+    addRoundedBox(doorPivot, [1.82, 2.78, 0.12], [0.91, 1.52, 0], fixture, 0.06)
+    addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [1.56, 1.5, -0.1], dark, 0.03)
+
+    addRoundedBox(group, [1.45, 0.25, 0.72], [-2.45, 1.02, -1.55], ceramic, 0.12)
+    addRoundedBox(group, [0.9, 0.05, 0.42], [-2.45, 1.17, -1.55], dark, 0.03)
+    addRoundedBox(group, [0.18, 0.78, 0.18], [-2.45, 0.58, -1.55], fixture, 0.05)
+    addRoundedBox(group, [0.12, 0.5, 0.12], [-2.45, 1.42, -1.78], fixture, 0.04)
+    addRoundedBox(group, [0.52, 0.12, 0.12], [-2.22, 1.63, -1.78], fixture, 0.04)
+
+    addRoundedBox(group, [0.78, 1.0, 0.42], [0, 1.08, backLocalZ + 0.35], ceramic, 0.16)
+    addRoundedBox(group, [0.46, 0.42, 0.38], [0, 0.48, backLocalZ + 0.5], fixture, 0.12)
+
+    const toiletBowl = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.14, 12, 32), ceramic)
+    toiletBowl.rotation.x = Math.PI / 2; toiletBowl.position.set(2.25, 0.72, -1.5); toiletBowl.scale.z = 1.28; group.add(toiletBowl)
+    addRoundedBox(group, [0.62, 0.5, 0.62], [2.25, 0.42, -1.5], ceramic, 0.16)
+    addRoundedBox(group, [1.05, 1.05, 0.38], [2.25, 1.08, -2.08], ceramic, 0.12)
   } else {
+    sign.position.set(0, 3.42, backLocalZ * 0.91); group.add(sign)
     addRoundedBox(group, [5.9, 1.08, 0.9], [0, 0.68, 0.72], fixture, 0.14)
     addRoundedBox(group, [5.25, 0.16, 0.98], [0, 1.24, 0.72], dark, 0.05)
     for (const x of [-1.35, 1.35]) {
@@ -254,12 +299,13 @@ function buildMetaverseStation(scene: THREE.Scene) {
   grid.material.transparent = true; grid.material.opacity = 0.32; grid.position.y = 0.015; scene.add(grid)
   const structure = new THREE.MeshStandardMaterial({ color: '#f4f7f8', metalness: 0.58, roughness: 0.24 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
-  for (let z = -21; z <= 21; z += 7) {
-    addRoundedBox(scene, [44, 0.3, 0.38], [0, 8.7, z], structure, 0.1)
-    const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 6.5), glass)
-    roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, z + 3.35); scene.add(roofPanel)
+  const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 47), glass)
+  roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, 0); scene.add(roofPanel)
+  for (const booth of BOOTHS) {
+    scene.add(createBooth(booth))
+    const entrance = booth.trainCar ? createTrainDoor(booth) : createGate(booth)
+    scene.add(entrance); animated.push(entrance)
   }
-  for (const booth of BOOTHS) { scene.add(createBooth(booth)); const gate = createGate(booth); scene.add(gate); animated.push(gate) }
   for (const facility of FACILITIES) scene.add(createFacility(facility))
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
@@ -302,9 +348,11 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.stroke()
     context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `900 ${Math.max(7, size * 0.019)}px system-ui, sans-serif`; context.fillText(zone.gateCode, x + width / 2, y + height * 0.44)
     context.font = `800 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
-    context.fillStyle = '#143e57'
-    if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
-    else context.fillRect(worldToMap(zone.gate.x) - width * 0.14, worldToMap(zone.gate.z) - 2, width * 0.28, 4)
+    if ('id' in zone) {
+      context.fillStyle = '#143e57'
+      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
+      else context.fillRect(worldToMap(zone.gate.x) - width * 0.14, worldToMap(zone.gate.z) - 2, width * 0.28, 4)
+    }
   }
   const x = worldToMap(player.x); const y = worldToMap(player.z)
   context.fillStyle = '#fff'; context.shadowColor = '#17c9ff'; context.shadowBlur = 10; context.beginPath(); context.arc(x, y, Math.max(4, size * 0.012), 0, Math.PI * 2); context.fill()
@@ -386,8 +434,14 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
         if (wings) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.25
           wings[0].rotation.y = THREE.MathUtils.lerp(wings[0].rotation.y, open ? -1.15 : 0, 0.1); wings[1].rotation.y = THREE.MathUtils.lerp(wings[1].rotation.y, open ? 1.15 : 0, 0.1)
-          const light = object.userData.light as THREE.PointLight; light.intensity = 2.7 + Math.sin(elapsed * 3.2) * 0.5
         }
+        const slidingDoors = object.userData.slidingDoors as THREE.Mesh[] | undefined
+        if (slidingDoors) {
+          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.75
+          slidingDoors.forEach((door) => { const closedX = door.userData.closedX as number; door.position.x = THREE.MathUtils.lerp(door.position.x, open ? closedX * 2.05 : closedX, 0.1) })
+        }
+        const light = object.userData.light as THREE.PointLight | undefined
+        if (light) light.intensity = 2.7 + Math.sin(elapsed * 3.2) * 0.5
       }
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
