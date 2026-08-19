@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import boothOneImage from '../assets/roadview/booth-1.png'
 import boothTwoImage from '../assets/roadview/booth-2.png'
 import boothThreeImage from '../assets/roadview/booth-3.png'
@@ -50,16 +51,19 @@ function zoneSize(zone: RoadViewBooth | StationFacility) {
 }
 
 const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
-  if (zone.gateCode === 'F02') return []
   const size = zoneSize(zone)
   const halfWidth = size.width / 2
   const halfDepth = size.depth / 2
   if (zone.gate.side === 'east' || zone.gate.side === 'west') {
     const backX = zone.gate.side === 'east' ? zone.x - halfWidth : zone.x + halfWidth
-    return [
+    const shellWalls = [
       { x1: zone.x - halfWidth, x2: zone.x + halfWidth, z1: zone.z - halfDepth - 0.18, z2: zone.z - halfDepth + 0.28 },
       { x1: zone.x - halfWidth, x2: zone.x + halfWidth, z1: zone.z + halfDepth - 0.28, z2: zone.z + halfDepth + 0.18 },
       { x1: backX - 0.22, x2: backX + 0.22, z1: zone.z - halfDepth, z2: zone.z + halfDepth },
+    ]
+    if (zone.gateCode === 'F02') return shellWalls
+    return [
+      ...shellWalls,
       { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: zone.z - 1.42 },
       { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z + 1.42, z2: zone.z + halfDepth },
     ]
@@ -114,6 +118,66 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, radius), material)
   mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
   return mesh
+}
+
+function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material) {
+  const wallThickness = 0.34
+  const height = 5.16
+  const outer = new THREE.Shape()
+  outer.moveTo(-BOOTH_WIDTH / 2, 0)
+  outer.lineTo(BOOTH_WIDTH / 2, 0)
+  outer.lineTo(BOOTH_WIDTH / 2, height)
+  outer.lineTo(-BOOTH_WIDTH / 2, height)
+  outer.closePath()
+  const interior = new THREE.Path()
+  interior.moveTo(-BOOTH_WIDTH / 2 + wallThickness, wallThickness)
+  interior.lineTo(-BOOTH_WIDTH / 2 + wallThickness, height - wallThickness)
+  interior.lineTo(BOOTH_WIDTH / 2 - wallThickness, height - wallThickness)
+  interior.lineTo(BOOTH_WIDTH / 2 - wallThickness, wallThickness)
+  interior.closePath()
+  outer.holes.push(interior)
+
+  const continuousFrame = new THREE.ExtrudeGeometry(outer, {
+    depth: BOOTH_DEPTH,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    bevelSize: 0.08,
+    bevelThickness: 0.08,
+    curveSegments: 4,
+  })
+  continuousFrame.translate(0, 0, -BOOTH_DEPTH / 2)
+  const back = new THREE.BoxGeometry(BOOTH_WIDTH, height, wallThickness)
+  back.translate(0, height / 2, -BOOTH_DEPTH / 2 + wallThickness / 2)
+  const frameGeometry = continuousFrame.index ? continuousFrame.toNonIndexed() : continuousFrame
+  const backGeometry = back.index ? back.toNonIndexed() : back
+  const geometry = mergeGeometries([frameGeometry, backGeometry], false)
+  if (frameGeometry !== continuousFrame) continuousFrame.dispose()
+  if (backGeometry !== back) back.dispose()
+  frameGeometry.dispose(); backGeometry.dispose()
+  geometry.computeVertexNormals()
+  const shell = new THREE.Mesh(geometry, material)
+  shell.castShadow = true; shell.receiveShadow = true; parent.add(shell)
+  return { interiorBackZ: -BOOTH_DEPTH / 2 + wallThickness + 0.06, height }
+}
+
+function addIntegratedDoorFacade(parent: THREE.Object3D, material: THREE.Material) {
+  const facadeHeight = 4.86
+  const openingWidth = 2.08
+  const openingHeight = 3.05
+  const sideWidth = (BOOTH_WIDTH - openingWidth) / 2
+  const depth = 0.24
+  const frontZ = BOOTH_DEPTH / 2 - depth / 2
+  const left = new THREE.BoxGeometry(sideWidth, facadeHeight, depth)
+  left.translate(-(openingWidth + sideWidth) / 2, facadeHeight / 2, frontZ)
+  const right = new THREE.BoxGeometry(sideWidth, facadeHeight, depth)
+  right.translate((openingWidth + sideWidth) / 2, facadeHeight / 2, frontZ)
+  const header = new THREE.BoxGeometry(openingWidth, facadeHeight - openingHeight, depth)
+  header.translate(0, openingHeight + (facadeHeight - openingHeight) / 2, frontZ)
+  const geometry = mergeGeometries([left, right, header], false)
+  left.dispose(); right.dispose(); header.dispose()
+  geometry.computeVertexNormals()
+  const facade = new THREE.Mesh(geometry, material)
+  facade.castShadow = true; facade.receiveShadow = true; parent.add(facade)
 }
 
 function createGate(zone: RoadViewBooth) {
@@ -217,18 +281,13 @@ function createBooth(zone: RoadViewBooth) {
   const accent = new THREE.Color(zone.color)
   const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.24, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const panel = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.7), emissive: accent, emissiveIntensity: 0.12, metalness: 0.16, roughness: 0.4 })
-  const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2
-  const backLocalZ = -halfDepth
-  addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
-  addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], panel, 0.1)
-  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
-  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
-  addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
+  const { interiorBackZ } = addIntegratedBoothShell(group, shell)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], panel, 0.04)
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(4.4, 1.55),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
-  name.position.set(0, 3.4, backLocalZ * 0.91); group.add(name)
+  name.position.set(0, 3.4, interiorBackZ + 0.07); group.add(name)
   return group
 }
 
@@ -243,29 +302,24 @@ function createFacility(facility: StationFacility) {
   const dark = new THREE.MeshStandardMaterial({ color: '#21465a', metalness: 0.18, roughness: 0.42 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.04, roughness: 0.18, clearcoat: 0.82, clearcoatRoughness: 0.16 })
   const mirror = new THREE.MeshPhysicalMaterial({ color: '#bfe8f2', metalness: 0.78, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.04 })
-  const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
+  const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
+  const { interiorBackZ } = addIntegratedBoothShell(group, shell)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], wall, 0.04)
   const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'ECO EXPRESS STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
   )
   if (facility.gateCode === 'F01') {
-    addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
-    addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], wall, 0.1)
-    addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
-    addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
-    addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
-    addRoundedBox(group, [3.18, 4.55, 0.3], [-2.61, 2.34, halfDepth], wall, 0.1)
-    addRoundedBox(group, [3.18, 4.55, 0.3], [2.61, 2.34, halfDepth], wall, 0.1)
-    addRoundedBox(group, [2.04, 1.15, 0.3], [0, 4.12, halfDepth], wall, 0.08)
+    addIntegratedDoorFacade(group, wall)
     sign.position.set(0, 4.0, halfDepth + 0.18); sign.scale.setScalar(0.7); group.add(sign)
     const doorPivot = new THREE.Group(); doorPivot.position.set(-0.92, 0, halfDepth - 0.08); group.add(doorPivot)
     addRoundedBox(doorPivot, [1.82, 2.78, 0.12], [0.91, 1.52, 0], fixture, 0.06)
     addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [1.56, 1.5, -0.1], dark, 0.03)
     group.userData.hingedDoor = doorPivot
 
-    addRoundedBox(group, [1.72, 1.5, 0.12], [-2.35, 2.2, backLocalZ + 0.2], fixture, 0.05)
-    addRoundedBox(group, [1.5, 1.28, 0.06], [-2.35, 2.2, backLocalZ + 0.28], mirror, 0.04)
+    addRoundedBox(group, [1.72, 1.5, 0.12], [-2.35, 2.2, interiorBackZ + 0.05], fixture, 0.05)
+    addRoundedBox(group, [1.5, 1.28, 0.06], [-2.35, 2.2, interiorBackZ + 0.14], mirror, 0.04)
     addRoundedBox(group, [1.55, 0.28, 0.82], [-2.35, 1.0, -1.75], ceramic, 0.12)
     addRoundedBox(group, [0.92, 0.06, 0.48], [-2.35, 1.16, -1.75], dark, 0.03)
     addRoundedBox(group, [0.2, 0.75, 0.2], [-2.35, 0.58, -1.75], fixture, 0.05)
@@ -282,9 +336,7 @@ function createFacility(facility: StationFacility) {
     addRoundedBox(group, [0.28, 0.12, 0.06], [2.25, 1.32, -1.96], fixture, 0.03)
     addRoundedBox(group, [0.16, 3.15, 2.15], [1.15, 1.62, -1.55], wall, 0.05)
   } else {
-    sign.position.set(0, 3.28, -1.35); group.add(sign)
-    addRoundedBox(group, [0.16, 2.0, 0.16], [-1.75, 2.1, -1.4], fixture, 0.04)
-    addRoundedBox(group, [0.16, 2.0, 0.16], [1.75, 2.1, -1.4], fixture, 0.04)
+    sign.position.set(0, 3.42, interiorBackZ + 0.07); group.add(sign)
     addRoundedBox(group, [5.2, 1.08, 0.86], [0, 0.68, -0.7], fixture, 0.14)
     addRoundedBox(group, [4.7, 0.16, 0.94], [0, 1.24, -0.7], dark, 0.05)
     for (const x of [-1.35, 1.35]) {
