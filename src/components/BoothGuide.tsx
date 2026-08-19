@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { MissionId } from '../types'
-import academyVideo from '../assets/academy/high-speed-refrigeration.mp4'
-import kitCompleteImage from '../assets/academy/kit-complete.png'
-import kitMaterialsImage from '../assets/academy/kit-materials.png'
-import kitProcessImage from '../assets/academy/kit-process.png'
+import kitFinalImage from '../assets/academy/kit-final-4way.png'
+import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
+import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
+import kitProcessImage from '../assets/academy/kit-process-4way.png'
 import boothOneImage from '../assets/booths/booth-1.png'
 import boothTwoImage from '../assets/booths/booth-2.png'
 import boothThreeImage from '../assets/booths/booth-3.png'
@@ -31,7 +31,9 @@ type EnvironmentBooth = {
   theme: 'blue' | 'red' | 'green' | 'yellow'
 }
 
-type AcademySlide = {
+type AcademyContent = {
+  label: string
+  eyebrow: string
   title: string
   description: string
   image: string
@@ -43,24 +45,38 @@ const sectionHeaders: Record<BoothSection, { lead: string; accent: string; descr
   booths: { lead: '전시장을 걸으며', accent: '지구를 만나는 부스', description: '3D 로드뷰로 전시장을 둘러보고 네 가지 환경 체험 부스를 확인해 보세요.' },
 }
 
-const academySlides: readonly AcademySlide[] = [
+const academyContents: readonly AcademyContent[] = [
   {
-    title: '냉동사이클 키트 구성 재료',
-    description: '아크릴판과 배관, 네 가지 핵심 장치, LED와 제어 장치를 먼저 확인해 보세요.',
-    image: kitMaterialsImage,
-    imageAlt: '냉동사이클 교육 키트에 필요한 구성 재료와 용도를 정리한 표',
-  },
-  {
-    title: '냉동사이클 키트 제작 과정',
-    description: '부품 배치부터 배관·LED·표시장치 설치와 작동 테스트까지 12단계를 따라가 보세요.',
+    label: '영상',
+    eyebrow: 'BUILD PROCESS',
+    title: '키트 제작 과정',
+    description: '베이스판 준비부터 부품 조립, 배관 연결, 작동 테스트까지 전체 제작 순서를 한눈에 확인해 보세요.',
     image: kitProcessImage,
-    imageAlt: '냉동사이클 교육 키트를 조립하는 12단계 제작 과정',
+    imageAlt: '냉난방 4-way 밸브 교육용 키트를 완성하는 13단계 제작 과정',
   },
   {
-    title: '냉동사이클 키트 완성본',
-    description: '압축·응축·팽창·증발의 흐름과 구간별 온도·압력 변화를 완성된 키트에서 확인해 보세요.',
-    image: kitCompleteImage,
-    imageAlt: '빨간색과 파란색 LED로 냉매 순환을 표현한 냉동사이클 교육 키트 완성본',
+    label: '완성품',
+    eyebrow: 'FINAL KIT',
+    title: '최종 완성본',
+    description: '냉방과 난방의 냉매 흐름을 빨간색과 파란색 배관으로 표현한 교육용 키트의 완성 모습을 살펴보세요.',
+    image: kitFinalImage,
+    imageAlt: '빨간색과 파란색 냉매 배관, 압축기와 4-way 밸브가 조립된 교육용 키트 완성본',
+  },
+  {
+    label: '재료',
+    eyebrow: 'KIT MATERIALS',
+    title: '키트 재료 구성',
+    description: '베이스판, 압축기, 4-way 밸브, 열교환기와 제어 부품 등 키트 제작에 필요한 재료를 확인해 보세요.',
+    image: kitMaterialsImage,
+    imageAlt: '냉난방 4-way 밸브 교육용 키트에 필요한 14가지 구성 재료와 예상 비용',
+  },
+  {
+    label: '작동원리',
+    eyebrow: 'HOW IT WORKS',
+    title: '냉방·난방 작동원리',
+    description: '4-way 밸브가 냉매 이동 경로를 바꾸어 실내기와 실외기의 역할을 전환하는 원리를 비교해 보세요.',
+    image: kitPrincipleImage,
+    imageAlt: '냉각 운전과 가열 운전에서 4-way 밸브와 냉매 흐름이 바뀌는 작동원리',
   },
 ]
 
@@ -111,7 +127,7 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
   const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
-  const currentAcademySlide = academyStep ? academySlides[academyStep - 1] : null
+  const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
   const sectionHeader = sectionHeaders[section]
 
   useEffect(() => {
@@ -136,32 +152,32 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
 
   return (
     <main id="main-content" className="page booth-page">
-      <section className="booth-hero" aria-labelledby="booth-hero-title">
+      {section === 'booths' ? <section className="booth-hero" aria-labelledby="booth-hero-title">
         <div className="booth-hero__copy">
           <h1 id="booth-hero-title">{sectionHeader.lead}<br /><em>{sectionHeader.accent}</em></h1>
           <p className="booth-hero__description">{sectionHeader.description}</p>
         </div>
-      </section>
+      </section> : null}
 
       {section === 'education' ? (
-        <div id="experience-panel-education" className="experience-section-panel" role="region" aria-label="교육 콘텐츠">
-          <section className="booth-hall booth-hall--train" aria-labelledby="hall-one-title">
-            <button className="booth-hall__trigger" type="button" aria-haspopup="dialog" aria-label="초고속 냉동사이클 영상과 키트 제작 과정 보기" onClick={() => setAcademyStep(0)} />
-            <div className="booth-hall__visual" aria-hidden="true">
-              <span className="booth-hall__number">01</span>
-              <div className="booth-mini-train"><i /><i /><i /></div>
-              <div className="booth-mini-rail" />
-              <span className="booth-speed-chip"><Icon name="gauge" /> 350 km/h</span>
-            </div>
-            <div className="booth-hall__content">
-              <h2 id="hall-one-title">달리는 열차 속에서 장비를 조정하여 살아남아라!</h2>
-              <strong>초고속 냉동사이클 체험</strong>
-              <p>초고속 환경에서 냉방이 유지되는 원리를 냉동 사이클 키트를 직접 제작하며 배우는 교육 프로그램입니다.</p>
-              <div className="booth-hall__meta">
-                <span><Icon name="snowflake" /> 냉동 사이클 핵심 원리</span>
-                <span><Icon name="train" /> KTX 초고속 환경</span>
+        <div id="experience-panel-education" className="kit-education" role="region" aria-labelledby="kit-education-title">
+          <section className="kit-education__board">
+            <header className="kit-education__header">
+              <div>
+                <span>HVAC EDUCATION KIT</span>
+                <h1 id="kit-education-title">냉·난방 4-way 밸브 교육용 키트</h1>
               </div>
-              <span className="environment-booth__onsite"><span className="status-dot" /> 영상과 키트 제작 과정 보기 <Icon name="arrow" /></span>
+              <p>제작 과정부터 작동원리까지 네 가지 자료로 살펴보세요.</p>
+            </header>
+            <div className="kit-education__grid">
+              {academyContents.map((content, index) => (
+                <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(index)} key={content.label}>
+                  <span className="kit-education-card__index">0{index + 1}</span>
+                  <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
+                  <span className="kit-education-card__copy"><small>{content.eyebrow}</small><strong>{content.label}</strong></span>
+                  <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
+                </button>
+              ))}
             </div>
           </section>
         </div>
@@ -227,48 +243,33 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
         </div>
       ) : null}
 
-      {academyStep !== null ? (
+      {academyStep !== null && currentAcademyContent ? (
         <div className="academy-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setAcademyStep(null)}>
-          <section className="academy-dialog" role="dialog" aria-modal="true" aria-labelledby="academy-dialog-title">
+          <section className="academy-dialog academy-dialog--kit" role="dialog" aria-modal="true" aria-labelledby="academy-dialog-title">
             <header>
               <div>
-                <span>HALL 01 · 초고속 냉동사이클</span>
-                <h2 id="academy-dialog-title">{academyStep === 0 ? '달리는 열차 속 냉동공조 기술' : currentAcademySlide?.title}</h2>
+                <span>{currentAcademyContent.eyebrow} · 냉·난방 4-WAY 밸브</span>
+                <h2 id="academy-dialog-title">{currentAcademyContent.title}</h2>
               </div>
-              <button type="button" aria-label="초고속 냉동사이클 체험 닫기" onClick={() => setAcademyStep(null)} autoFocus>×</button>
+              <button type="button" aria-label="키트 교육 자료 닫기" onClick={() => setAcademyStep(null)} autoFocus>×</button>
             </header>
 
-            <div className={`academy-dialog__stage${academyStep === 0 ? ' academy-dialog__stage--video' : ' academy-dialog__stage--image'}`}>
-              {academyStep === 0 ? (
-                <video src={academyVideo} controls autoPlay playsInline preload="metadata" onEnded={() => setAcademyStep(1)}>
-                  브라우저가 영상 재생을 지원하지 않습니다.
-                </video>
-              ) : currentAcademySlide ? (
-                <figure>
-                  <img src={currentAcademySlide.image} alt={currentAcademySlide.imageAlt} decoding="async" />
-                  <figcaption>{currentAcademySlide.description}</figcaption>
-                </figure>
-              ) : null}
+            <div className="academy-dialog__stage academy-dialog__stage--image">
+              <figure>
+                <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
+                <figcaption>{currentAcademyContent.description}</figcaption>
+              </figure>
             </div>
 
             <footer>
-              <div className="academy-dialog__progress" aria-label={`전체 4단계 중 ${academyStep + 1}단계`}>
-                {['영상', '재료', '제작', '완성'].map((label, index) => (
-                  <span className={index === academyStep ? 'is-current' : index < academyStep ? 'is-complete' : ''} key={label}><i>{index + 1}</i>{label}</span>
+              <div className="academy-dialog__progress academy-dialog__progress--tabs" aria-label={`전체 4개 자료 중 ${academyStep + 1}번째`}>
+                {academyContents.map((content, index) => (
+                  <button className={index === academyStep ? 'is-current' : ''} type="button" onClick={() => setAcademyStep(index)} key={content.label}>
+                    <i>{index + 1}</i>{content.label}
+                  </button>
                 ))}
               </div>
-              {academyStep === 0 ? (
-                <p className="academy-dialog__notice"><Icon name="play" /> 영상이 끝나면 키트 재료 화면으로 자동 이동해요.</p>
-              ) : (
-                <div className="academy-dialog__actions">
-                  <button type="button" onClick={() => setAcademyStep(academyStep - 1)}><Icon name="chevronLeft" /> 이전</button>
-                  {academyStep < academySlides.length ? (
-                    <button className="primary-button" type="button" onClick={() => setAcademyStep(academyStep + 1)}>다음 단계 <Icon name="arrow" /></button>
-                  ) : (
-                    <button className="primary-button" type="button" onClick={() => setAcademyStep(null)}>체험 마치기 <Icon name="check" /></button>
-                  )}
-                </div>
-              )}
+              <button className="academy-dialog__done" type="button" onClick={() => setAcademyStep(null)}>확인 <Icon name="check" /></button>
             </footer>
           </section>
         </div>
