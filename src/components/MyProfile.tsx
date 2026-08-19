@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { rewardProducts } from '../data/rewards'
 import type { ParticipantProfile, RewardOrder, RewardProduct, RoadViewGateCode } from '../types'
 import { Icon } from './Icon'
@@ -29,14 +30,14 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
   cash: '현금',
 }
 
-const roadViewTickets: readonly { code: RoadViewGateCode; location: string; title: string }[] = [
-  { code: 'B01', location: '1번 승강장', title: '빙하 위 펭귄 구조' },
-  { code: 'L01', location: '전시 열차 1호차', title: '냉동공조 실험실' },
-  { code: 'B02', location: '2번 승강장', title: '무더운 여름' },
-  { code: 'B03', location: '3번 승강장', title: '동물들을 구하라' },
-  { code: 'E01', location: '전시 열차 2호차', title: '초고속 냉동사이클' },
-  { code: 'B04', location: '4번 승강장', title: '나비효과' },
-  { code: 'R01', location: '전시 열차 3호차', title: '굿즈샵' },
+const roadViewTickets: readonly { code: RoadViewGateCode; location: string; title: string; color: string }[] = [
+  { code: 'E01', location: '전시 열차 2호차', title: '초고속 냉동사이클', color: '#e69a35' },
+  { code: 'L01', location: '전시 열차 1호차', title: '냉동공조 실험실', color: '#73b62f' },
+  { code: 'R01', location: '전시 열차 3호차', title: '굿즈샵', color: '#e45575' },
+  { code: 'B01', location: '부스 1 · 1번 승강장', title: '빙하 위 펭귄 구조', color: '#45aee8' },
+  { code: 'B02', location: '부스 2 · 2번 승강장', title: '무더운 여름', color: '#35b981' },
+  { code: 'B03', location: '부스 3 · 3번 승강장', title: '동물들을 구하라', color: '#ae7cff' },
+  { code: 'B04', location: '부스 4 · 4번 승강장', title: '나비효과', color: '#82e76d' },
 ]
 
 export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLogout, onDeleteAccount }: MyProfileProps) {
@@ -75,7 +76,8 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
         <div className="cket-ticket-grid">
           {roadViewTickets.map((ticket) => {
             const visited = visitedRoadViewGates.has(ticket.code)
-            return <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code}><span className="cket-ticket__code">{ticket.code}</span><span className="cket-ticket__icon"><Icon name={visited ? 'train' : 'lock'} /></span><p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p></article>
+            const ticketStyle = { '--ticket-color': ticket.color } as CSSProperties
+            return <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={ticketStyle}><span className="cket-ticket__code">{ticket.code}</span><p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p></article>
           })}
         </div>
       </section>
