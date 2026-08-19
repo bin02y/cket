@@ -163,7 +163,7 @@ function App() {
       ) : activeTab === 'education' ? (
         <BoothGuide section="education" completedBooths={completedBooths} />
       ) : activeTab === 'experiment' ? (
-        <BoothGuide section="experiment" completedBooths={completedBooths} />
+        <main id="main-content" className="page empty-tab-page" aria-label="실험" />
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" completedBooths={completedBooths} />
       ) : activeTab === 'shop' ? (

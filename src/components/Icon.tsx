@@ -2,7 +2,7 @@ import type { SVGProps } from 'react'
 import type { TabId } from '../types'
 
 type IconProps = SVGProps<SVGSVGElement> & {
-  name: TabId | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup' | 'stamp'
+  name: TabId | 'missions' | 'wallet' | 'arrow' | 'leaf' | 'sparkle' | 'train' | 'play' | 'pause' | 'rotate' | 'snowflake' | 'wind' | 'thermometer' | 'gauge' | 'chevronLeft' | 'lock' | 'check' | 'paw' | 'butterfly' | 'recycle' | 'warning' | 'car' | 'cup' | 'stamp' | 'map'
 }
 
 export function Icon({ name, ...props }: IconProps) {
@@ -19,7 +19,7 @@ export function Icon({ name, ...props }: IconProps) {
 
   const paths = {
     home: <><path d="m3.5 10.5 8.5-7 8.5 7" /><path d="M5.5 9.2V21h13V9.2M9.5 21v-6h5v6" /></>,
-    education: <><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H12v18H7.5A3.5 3.5 0 0 0 4 23z" /><path d="M20 5.5A3.5 3.5 0 0 0 16.5 2H12v18h4.5A3.5 3.5 0 0 1 20 23z" /></>,
+    education: <><path d="m3 9 9-6 9 6" /><path d="M5 9v11h14V9M3 20h18M9 20v-6h6v6M8 10h.01M12 10h.01M16 10h.01" /></>,
     experiment: <><path d="M9 2h6M10 2v6l-5.4 9.2A3.2 3.2 0 0 0 7.4 22h9.2a3.2 3.2 0 0 0 2.8-4.8L14 8V2" /><path d="M7 16h10M9.5 13h5" /></>,
     booths: <><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /><path d="M7.5 7.5h.01M16.5 7.5h.01M7.5 16.5h.01M16.5 16.5h.01" /></>,
     missions: <><path d="M8 4h8M9 2h6v4H9z" /><path d="M6 4.5H4.5v17h15v-17H18M8 11l2 2 5-5M8 17h8" /></>,
@@ -47,6 +47,7 @@ export function Icon({ name, ...props }: IconProps) {
     car: <><path d="m5 16-1 3M19 16l1 3M3 13l2-6h14l2 6v5H3z" /><path d="M6 13h12M7 17h.01M17 17h.01" /></>,
     cup: <><path d="M6 3h11l-1 18H8zM17 6h2a2 2 0 0 1 0 4h-2" /><path d="M8 7h8" /></>,
     stamp: <><path d="M9.5 3.5h5l.8 4.1a2.8 2.8 0 0 0 1.2 1.8l1.5 1V14H6v-3.6l1.5-1a2.8 2.8 0 0 0 1.2-1.8z" /><path d="M5 14h14v3H5zM4 21h16M6 17l-1 4M18 17l1 4" /></>,
+    map: <><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" /></>,
   }
 
   return <svg {...commonProps}>{paths[name]}</svg>

@@ -10,7 +10,6 @@ import boothTwoImage from '../assets/booths/booth-2.png'
 import boothThreeImage from '../assets/booths/booth-3.png'
 import boothFourImage from '../assets/booths/booth-4.png'
 import { Icon } from './Icon'
-import { RefrigerationExperiment } from './RefrigerationExperiment'
 
 const RoadView3D = lazy(() => import('./RoadView3D'))
 
@@ -19,7 +18,7 @@ type BoothGuideProps = {
   section: BoothSection
 }
 
-type BoothSection = 'education' | 'experiment' | 'booths'
+type BoothSection = 'education' | 'booths'
 
 type EnvironmentBooth = {
   id: MissionId
@@ -41,7 +40,6 @@ type AcademySlide = {
 
 const sectionHeaders: Record<BoothSection, { lead: string; accent: string; description: string }> = {
   education: { lead: '기술을 이해하고', accent: '원리를 배우는 교육', description: '영상과 냉동사이클 키트 제작 과정을 따라 초고속 열차의 냉방 기술을 배워보세요.' },
-  experiment: { lead: '직접 눌러 확인하는', accent: '냉동공조 가상 실험', description: '압축·응축·팽창·증발 단계에 따라 달라지는 냉매의 온도와 압력을 관찰해 보세요.' },
   booths: { lead: '전시장을 걸으며', accent: '지구를 만나는 부스', description: '3D 로드뷰로 전시장을 둘러보고 네 가지 환경 체험 부스를 확인해 보세요.' },
 }
 
@@ -167,10 +165,6 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
             </div>
           </section>
         </div>
-      ) : section === 'experiment' ? (
-        <div id="experience-panel-experiment" className="experience-section-panel" role="region" aria-label="실험 콘텐츠">
-          <RefrigerationExperiment />
-        </div>
       ) : (
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <section className="roadview-entry" aria-labelledby="roadview-entry-title">
@@ -180,7 +174,7 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
               <p>전시장을 자유롭게 걸으며 여섯 개 체험 구역의 위치와 안내를 먼저 확인해 보세요.</p>
             </div>
             <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
-              <span><Icon name="sparkle" /></span>
+              <span><Icon name="map" /></span>
               <span><strong>3D 로드뷰</strong><small>전시장을 먼저 걸어보세요</small></span>
               <Icon name="arrow" />
             </button>

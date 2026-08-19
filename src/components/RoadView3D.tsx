@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { Icon } from './Icon'
 
 type RoadView3DProps = {
   onClose: () => void
@@ -419,7 +420,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
 
       <header className="roadview__topbar">
         <div className="roadview__brand">
-          <span className="roadview__brand-mark" aria-hidden="true"><i /><i /><i /></span>
+          <span className="roadview__brand-mark" aria-hidden="true"><Icon name="map" /></span>
           <span className="roadview__brand-copy"><strong>3D ROADVIEW</strong><small>INTERACTIVE EXHIBITION</small></span>
         </div>
         <div className="roadview__top-actions">
