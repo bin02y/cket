@@ -115,7 +115,7 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
   return mesh
 }
 
-function createGate(zone: RoadViewBooth | StationFacility) {
+function createGate(zone: RoadViewBooth) {
   const group = new THREE.Group()
   group.position.set(zone.gate.x, 0, zone.gate.z)
   if (zone.gate.side === 'north') group.rotation.y = Math.PI
@@ -135,7 +135,6 @@ function createGate(zone: RoadViewBooth | StationFacility) {
   leftWing.position.set(-0.66, 0.8, 0)
   const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
-  addRoundedBox(group, [3.65, 0.2, 0.24], [0, 2.55, 0], glowMaterial, 0.08)
   if (zone.trainCar) {
     const sign = new THREE.Mesh(
       new THREE.PlaneGeometry(2.75, 0.97),
@@ -148,7 +147,7 @@ function createGate(zone: RoadViewBooth | StationFacility) {
   return group
 }
 
-function createTrainCarBooth(zone: RoadViewBooth | StationFacility) {
+function createTrainCarBooth(zone: RoadViewBooth) {
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
   group.rotation.y = -Math.PI / 2
   const accent = new THREE.Color(zone.color)
@@ -186,7 +185,7 @@ function createTrainCarBooth(zone: RoadViewBooth | StationFacility) {
   return group
 }
 
-function createBooth(zone: RoadViewBooth | StationFacility) {
+function createBooth(zone: RoadViewBooth) {
   if (zone.trainCar) return createTrainCarBooth(zone)
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
   if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
@@ -195,7 +194,6 @@ function createBooth(zone: RoadViewBooth | StationFacility) {
   const accent = new THREE.Color(zone.color)
   const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.24, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const panel = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.7), emissive: accent, emissiveIntensity: 0.12, metalness: 0.16, roughness: 0.4 })
-  const glow = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.62, metalness: 0.22, roughness: 0.3 })
   const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2
   const backLocalZ = -halfDepth
   addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
@@ -203,13 +201,48 @@ function createBooth(zone: RoadViewBooth | StationFacility) {
   addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
   addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
   addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
-  for (const x of [-3.2, -1.6, 0, 1.6, 3.2]) addRoundedBox(group, [0.08, 0.1, BOOTH_DEPTH - 0.5], [x, 4.84, 0], glow, 0.025)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.7, 0.08, 1.25], [0, 0.34, backLocalZ * 0.58], glow, 0.03)
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(4.4, 1.55),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
   name.position.set(0, 3.4, backLocalZ * 0.91); group.add(name)
+  return group
+}
+
+function createFacility(facility: StationFacility) {
+  const group = new THREE.Group(); group.position.set(facility.x, 0, facility.z)
+  if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
+  const accent = new THREE.Color(facility.color)
+  const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.18, roughness: 0.34, clearcoat: 0.6, clearcoatRoughness: 0.24 })
+  const wall = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.84), metalness: 0.08, roughness: 0.48 })
+  const fixture = new THREE.MeshStandardMaterial({ color: '#dbe5e9', metalness: 0.36, roughness: 0.3 })
+  const dark = new THREE.MeshStandardMaterial({ color: '#21465a', metalness: 0.18, roughness: 0.42 })
+  const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
+  addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.24, BOOTH_DEPTH + 0.3], [0, 0.1, 0], shell, 0.12)
+  addRoundedBox(group, [BOOTH_WIDTH, 4.4, 0.3], [0, 2.25, backLocalZ], wall, 0.1)
+  addRoundedBox(group, [0.3, 4.4, BOOTH_DEPTH], [-halfWidth, 2.25, 0], shell, 0.1)
+  addRoundedBox(group, [0.3, 4.4, BOOTH_DEPTH], [halfWidth, 2.25, 0], shell, 0.1)
+  addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.28, BOOTH_DEPTH + 0.2], [0, 4.52, 0], shell, 0.1)
+  const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.15, 1.46),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'ECO EXPRESS STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
+  )
+  sign.position.set(0, 3.42, backLocalZ * 0.91); group.add(sign)
+  if (facility.gateCode === 'F01') {
+    for (const x of [-2.25, 0, 2.25]) {
+      addRoundedBox(group, [1.68, 2.55, 0.18], [x, 1.46, backLocalZ + 0.25], fixture, 0.08)
+      addRoundedBox(group, [0.12, 0.12, 0.08], [x + 0.58, 1.46, backLocalZ + 0.37], dark, 0.03)
+    }
+  } else {
+    addRoundedBox(group, [5.9, 1.08, 0.9], [0, 0.68, 0.72], fixture, 0.14)
+    addRoundedBox(group, [5.25, 0.16, 0.98], [0, 1.24, 0.72], dark, 0.05)
+    for (const x of [-1.35, 1.35]) {
+      addRoundedBox(group, [0.82, 0.56, 0.12], [x, 1.7, 0.26], dark, 0.06)
+      addRoundedBox(group, [0.1, 0.42, 0.1], [x, 1.43, 0.26], fixture, 0.03)
+    }
+  }
   return group
 }
 
@@ -219,30 +252,15 @@ function buildMetaverseStation(scene: THREE.Scene) {
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
   const grid = new THREE.GridHelper(46, 46, '#7ea6b9', '#c1d0d8')
   grid.material.transparent = true; grid.material.opacity = 0.32; grid.position.y = 0.015; scene.add(grid)
-  const blueLine = new THREE.MeshStandardMaterial({ color: '#1676ad', emissive: '#1676ad', emissiveIntensity: 0.24, metalness: 0.4, roughness: 0.25 })
-  const greenLine = new THREE.MeshStandardMaterial({ color: '#3ca87b', emissive: '#3ca87b', emissiveIntensity: 0.2, metalness: 0.32, roughness: 0.28 })
-  for (const x of [-7.1, 7.1]) addRoundedBox(scene, [0.08, 0.035, 46], [x, 0.045, 0], x < 0 ? blueLine : greenLine, 0.02)
   const structure = new THREE.MeshStandardMaterial({ color: '#f4f7f8', metalness: 0.58, roughness: 0.24 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
-  addRoundedBox(scene, [2.5, 0.035, 30.5], [0, 0.045, 3.7], blueLine, 0.02)
-  for (const x of [-3.25, 3.25]) {
-    addRoundedBox(scene, [0.42, 4.4, 0.58], [x, 2.2, 16.3], structure, 0.12)
-    const entranceGlass = new THREE.Mesh(new THREE.PlaneGeometry(4, 2.95), glass)
-    entranceGlass.rotation.y = Math.PI / 2; entranceGlass.position.set(x, 2.35, 18.3); scene.add(entranceGlass)
-  }
-  addRoundedBox(scene, [7.1, 0.38, 0.62], [0, 4.25, 16.3], structure, 0.12)
-  const entranceSign = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.4, 1.55),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture('에코 익스프레스 입구', 'STATION ENTRANCE', '#1780ad', 'E01 전시 객차 방향'), transparent: true, side: THREE.DoubleSide }),
-  )
-  entranceSign.name = 'station-entrance-sign'; entranceSign.position.set(0, 3.25, 15.96); scene.add(entranceSign)
-  for (const x of [-21, 21]) for (let z = -21; z <= 21; z += 7) addRoundedBox(scene, [0.38, 8.8, 0.48], [x, 4.4, z], structure, 0.1)
   for (let z = -21; z <= 21; z += 7) {
     addRoundedBox(scene, [44, 0.3, 0.38], [0, 8.7, z], structure, 0.1)
     const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 6.5), glass)
     roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, z + 3.35); scene.add(roofPanel)
   }
-  for (const zone of ZONES) { scene.add(createBooth(zone)); const gate = createGate(zone); scene.add(gate); animated.push(gate) }
+  for (const booth of BOOTHS) { scene.add(createBooth(booth)); const gate = createGate(booth); scene.add(gate); animated.push(gate) }
+  for (const facility of FACILITIES) scene.add(createFacility(facility))
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
@@ -288,11 +306,6 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
     else context.fillRect(worldToMap(zone.gate.x) - width * 0.14, worldToMap(zone.gate.z) - 2, width * 0.28, 4)
   }
-  const entranceX = worldToMap(-3.55); const entranceY = worldToMap(15.85)
-  const entranceWidth = worldToMap(3.55) - entranceX; const entranceHeight = worldToMap(20.8) - entranceY
-  context.fillStyle = '#eaf7fb'; context.strokeStyle = '#1676ad'; context.lineWidth = 1.5
-  context.beginPath(); context.roundRect(entranceX, entranceY, entranceWidth, entranceHeight, Math.max(4, size * 0.01)); context.fill(); context.stroke()
-  context.fillStyle = '#145371'; context.textAlign = 'center'; context.font = `900 ${Math.max(6, size * 0.016)}px system-ui, sans-serif`; context.fillText('입구 · ENTRANCE', entranceX + entranceWidth / 2, entranceY + entranceHeight * 0.62)
   const x = worldToMap(player.x); const y = worldToMap(player.z)
   context.fillStyle = '#fff'; context.shadowColor = '#17c9ff'; context.shadowBlur = 10; context.beginPath(); context.arc(x, y, Math.max(4, size * 0.012), 0, Math.PI * 2); context.fill()
   context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x - Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
@@ -327,8 +340,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     const resize = () => {
       const width = canvas.clientWidth; const height = canvas.clientHeight
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 720 ? 1.4 : 1.8)); renderer.setSize(width, height, false)
-      const entranceSign = scene.getObjectByName('station-entrance-sign')
-      if (entranceSign) entranceSign.scale.setScalar(width < 600 && height > width ? 0.5 : 1)
       camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix()
     }
     const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(canvas); resize()
@@ -420,9 +431,9 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
         </div>
         <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>AUTO GATE</strong><small>개찰구 통과 시 자동 안내</small></span></div>
       </div>
-      {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel" role="dialog" aria-modal="true" aria-labelledby="roadview-map-title">
-        <header><div><span>METAVERSE STATION DIRECTORY</span><h2 id="roadview-map-title">에코 익스프레스 역사 지도</h2></div><button type="button" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button></header>
-        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" /><p className="roadview__map-legend"><i /> 현재 위치 <b /> 객차 출입문</p>
+      {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
+        <button type="button" className="roadview__map-close" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button>
+        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
