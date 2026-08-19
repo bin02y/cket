@@ -1,5 +1,5 @@
 import { Icon } from './Icon'
-import ecoExpressLogo from '../assets/eco-express-logo.jpg'
+import ecoExpressLogo from '../assets/eco-express-logo-transparent.png'
 
 type AppHeaderProps = {
   balance: number

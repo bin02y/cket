@@ -2,6 +2,7 @@ services:
   - type: web
     name: eco-express
     runtime: static
+    autoDeploy: yes
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     envVars:

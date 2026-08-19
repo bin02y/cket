@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { AuthActionResult, AuthCredentials, SignUpDetails } from '../types'
-import ecoExpressLogo from '../assets/eco-express-logo.jpg'
+import ecoExpressLogo from '../assets/eco-express-logo-transparent.png'
 import { Icon } from './Icon'
 
 type AuthMode = 'login' | 'signup'
