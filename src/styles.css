@@ -1083,26 +1083,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .eco-passport__stamps strong { min-height: 34px; margin-top: 4px; color: var(--blue-950); font-size: 11px; line-height: 1.45; word-break: keep-all; }
 .eco-passport__stamps em { margin-top: 7px; color: #9aaab2; font-size: 7px; font-style: normal; font-weight: 800; letter-spacing: .08em; }
 .eco-passport__stamps .is-stamped em { color: var(--green-700); }
-.eco-passport__result { display: flex; align-items: center; gap: 13px; margin-top: 19px; padding: 15px 17px; background: rgba(255,255,255,.78); border: 1px solid #dce9e9; border-radius: 17px; }
-.eco-passport__result > span { display: grid; flex: 0 0 auto; place-items: center; width: 39px; height: 39px; color: var(--green-700); background: var(--green-100); border-radius: 12px; }
-.eco-passport__result > span svg { width: 20px; height: 20px; }
-.eco-passport__result p { flex: 1; margin: 0; }
-.eco-passport__result strong,.eco-passport__result small { display: block; }
-.eco-passport__result strong { color: var(--blue-950); font-size: 12px; }
-.eco-passport__result small { margin-top: 3px; color: var(--muted); font-size: 9px; }
-.eco-passport__result button { display: flex; align-items: center; gap: 6px; padding: 10px 13px; color: white; background: var(--blue-600); border: 0; border-radius: 12px; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
-.eco-passport__result button svg { width: 14px; height: 14px; }
-.eco-passport__result > em { padding: 8px 12px; color: var(--green-700); background: var(--green-100); border-radius: 10px; font-size: 9px; font-style: normal; font-weight: 900; letter-spacing: .1em; }
-
 @media (max-width: 700px) {
   .quick-booth-card { padding: 28px 18px; border-radius: 25px; }
   .quick-booth-choices { grid-template-columns: 1fr; }
   .quick-booth-choices button { min-height: 66px; }
   .eco-passport__stamps { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .eco-passport__stamps article:last-child { grid-column: 1 / -1; }
-  .eco-passport__result { align-items: flex-start; flex-wrap: wrap; }
-  .eco-passport__result p { min-width: calc(100% - 60px); }
-  .eco-passport__result button,.eco-passport__result > em { margin-left: 52px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1145,22 +1131,20 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .reward-catalog__heading h1 { margin: 0; color: var(--blue-950); font-size: 36px; letter-spacing: -.04em; }
 .reward-catalog__heading .shop-wallet-chip { min-width: 220px; }
 .profile-avatar { border-radius: 50%; transform: none; }
-.profile-top-cards { display: grid; grid-template-columns: minmax(0,1fr) 220px; gap: 16px; margin-bottom: 24px; }
-.profile-journey-card,.profile-logout-card { display: flex; align-items: center; min-height: 96px; padding: 16px 20px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 12px 30px rgba(20,82,117,.07); }
-.profile-journey-card { gap: 16px; }
-.profile-journey-card h1 { margin: 0; color: var(--blue-950); font-size: clamp(26px,3vw,38px); letter-spacing: -.045em; }
-.profile-logout-card { justify-content: space-between; color: var(--blue-700); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
-.profile-logout-card svg { width: 20px; height: 20px; }
-.profile-logout-card:hover { border-color: var(--blue-200); background: var(--blue-50); }
+.profile-top-cards { margin-bottom: 24px; }
+.profile-journey-card { display: flex; align-items: center; gap: 16px; min-height: 96px; padding: 16px 20px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 12px 30px rgba(20,82,117,.07); }
+.profile-journey-card h1 { min-width: 0; margin: 0; color: var(--blue-950); font-size: clamp(26px,3vw,38px); letter-spacing: -.045em; }
+.profile-journey-logout { flex: 0 0 auto; min-height: 36px; margin-left: auto; padding: 0 13px; color: #728692; background: white; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; }
+.profile-journey-logout:hover { color: var(--blue-700); border-color: var(--blue-200); background: var(--blue-50); }
 
 @media (max-width: 680px) {
   .reward-catalog { margin-top: 0; }
   .reward-catalog__heading { align-items: stretch; }
   .reward-catalog__heading h1 { font-size: 29px; }
   .reward-catalog__heading .shop-wallet-chip { min-width: 0; width: 100%; }
-  .profile-top-cards { grid-template-columns: 1fr; gap: 11px; }
-  .profile-journey-card,.profile-logout-card { min-height: 82px; border-radius: 19px; }
-  .profile-logout-card { min-height: 58px; }
+  .profile-journey-card { min-height: 82px; border-radius: 19px; }
+  .profile-journey-card h1 { font-size: 24px; }
+  .profile-journey-logout { padding-inline: 10px; }
 }
 
 /* Experience tab · immersive 3D roadview */

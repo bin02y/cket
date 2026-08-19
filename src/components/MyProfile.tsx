@@ -7,7 +7,6 @@ type MyProfileProps = {
   completedBooths: ReadonlySet<MissionId>
   onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
-  onOpenBooths: () => void
 }
 
 const stampBooths: readonly { id: MissionId; number: string; hall: string; title: string; icon: 'train' | 'snowflake' | 'wind' | 'paw' | 'butterfly' }[] = [
@@ -18,7 +17,7 @@ const stampBooths: readonly { id: MissionId; number: string; hall: string; title
   { id: 4, number: '05', hall: '환경 부스 4', title: '나비효과', icon: 'butterfly' },
 ]
 
-export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount, onOpenBooths }: MyProfileProps) {
+export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -37,8 +36,8 @@ export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount,
         <article className="profile-journey-card">
           <div className="profile-avatar"><Icon name="leaf" /></div>
           <h1 id="profile-title">{profile.name}님의 에코여정</h1>
+          <button className="profile-journey-logout" type="button" onClick={onLogout}>로그아웃</button>
         </article>
-        <button className="profile-logout-card" type="button" onClick={onLogout}><span>로그아웃</span><Icon name="arrow" /></button>
       </section>
 
       <section className={`eco-passport${passportReady ? ' eco-passport--issued' : ''}`} aria-labelledby="eco-passport-title">
@@ -52,7 +51,6 @@ export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount,
             return <article className={completed ? 'is-stamped' : ''} key={booth.id}><span className="eco-stamp__number">{booth.number}</span><span className="eco-stamp__seal"><Icon name={completed ? booth.icon : 'lock'} /></span><p><small>{booth.hall}</small><strong>{booth.title}</strong><em>{completed ? 'STAMPED' : '체험 전'}</em></p></article>
           })}
         </div>
-        <div className="eco-passport__result"><span><Icon name={passportReady ? 'check' : 'sparkle'} /></span><p><strong>{passportReady ? `${profile.name}님의 ECO PASSPORT` : '다섯 부스를 모두 방문해 주세요'}</strong><small>{passportReady ? '지구를 위한 다섯 번의 행동을 완료한 에코 트래블러입니다.' : '완료한 부스마다 스탬프 한 개가 자동으로 기록됩니다.'}</small></p>{passportReady ? <em>ISSUED</em> : <button type="button" onClick={onOpenBooths}>부스 체험하기 <Icon name="arrow" /></button>}</div>
       </section>
 
       <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>

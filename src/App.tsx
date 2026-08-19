@@ -169,7 +169,7 @@ function App() {
       ) : activeTab === 'shop' ? (
         <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} onOpenBooths={() => navigateTo('booths')} />
+        <MyProfile profile={currentParticipant} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>
