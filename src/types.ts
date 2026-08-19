@@ -38,11 +38,8 @@ export type RewardPaymentMethod = 'points' | 'cash' | 'free'
 export type RewardProduct = {
   id: RewardId
   name: string
-  subtitle: string
   image: string
   imageAlt: string
-  descriptions: readonly string[]
-  impact: string
   cashPrice: number
   points: number | null
   category: 'tech' | 'lifestyle' | 'limited'
