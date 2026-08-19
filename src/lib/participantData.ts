@@ -1,10 +1,11 @@
 import type { User } from '@supabase/supabase-js'
-import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult } from '../types'
+import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
 type ProfileRow = Tables<'profiles'>
 type TransactionRow = Tables<'point_transactions'>
+type RewardOrderRow = Tables<'reward_orders'>
 
 const rewardIds = new Set<RewardId>([
   'cycle-parts-keyring',
@@ -58,21 +59,40 @@ function toPointTransaction(row: TransactionRow): PointTransaction {
   }
 }
 
+function toRewardOrder(row: RewardOrderRow): RewardOrder {
+  const knownStatus = row.status === 'ready' || row.status === 'picked_up' || row.status === 'cancelled'
+    ? row.status
+    : 'requested'
+
+  return {
+    id: row.id,
+    rewardId: row.reward_id,
+    orderCode: row.pickup_code,
+    pointsSpent: row.points_spent,
+    cashPaid: row.cash_paid,
+    status: knownStatus,
+    createdAt: transactionTimeFormatter.format(new Date(row.created_at)),
+  }
+}
+
 export async function loadParticipantData(user: User) {
   if (!supabase) throw new Error('Supabase 연결 정보가 없습니다.')
 
   const fallbackProfile = profileFromAuthUser(user)
-  const [profileResult, transactionResult] = await Promise.all([
+  const [profileResult, transactionResult, orderResult] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('reward_orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
   ])
 
   if (profileResult.error) throw profileResult.error
   if (transactionResult.error) throw transactionResult.error
+  if (orderResult.error) throw orderResult.error
 
   return {
     profile: toParticipantProfile(profileResult.data, fallbackProfile),
     transactions: transactionResult.data.map(toPointTransaction),
+    orders: orderResult.data.map(toRewardOrder),
   }
 }
 

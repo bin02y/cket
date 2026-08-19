@@ -1,12 +1,22 @@
 import { useState } from 'react'
-import type { MissionId, ParticipantProfile } from '../types'
+import { rewardProducts } from '../data/rewards'
+import type { MissionId, ParticipantProfile, RewardOrder, RewardProduct } from '../types'
 import { Icon } from './Icon'
 
 type MyProfileProps = {
   profile: ParticipantProfile
   completedBooths: ReadonlySet<MissionId>
+  orders: readonly RewardOrder[]
   onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
+}
+
+const rewardById = new Map<string, RewardProduct>(rewardProducts.map((reward) => [reward.id, reward]))
+const orderStatusLabels: Record<RewardOrder['status'], string> = {
+  requested: '주문 접수',
+  ready: '수령 준비',
+  picked_up: '수령 완료',
+  cancelled: '주문 취소',
 }
 
 const stampBooths: readonly { id: MissionId; number: string; hall: string; title: string; icon: 'train' | 'snowflake' | 'wind' | 'paw' | 'butterfly' }[] = [
@@ -17,7 +27,7 @@ const stampBooths: readonly { id: MissionId; number: string; hall: string; title
   { id: 4, number: '05', hall: '환경 부스 4', title: '나비효과', icon: 'butterfly' },
 ]
 
-export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount }: MyProfileProps) {
+export function MyProfile({ profile, completedBooths, orders, onLogout, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -51,6 +61,22 @@ export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount 
             return <article className={completed ? 'is-stamped' : ''} key={booth.id}><span className="eco-stamp__number">{booth.number}</span><span className="eco-stamp__seal"><Icon name={completed ? booth.icon : 'lock'} /></span><p><small>{booth.hall}</small><strong>{booth.title}</strong><em>{completed ? 'STAMPED' : '체험 전'}</em></p></article>
           })}
         </div>
+      </section>
+
+      <section className="order-history" aria-labelledby="order-history-title">
+        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>굿즈 구매와 현장 수령 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
+        {orders.length > 0 ? (
+          <div className="order-history__list">
+            {orders.map((order) => {
+              const reward = rewardById.get(order.rewardId)
+              return <article key={order.id}>
+                <div className="order-history__image">{reward ? <img src={reward.image} alt="" loading="lazy" decoding="async" /> : <Icon name="shop" />}</div>
+                <div className="order-history__info"><span className={`order-status order-status--${order.status}`}>{orderStatusLabels[order.status]}</span><h3>{reward?.name ?? '굿즈 주문'}</h3><p>{order.createdAt}</p></div>
+                <dl><div><dt>수령 코드</dt><dd>{order.orderCode}</dd></div><div><dt>결제</dt><dd>{order.cashPaid.toLocaleString('ko-KR')}원{order.pointsSpent > 0 ? ` · ${order.pointsSpent.toLocaleString('ko-KR')} P` : ''}</dd></div></dl>
+              </article>
+            })}
+          </div>
+        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>굿즈를 구매하면 이곳에서 수령 상태를 확인할 수 있어요.</p></div>}
       </section>
 
       <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>

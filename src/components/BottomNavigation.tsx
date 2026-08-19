@@ -6,7 +6,7 @@ const navigationItems: ReadonlyArray<{ id: TabId; label: string }> = [
   { id: 'education', label: '교육' },
   { id: 'experiment', label: '실험' },
   { id: 'booths', label: '부스' },
-  { id: 'shop', label: '리워드' },
+  { id: 'shop', label: '굿즈' },
   { id: 'my', label: 'MY' },
 ]
 

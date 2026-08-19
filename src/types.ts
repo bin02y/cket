@@ -54,6 +54,16 @@ export type RewardRedemptionResult =
   | { status: 'already_claimed' }
   | { status: 'error'; message: string }
 
+export type RewardOrder = {
+  id: string
+  rewardId: string
+  orderCode: string
+  pointsSpent: number
+  cashPaid: number
+  status: 'requested' | 'ready' | 'picked_up' | 'cancelled'
+  createdAt: string
+}
+
 export type PointTransaction = {
   id: string
   type: 'earn' | 'spend'

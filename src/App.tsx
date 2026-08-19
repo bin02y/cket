@@ -9,12 +9,13 @@ import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
 import { loadParticipantData, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
+  const [orders, setOrders] = useState<RewardOrder[]>([])
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
   const [dataError, setDataError] = useState('')
   const dataRequestId = useRef(0)
@@ -29,6 +30,7 @@ function App() {
       if (dataRequestId.current !== requestId) return null
       setCurrentParticipant(data.profile)
       setTransactions(data.transactions)
+      setOrders(data.orders)
       return null
     } catch (error) {
       if (dataRequestId.current !== requestId) return null
@@ -52,6 +54,7 @@ function App() {
         dataRequestId.current += 1
         setCurrentParticipant(null)
         setTransactions([])
+        setOrders([])
         setDataError('')
         setIsAuthLoading(false)
         return
@@ -107,11 +110,13 @@ function App() {
     if (supabase) await supabase.auth.signOut()
     setCurrentParticipant(null)
     setTransactions([])
+    setOrders([])
     setDataError('')
     setActiveTab('home')
   }
 
   async function deleteAccount() {
+    const participantId = currentParticipant?.id
     if (supabase) {
       const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' })
       if (error) return '계정 삭제 서버 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.'
@@ -120,8 +125,16 @@ function App() {
     dataRequestId.current += 1
     setCurrentParticipant(null)
     setTransactions([])
+    setOrders([])
     setDataError('')
     setActiveTab('home')
+    if (participantId) {
+      try {
+        window.localStorage.removeItem(`eco-express-shop:${participantId}:v1`)
+      } catch {
+        // Account deletion is complete even when browser storage is unavailable.
+      }
+    }
     return null
   }
 
@@ -167,9 +180,9 @@ function App() {
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" />
       ) : activeTab === 'shop' ? (
-        <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
+        <RewardShop participantId={currentParticipant.id} balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} completedBooths={completedBooths} onLogout={logout} onDeleteAccount={deleteAccount} />
+        <MyProfile profile={currentParticipant} completedBooths={completedBooths} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>
