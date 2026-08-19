@@ -50,6 +50,7 @@ function zoneSize(zone: RoadViewBooth | StationFacility) {
 }
 
 const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
+  if (zone.gateCode === 'F02') return []
   const size = zoneSize(zone)
   const halfWidth = size.width / 2
   const halfDepth = size.depth / 2
@@ -135,8 +136,6 @@ function createGate(zone: RoadViewBooth) {
   leftWing.position.set(-0.66, 0.8, 0)
   const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
-  const gateLight = new THREE.PointLight(accent, 3.2, 8, 2)
-  gateLight.position.set(0, 2.25, zone.gate.side === 'south' ? 0.6 : -0.6); group.add(gateLight); group.userData.light = gateLight
   return group
 }
 
@@ -145,7 +144,6 @@ function createTrainDoor(zone: RoadViewBooth) {
   if (zone.gate.side === 'north') group.rotation.y = Math.PI
   else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
-  const accent = new THREE.Color(zone.color)
   const frame = new THREE.MeshStandardMaterial({ color: '#e8eff2', metalness: 0.68, roughness: 0.22 })
   const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.38, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#83c6df', transparent: true, opacity: 0.58, metalness: 0.2, roughness: 0.08, side: THREE.DoubleSide })
@@ -164,7 +162,6 @@ function createTrainDoor(zone: RoadViewBooth) {
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, `${zone.gateCode} · TRAIN DOOR`, zone.color, 'AUTOMATIC SLIDING DOOR'), transparent: true, side: THREE.DoubleSide }),
   )
   sign.position.set(0, 4.15, 0); group.add(sign)
-  const doorLight = new THREE.PointLight(accent, 2.5, 7, 2); doorLight.position.set(0, 3.15, 0.5); group.add(doorLight); group.userData.light = doorLight
   return group
 }
 
@@ -197,9 +194,8 @@ function createTrainCarBooth(zone: RoadViewBooth) {
   addRoundedBox(group, [0.24, 4.05, sideSectionDepth], [halfWidth, 2.18, sideOffset], white, 0.1)
   addRoundedBox(group, [0.24, 0.82, 2.6], [halfWidth, 3.78, 0], white, 0.08)
 
-  for (const sideX of [-halfWidth - 0.13, halfWidth + 0.13]) {
-    addRoundedBox(group, [0.06, 0.25, 9], [sideX, 0.95, 0], blue, 0.02)
-  }
+  addRoundedBox(group, [0.06, 0.25, 9], [-halfWidth - 0.13, 0.95, 0], blue, 0.02)
+  for (const z of [-3.05, 3.05]) addRoundedBox(group, [0.06, 0.25, 2.9], [halfWidth + 0.13, 0.95, z], blue, 0.02)
   for (const z of [-3.45, -2.25, 2.25, 3.45]) {
     addRoundedBox(group, [0.06, 1.0, 0.86], [-halfWidth - 0.13, 2.55, z], windowMaterial, 0.08)
     addRoundedBox(group, [0.06, 1.0, 0.86], [halfWidth + 0.13, 2.55, z], windowMaterial, 0.08)
@@ -246,46 +242,54 @@ function createFacility(facility: StationFacility) {
   const fixture = new THREE.MeshStandardMaterial({ color: '#dbe5e9', metalness: 0.36, roughness: 0.3 })
   const dark = new THREE.MeshStandardMaterial({ color: '#21465a', metalness: 0.18, roughness: 0.42 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.04, roughness: 0.18, clearcoat: 0.82, clearcoatRoughness: 0.16 })
+  const mirror = new THREE.MeshPhysicalMaterial({ color: '#bfe8f2', metalness: 0.78, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.04 })
   const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
-  addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
-  addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], wall, 0.1)
-  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
-  addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
-  addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
   const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'ECO EXPRESS STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
   )
   if (facility.gateCode === 'F01') {
+    addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
+    addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], wall, 0.1)
+    addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
+    addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [halfWidth, 2.52, 0], shell, 0.1)
+    addRoundedBox(group, [BOOTH_WIDTH + 0.2, 0.3, BOOTH_DEPTH + 0.2], [0, 5.02, 0], shell, 0.12)
     addRoundedBox(group, [3.18, 4.55, 0.3], [-2.61, 2.34, halfDepth], wall, 0.1)
     addRoundedBox(group, [3.18, 4.55, 0.3], [2.61, 2.34, halfDepth], wall, 0.1)
     addRoundedBox(group, [2.04, 1.15, 0.3], [0, 4.12, halfDepth], wall, 0.08)
     sign.position.set(0, 4.0, halfDepth + 0.18); sign.scale.setScalar(0.7); group.add(sign)
-    const doorPivot = new THREE.Group(); doorPivot.position.set(-0.92, 0, halfDepth - 0.08); doorPivot.rotation.y = -1.02; group.add(doorPivot)
+    const doorPivot = new THREE.Group(); doorPivot.position.set(-0.92, 0, halfDepth - 0.08); group.add(doorPivot)
     addRoundedBox(doorPivot, [1.82, 2.78, 0.12], [0.91, 1.52, 0], fixture, 0.06)
     addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [1.56, 1.5, -0.1], dark, 0.03)
+    group.userData.hingedDoor = doorPivot
 
-    addRoundedBox(group, [1.45, 0.25, 0.72], [-2.45, 1.02, -1.55], ceramic, 0.12)
-    addRoundedBox(group, [0.9, 0.05, 0.42], [-2.45, 1.17, -1.55], dark, 0.03)
-    addRoundedBox(group, [0.18, 0.78, 0.18], [-2.45, 0.58, -1.55], fixture, 0.05)
-    addRoundedBox(group, [0.12, 0.5, 0.12], [-2.45, 1.42, -1.78], fixture, 0.04)
-    addRoundedBox(group, [0.52, 0.12, 0.12], [-2.22, 1.63, -1.78], fixture, 0.04)
+    addRoundedBox(group, [1.72, 1.5, 0.12], [-2.35, 2.2, backLocalZ + 0.2], fixture, 0.05)
+    addRoundedBox(group, [1.5, 1.28, 0.06], [-2.35, 2.2, backLocalZ + 0.28], mirror, 0.04)
+    addRoundedBox(group, [1.55, 0.28, 0.82], [-2.35, 1.0, -1.75], ceramic, 0.12)
+    addRoundedBox(group, [0.92, 0.06, 0.48], [-2.35, 1.16, -1.75], dark, 0.03)
+    addRoundedBox(group, [0.2, 0.75, 0.2], [-2.35, 0.58, -1.75], fixture, 0.05)
+    addRoundedBox(group, [0.12, 0.48, 0.12], [-2.35, 1.42, -2.02], fixture, 0.04)
+    addRoundedBox(group, [0.5, 0.12, 0.12], [-2.12, 1.62, -2.02], fixture, 0.04)
 
     addRoundedBox(group, [0.78, 1.0, 0.42], [0, 1.08, backLocalZ + 0.35], ceramic, 0.16)
     addRoundedBox(group, [0.46, 0.42, 0.38], [0, 0.48, backLocalZ + 0.5], fixture, 0.12)
 
-    const toiletBowl = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.14, 12, 32), ceramic)
-    toiletBowl.rotation.x = Math.PI / 2; toiletBowl.position.set(2.25, 0.72, -1.5); toiletBowl.scale.z = 1.28; group.add(toiletBowl)
-    addRoundedBox(group, [0.62, 0.5, 0.62], [2.25, 0.42, -1.5], ceramic, 0.16)
-    addRoundedBox(group, [1.05, 1.05, 0.38], [2.25, 1.08, -2.08], ceramic, 0.12)
+    const toiletBowl = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.14, 12, 32), ceramic)
+    toiletBowl.rotation.x = Math.PI / 2; toiletBowl.position.set(2.25, 0.72, -1.62); toiletBowl.scale.z = 1.3; group.add(toiletBowl)
+    addRoundedBox(group, [0.66, 0.5, 0.68], [2.25, 0.42, -1.62], ceramic, 0.16)
+    addRoundedBox(group, [1.08, 1.08, 0.4], [2.25, 1.08, -2.18], ceramic, 0.12)
+    addRoundedBox(group, [0.28, 0.12, 0.06], [2.25, 1.32, -1.96], fixture, 0.03)
+    addRoundedBox(group, [0.16, 3.15, 2.15], [1.15, 1.62, -1.55], wall, 0.05)
   } else {
-    sign.position.set(0, 3.42, backLocalZ * 0.91); group.add(sign)
-    addRoundedBox(group, [5.9, 1.08, 0.9], [0, 0.68, 0.72], fixture, 0.14)
-    addRoundedBox(group, [5.25, 0.16, 0.98], [0, 1.24, 0.72], dark, 0.05)
+    sign.position.set(0, 3.28, -1.35); group.add(sign)
+    addRoundedBox(group, [0.16, 2.0, 0.16], [-1.75, 2.1, -1.4], fixture, 0.04)
+    addRoundedBox(group, [0.16, 2.0, 0.16], [1.75, 2.1, -1.4], fixture, 0.04)
+    addRoundedBox(group, [5.2, 1.08, 0.86], [0, 0.68, -0.7], fixture, 0.14)
+    addRoundedBox(group, [4.7, 0.16, 0.94], [0, 1.24, -0.7], dark, 0.05)
     for (const x of [-1.35, 1.35]) {
-      addRoundedBox(group, [0.82, 0.56, 0.12], [x, 1.7, 0.26], dark, 0.06)
-      addRoundedBox(group, [0.1, 0.42, 0.1], [x, 1.43, 0.26], fixture, 0.03)
+      addRoundedBox(group, [0.82, 0.56, 0.12], [x, 1.7, -0.88], dark, 0.06)
+      addRoundedBox(group, [0.1, 0.42, 0.1], [x, 1.43, -0.88], fixture, 0.03)
     }
   }
   return group
@@ -306,7 +310,11 @@ function buildMetaverseStation(scene: THREE.Scene) {
     const entrance = booth.trainCar ? createTrainDoor(booth) : createGate(booth)
     scene.add(entrance); animated.push(entrance)
   }
-  for (const facility of FACILITIES) scene.add(createFacility(facility))
+  for (const facility of FACILITIES) {
+    const builtFacility = createFacility(facility)
+    scene.add(builtFacility)
+    if (builtFacility.userData.hingedDoor) animated.push(builtFacility)
+  }
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
@@ -380,9 +388,6 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     scene.add(new THREE.HemisphereLight('#ffffff', '#b8cad2', 2.25))
     const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024)
     sun.shadow.camera.left = -26; sun.shadow.camera.right = 26; sun.shadow.camera.top = 26; sun.shadow.camera.bottom = -26; scene.add(sun)
-    for (const [x, z, color] of [[-18, -8, '#dff5ff'], [18, -8, '#dff5ff'], [-18, 8, '#eef8ff'], [18, 8, '#eef8ff']] as const) {
-      const light = new THREE.PointLight(color, 3.2, 22, 2); light.position.set(x, 4.8, z); scene.add(light)
-    }
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const resize = () => {
@@ -440,8 +445,11 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.75
           slidingDoors.forEach((door) => { const closedX = door.userData.closedX as number; door.position.x = THREE.MathUtils.lerp(door.position.x, open ? closedX * 2.05 : closedX, 0.1) })
         }
-        const light = object.userData.light as THREE.PointLight | undefined
-        if (light) light.intensity = 2.7 + Math.sin(elapsed * 3.2) * 0.5
+        const hingedDoor = object.userData.hingedDoor as THREE.Group | undefined
+        if (hingedDoor) {
+          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 4.1
+          hingedDoor.rotation.y = THREE.MathUtils.lerp(hingedDoor.rotation.y, open ? 1.18 : 0, 0.12)
+        }
       }
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
