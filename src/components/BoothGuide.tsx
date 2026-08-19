@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { MissionId } from '../types'
 import academyVideo from '../assets/academy/high-speed-refrigeration.mp4'
 import kitCompleteImage from '../assets/academy/kit-complete.png'
@@ -9,6 +10,8 @@ import boothTwoImage from '../assets/booths/booth-2.png'
 import boothThreeImage from '../assets/booths/booth-3.png'
 import boothFourImage from '../assets/booths/booth-4.png'
 import { Icon } from './Icon'
+
+const RoadView3D = lazy(() => import('./RoadView3D'))
 
 type BoothGuideProps = {
   completedBooths: ReadonlySet<MissionId>
@@ -99,6 +102,7 @@ const environmentBooths: readonly EnvironmentBooth[] = [
 export function BoothGuide({ completedBooths }: BoothGuideProps) {
   const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
   const [academyStep, setAcademyStep] = useState<number | null>(null)
+  const [roadViewOpen, setRoadViewOpen] = useState(false)
   const currentAcademySlide = academyStep ? academySlides[academyStep - 1] : null
 
   useEffect(() => {
@@ -127,6 +131,11 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
         <div className="booth-hero__copy">
           <h1 id="booth-hero-title">배우고 선택하며<br /><em>지구를 지키는 여정</em></h1>
           <p className="booth-hero__description">달리는 열차 속 공조 기술부터 환경 부스, 리워드관까지 순서대로 즐겨보세요.</p>
+          <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
+            <span><Icon name="sparkle" /></span>
+            <span><strong>3D 로드뷰</strong><small>전시장을 먼저 걸어보세요</small></span>
+            <Icon name="arrow" />
+          </button>
         </div>
       </section>
 
@@ -240,6 +249,13 @@ export function BoothGuide({ completedBooths }: BoothGuideProps) {
             </footer>
           </section>
         </div>
+      ) : null}
+
+      {roadViewOpen ? createPortal(
+        <Suspense fallback={<div className="roadview-loading" role="status">3D 전시장을 준비하고 있습니다…</div>}>
+          <RoadView3D onClose={() => setRoadViewOpen(false)} />
+        </Suspense>,
+        document.body,
       ) : null}
     </main>
   )
