@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js'
-import type { CheckoutDetails, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SimulatedPaymentMethod } from '../types'
+import type { CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SimulatedPaymentMethod } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
@@ -20,16 +20,16 @@ const rewardIds = new Set<RewardId>([
 const joinedAtFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' })
 const transactionTimeFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })
 
-function isMissionId(value: number | null): value is MissionId {
-  return value === 1 || value === 2 || value === 3 || value === 4 || value === 5
-}
-
 function isRewardId(value: string | null): value is RewardId {
   return value !== null && rewardIds.has(value as RewardId)
 }
 
 function isJsonObject(value: Json): value is { [key: string]: Json | undefined } {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isRoadViewGateCode(value: Json | undefined): value is RoadViewGateCode {
+  return value === 'L01' || value === 'E01' || value === 'R01' || value === 'B01' || value === 'B02' || value === 'B03' || value === 'B04'
 }
 
 function toParticipantProfile(row: ProfileRow, fallback: ParticipantProfile): ParticipantProfile {
@@ -42,9 +42,11 @@ function toParticipantProfile(row: ProfileRow, fallback: ParticipantProfile): Pa
 }
 
 function toPointTransaction(row: TransactionRow): PointTransaction {
-  const missionId = isMissionId(row.mission_id) ? row.mission_id : undefined
   const rewardId = isRewardId(row.reward_id) ? row.reward_id : undefined
-  const category = row.source === 'reward' ? 'reward' : missionId && missionId <= 2 ? 'academy' : 'popup'
+  const roadViewGateCode = isJsonObject(row.metadata) && isRoadViewGateCode(row.metadata.roadview_gate_code)
+    ? row.metadata.roadview_gate_code
+    : undefined
+  const category = row.source === 'reward' ? 'reward' : 'academy'
 
   return {
     id: row.id,
@@ -53,8 +55,8 @@ function toPointTransaction(row: TransactionRow): PointTransaction {
     title: row.title,
     description: row.description,
     category,
-    missionId,
     rewardId,
+    roadViewGateCode,
     createdAt: transactionTimeFormatter.format(new Date(row.created_at)),
   }
 }
@@ -114,17 +116,6 @@ export async function loadParticipantData(user: User) {
   }
 }
 
-export async function saveBoothCompletion(missionId: MissionId, bonusPoints: number) {
-  if (!supabase) throw new Error('Supabase 연결 정보가 없습니다.')
-  const { data, error } = await supabase.rpc('complete_mission', {
-    p_mission_id: missionId,
-    p_bonus_points: bonusPoints,
-  })
-  if (error) throw error
-  if (!isJsonObject(data)) throw new Error('부스 체험 저장 응답 형식이 올바르지 않습니다.')
-  return data.status === 'completed' || data.status === 'already_completed'
-}
-
 export async function saveRoadViewGateVisit(gateCode: RoadViewGateCode): Promise<RoadViewGateRewardResult> {
   if (!supabase) return { status: 'error', message: 'Supabase 연결 정보가 없습니다.' }
 
@@ -170,16 +161,12 @@ export async function saveRewardRedemption(rewardId: RewardId, pointsToUse: numb
   if (data.status === 'insufficient' && typeof data.shortage === 'number') {
     return { status: 'insufficient', shortage: data.shortage }
   }
-  if (data.status === 'locked' && typeof data.required_stamps === 'number') {
-    return { status: 'locked', requiredStamps: data.required_stamps }
-  }
   if (data.status === 'already_claimed') return { status: 'already_claimed' }
   return { status: 'error', message: '굿즈 교환 결과를 확인하지 못했습니다.' }
 }
 
 export function translateDataError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error)
-  if (message.includes('Invalid mission bonus')) return '체험 보너스 점수를 확인해 주세요.'
   if (message.includes('Invalid point discount') || message.includes('Point discount unavailable')) return '사용할 포인트를 다시 확인해 주세요.'
   if (message.includes('Invalid shipping details')) return '배송 정보를 다시 확인해 주세요.'
   if (message.includes('Invalid payment method')) return '결제수단을 다시 선택해 주세요.'

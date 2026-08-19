@@ -133,9 +133,9 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <section className="roadview-entry" aria-labelledby="roadview-entry-title">
             <div className="roadview-entry__copy">
-              <h1 id="roadview-entry-title">3D 전시장 로드뷰</h1>
+              <h1 id="roadview-entry-title">3D 전시관 로드뷰</h1>
             </div>
-            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시장 로드뷰 열기" onClick={openRoadView}>
+            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 열기" onClick={openRoadView}>
               <span><Icon name="arrow" /></span>
             </button>
           </section>

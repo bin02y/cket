@@ -1,7 +1,5 @@
 export type TabId = 'education' | 'experiment' | 'booths' | 'shop' | 'my'
 
-export type MissionId = 1 | 2 | 3 | 4 | 5
-
 export type RoadViewGateCode = 'L01' | 'E01' | 'R01' | 'B01' | 'B02' | 'B03' | 'B04'
 
 export type RoadViewGateRewardResult =
@@ -51,13 +49,11 @@ export type RewardProduct = {
   icon: 'leaf' | 'recycle' | 'train' | 'cup' | 'snowflake' | 'thermometer' | 'sparkle' | 'wind'
   theme: 'mint' | 'sky' | 'navy' | 'aqua'
   pickupNote: string
-  requirement?: 'participant' | 'one-stamp' | 'passport'
 }
 
 export type RewardRedemptionResult =
   | { status: 'success'; pointsSpent: number; cashPaid: number; paymentMethod: SimulatedPaymentMethod | 'free' }
   | { status: 'insufficient'; shortage: number }
-  | { status: 'locked'; requiredStamps: number }
   | { status: 'already_claimed' }
   | { status: 'error'; message: string }
 
@@ -94,7 +90,7 @@ export type PointTransaction = {
   title: string
   description: string
   category: 'academy' | 'popup' | 'reward'
-  missionId?: MissionId
   rewardId?: RewardId
+  roadViewGateCode?: RoadViewGateCode
   createdAt: string
 }

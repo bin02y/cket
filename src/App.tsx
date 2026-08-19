@@ -18,9 +18,8 @@ function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
   const [dataError, setDataError] = useState('')
   const dataRequestId = useRef(0)
-  const completedBooths = new Set(transactions.flatMap((transaction) => transaction.missionId ? [transaction.missionId] : []))
+  const visitedRoadViewGates = new Set(transactions.flatMap((transaction) => transaction.roadViewGateCode ? [transaction.roadViewGateCode] : []))
   const balance = transactions.reduce((total, transaction) => total + transaction.amount, 0)
-  const totalEarnedPoints = transactions.reduce((total, transaction) => transaction.amount > 0 ? total + transaction.amount : total, 0)
 
   const loadRemoteState = useCallback(async (user: User) => {
     const requestId = ++dataRequestId.current
@@ -188,9 +187,9 @@ function App() {
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'shop' ? (
-        <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
+        <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} balance={balance} totalEarnedPoints={totalEarnedPoints} completedBooths={completedBooths} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
+        <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

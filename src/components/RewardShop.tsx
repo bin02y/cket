@@ -10,7 +10,6 @@ type RewardShopProps = {
   participantId: string
   participantName: string
   balance: number
-  completedStamps: number
   onRedeem: (rewardId: RewardProduct['id'], pointsToUse: number, checkout: CheckoutDetails) => Promise<RewardRedemptionResult>
 }
 
@@ -47,13 +46,7 @@ function loadShopPreferences(storageKey: string): ShopPreferences {
   }
 }
 
-function requiredStampCount(reward: RewardProduct) {
-  if (reward.requirement === 'passport') return 5
-  if (reward.requirement === 'one-stamp') return 1
-  return 0
-}
-
-export function RewardShop({ participantId, participantName, balance, completedStamps, onRedeem }: RewardShopProps) {
+export function RewardShop({ participantId, participantName, balance, onRedeem }: RewardShopProps) {
   const storageKey = `eco-express-shop:${participantId}:v1`
   const [selectedReward, setSelectedReward] = useState<RewardProduct | null>(null)
   const [usePoints, setUsePoints] = useState(true)
@@ -188,8 +181,7 @@ export function RewardShop({ participantId, participantName, balance, completedS
             {collectionProducts.length > 0 ? (
               <div className="shop-collection-list">
                 {collectionProducts.map((reward) => {
-                  const unlocked = completedStamps >= requiredStampCount(reward)
-                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" disabled={!unlocked} onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" disabled={!unlocked} onClick={() => { openReward(reward); setActiveCollection(null) }}>구매</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
+                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" onClick={() => { openReward(reward); setActiveCollection(null) }}>구매</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
                 })}
               </div>
             ) : <p className="shop-collection-empty">{activeCollection === 'wishlist' ? '찜한 굿즈가 아직 없어요.' : '장바구니가 비어 있어요.'}</p>}
@@ -199,25 +191,22 @@ export function RewardShop({ participantId, participantName, balance, completedS
 
         <div className="reward-product-grid">
           {filteredRewards.map((reward) => {
-            const requiredStamps = requiredStampCount(reward)
-            const unlocked = completedStamps >= requiredStamps
             const isWishlisted = preferences.wishlist.includes(reward.id)
             const isInCart = preferences.cart.includes(reward.id)
             return (
-              <article className={`reward-product-card-shell${unlocked ? '' : ' is-locked'}`} key={reward.id}>
-                <button className={`reward-product-card${unlocked ? '' : ' is-locked'}`} type="button" disabled={!unlocked} onClick={() => openReward(reward)}>
+              <article className="reward-product-card-shell" key={reward.id}>
+                <button className="reward-product-card" type="button" onClick={() => openReward(reward)}>
                   <div className={`reward-product-card__visual reward-product-card__visual--${reward.theme}`}>
                     <img className="reward-product-image" src={reward.image} alt={reward.imageAlt} loading="lazy" decoding="async" />
                   </div>
                   <div className="reward-product-card__body">
                     <h3>{reward.name}</h3>
                     <span className="reward-product-card__price">{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</span>
-                    {!unlocked ? <p className="reward-product-card__locked"><Icon name="lock" /> 스탬프 {requiredStamps}개 필요</p> : null}
                   </div>
                 </button>
                 <div className="reward-product-card__quick-actions">
                   <button className={isWishlisted ? 'is-active' : ''} type="button" aria-label={`${reward.name} ${isWishlisted ? '찜 해제' : '찜하기'}`} aria-pressed={isWishlisted} onClick={() => togglePreference('wishlist', reward)}><Icon name="heart" /></button>
-                  <button className={isInCart ? 'is-active' : ''} type="button" disabled={!unlocked} aria-label={`${reward.name} ${isInCart ? '장바구니에서 삭제' : '장바구니 담기'}`} aria-pressed={isInCart} onClick={() => togglePreference('cart', reward)}><Icon name="cart" /></button>
+                  <button className={isInCart ? 'is-active' : ''} type="button" aria-label={`${reward.name} ${isInCart ? '장바구니에서 삭제' : '장바구니 담기'}`} aria-pressed={isInCart} onClick={() => togglePreference('cart', reward)}><Icon name="cart" /></button>
                 </div>
               </article>
             )
@@ -251,13 +240,6 @@ export function RewardShop({ participantId, participantName, balance, completedS
                 <p>결제 중 잔액이 바뀌어 선택한 포인트보다<br /><em>{redemption.shortage.toLocaleString('ko-KR')} P</em>가 부족합니다.</p>
                 <p className="reward-result__note"><Icon name="shop" /> 상품으로 돌아가 최신 잔액에 맞춰 다시 구매해 주세요.</p>
                 <div className="reward-result__actions"><button type="button" className="primary-button" onClick={returnToReward}>상품으로 돌아가기</button></div>
-              </div>
-            ) : redemption?.status === 'locked' ? (
-              <div className="reward-result reward-result--notice">
-                <span className="reward-result__icon"><Icon name="lock" /></span>
-                <h2 id="reward-dialog-title">스탬프가 조금 더 필요해요</h2>
-                <p>이 한정 굿즈는 스탬프 <strong>{redemption.requiredStamps}개</strong>를 모은 참가자에게 지급합니다.</p>
-                <div className="reward-result__actions"><button type="button" className="primary-button" onClick={closeDialog}>확인</button></div>
               </div>
             ) : redemption?.status === 'already_claimed' ? (
               <div className="reward-result reward-result--notice">

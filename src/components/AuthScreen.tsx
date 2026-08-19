@@ -78,7 +78,7 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
 
       <section className="auth-panel" aria-labelledby="auth-title">
         <h2 id="auth-title">{mode === 'signup' ? '에코 여정을 시작해요' : '다시 만나 반가워요'}</h2>
-        <p>{mode === 'signup' ? '간편 가입 후 부스 스탬프와 나의 ESG 변화를 기록할 수 있어요.' : '가입한 이메일로 에코 익스프레스에 다시 탑승하세요.'}</p>
+        <p>{mode === 'signup' ? '간편 가입 후 CKET TICKET과 나의 포인트를 기록할 수 있어요.' : '가입한 이메일로 CKET에 다시 로그인하세요.'}</p>
 
         <div className="auth-tabs" role="tablist" aria-label="인증 방식">
           <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => changeMode('signup')}>회원가입</button>

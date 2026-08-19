@@ -322,10 +322,6 @@ export type Database = {
         Args: { p_gate_code: string }
         Returns: Json
       }
-      complete_mission: {
-        Args: { p_bonus_points?: number; p_mission_id: number }
-        Returns: Json
-      }
       redeem_reward: {
         Args: {
           p_payment_method: string

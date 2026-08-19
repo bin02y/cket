@@ -1068,31 +1068,36 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .quick-booth-completed { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--green-700) !important; font-weight: 700; }
 .quick-booth-completed svg { width: 17px; height: 17px; }
 
-.eco-passport { margin-top: 28px; padding: clamp(24px,4vw,42px); background: linear-gradient(140deg,#f8fcff,#effaf7); border: 1px solid #d9e9ed; border-radius: 30px; box-shadow: 0 16px 38px rgba(17,70,98,.08); }
-.eco-passport--issued { background: radial-gradient(circle at 90% 0,rgba(84,223,175,.2),transparent 18rem),linear-gradient(140deg,#f9fdff,#effcf7); border-color: #bfe7d8; }
-.eco-passport__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
-.eco-passport__heading h2 { margin: 0; color: var(--blue-950); font-size: clamp(25px,3vw,36px); letter-spacing: -.035em; }
-.eco-passport__heading p { margin: 8px 0 0; color: var(--muted); font-size: 11px; }
-.eco-passport__heading > strong { padding: 10px 15px; color: var(--green-700); background: white; border: 1px solid #cde9de; border-radius: 13px; font-size: 16px; }
-.eco-passport__stamps { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; margin-top: 27px; }
-.eco-passport__stamps article { position: relative; min-width: 0; padding: 16px 12px; text-align: center; background: rgba(255,255,255,.7); border: 1px dashed #bfd0d9; border-radius: 20px; }
-.eco-passport__stamps article.is-stamped { background: white; border: 1px solid #8fd9bd; box-shadow: 0 10px 20px rgba(30,133,99,.08); }
-.eco-stamp__number { position: absolute; top: 8px; left: 10px; color: #a0b0b8; font-size: 8px; font-weight: 800; }
-.eco-stamp__seal { display: grid; place-items: center; width: 54px; height: 54px; margin: 7px auto 12px; color: #a8b7be; background: #edf2f4; border-radius: 50%; }
-.is-stamped .eco-stamp__seal { color: white; background: linear-gradient(145deg,var(--blue-500),var(--green-500)); box-shadow: 0 7px 16px rgba(29,146,118,.22); transform: rotate(-6deg); }
-.eco-stamp__seal svg { width: 25px; height: 25px; }
-.eco-passport__stamps p { min-width: 0; margin: 0; }
-.eco-passport__stamps small,.eco-passport__stamps strong,.eco-passport__stamps em { display: block; }
-.eco-passport__stamps small { color: var(--muted); font-size: 8px; }
-.eco-passport__stamps strong { min-height: 34px; margin-top: 4px; color: var(--blue-950); font-size: 11px; line-height: 1.45; word-break: keep-all; }
-.eco-passport__stamps em { margin-top: 7px; color: #9aaab2; font-size: 7px; font-style: normal; font-weight: 800; letter-spacing: .08em; }
-.eco-passport__stamps .is-stamped em { color: var(--green-700); }
+.cket-ticket-board { margin-top: 28px; padding: clamp(24px,4vw,42px); background: #f5fafc; border: 1px solid #d9e9ed; border-radius: 30px; box-shadow: 0 16px 38px rgba(17,70,98,.08); }
+.cket-ticket-board--complete { background: #f3fbf8; border-color: #bfe7d8; }
+.cket-ticket-board__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.cket-ticket-board__heading h2 { margin: 0; color: var(--blue-950); font-size: clamp(25px,3vw,36px); letter-spacing: -.035em; }
+.cket-ticket-board__heading p { margin: 8px 0 0; color: #526c79; font-size: 11px; }
+.cket-ticket-board__heading > strong { padding: 10px 15px; color: #08764e; background: white; border: 1px solid #cde9de; border-radius: 13px; font-size: 16px; }
+.cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 13px; margin-top: 27px; }
+.cket-ticket { position: relative; display: grid; grid-template-columns: 68px minmax(0,1fr); align-items: center; min-width: 0; min-height: 106px; overflow: hidden; padding: 15px 30px 15px 18px; background: #fff; border: 1px dashed #b9ccd5; box-shadow: 0 8px 20px rgba(24,67,91,.05); }
+.cket-ticket::before,.cket-ticket::after { content: ''; position: absolute; top: 50%; width: 18px; height: 18px; background: #f5fafc; border: 1px solid #d9e9ed; border-radius: 50%; transform: translateY(-50%); }
+.cket-ticket::before { left: -10px; }
+.cket-ticket::after { right: -10px; }
+.cket-ticket.is-visited { border-color: #7dcfb2; box-shadow: 0 9px 22px rgba(30,133,99,.09); }
+.cket-ticket__code { position: absolute; top: 9px; right: 13px; color: #667f8b; font-size: 8px; font-weight: 900; letter-spacing: .12em; }
+.cket-ticket__icon { display: grid; place-items: center; width: 48px; height: 48px; padding-right: 17px; color: #9cabb2; border-right: 1px dashed #c7d5db; }
+.cket-ticket.is-visited .cket-ticket__icon { color: var(--green-700); }
+.cket-ticket__icon svg { width: 30px; height: 30px; }
+.cket-ticket p,.cket-ticket small,.cket-ticket strong,.cket-ticket em { display: block; min-width: 0; }
+.cket-ticket p { margin: 0; }
+.cket-ticket small { color: #536d79; font-size: 8px; }
+.cket-ticket strong { margin-top: 4px; color: var(--blue-950); font-size: 12px; line-height: 1.35; word-break: keep-all; }
+.cket-ticket em { margin-top: 7px; color: #637c87; font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
+.cket-ticket.is-visited em { color: var(--green-700); }
 @media (max-width: 700px) {
   .quick-booth-card { padding: 28px 18px; border-radius: 25px; }
   .quick-booth-choices { grid-template-columns: 1fr; }
   .quick-booth-choices button { min-height: 66px; }
-  .eco-passport__stamps { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .eco-passport__stamps article:last-child { grid-column: 1 / -1; }
+  .cket-ticket-board { padding: 24px 17px; border-radius: 24px; }
+  .cket-ticket-board__heading p { max-width: 210px; }
+  .cket-ticket-grid { grid-template-columns: 1fr; }
+  .cket-ticket { min-height: 96px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1135,7 +1140,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .profile-top-cards { margin-bottom: 24px; }
 .profile-journey-card { display: flex; align-items: center; gap: 16px; min-height: 96px; padding: 16px 20px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 0; box-shadow: 0 12px 30px rgba(20,82,117,.07); }
 .profile-journey-card h1 { min-width: 0; margin: 0; color: var(--blue-950); font-size: clamp(26px,3vw,38px); letter-spacing: -.045em; }
-.profile-journey-logout { flex: 0 0 auto; min-height: 36px; margin-left: auto; padding: 0 13px; color: #728692; background: white; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; }
+.profile-journey-logout { flex: 0 0 auto; min-height: 36px; margin-left: auto; padding: 0 13px; color: #526a76; background: white; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; }
 .profile-journey-logout:hover { color: var(--blue-700); border-color: var(--blue-200); background: var(--blue-50); }
 .profile-point-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
 .profile-point-summary article { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 19px 20px; background: rgba(255,255,255,.94); border: 1px solid var(--line); box-shadow: 0 10px 26px rgba(20,82,117,.06); }

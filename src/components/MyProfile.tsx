@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { rewardProducts } from '../data/rewards'
-import type { MissionId, ParticipantProfile, RewardOrder, RewardProduct } from '../types'
+import type { ParticipantProfile, RewardOrder, RewardProduct, RoadViewGateCode } from '../types'
 import { Icon } from './Icon'
 
 type MyProfileProps = {
   profile: ParticipantProfile
   balance: number
-  totalEarnedPoints: number
-  completedBooths: ReadonlySet<MissionId>
+  visitedRoadViewGates: ReadonlySet<RoadViewGateCode>
   orders: readonly RewardOrder[]
   onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
@@ -30,19 +29,21 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
   cash: '현금',
 }
 
-const stampBooths: readonly { id: MissionId; number: string; hall: string; title: string; icon: 'train' | 'snowflake' | 'wind' | 'paw' | 'butterfly' }[] = [
-  { id: 1, number: '01', hall: '1관', title: '초고속 냉동사이클', icon: 'train' },
-  { id: 5, number: '02', hall: '환경 부스 1', title: '펭귄 구조', icon: 'snowflake' },
-  { id: 2, number: '03', hall: '환경 부스 2', title: '무더운 여름', icon: 'wind' },
-  { id: 3, number: '04', hall: '환경 부스 3', title: '동물 구하기', icon: 'paw' },
-  { id: 4, number: '05', hall: '환경 부스 4', title: '나비효과', icon: 'butterfly' },
+const roadViewTickets: readonly { code: RoadViewGateCode; location: string; title: string }[] = [
+  { code: 'B01', location: '1번 승강장', title: '빙하 위 펭귄 구조' },
+  { code: 'L01', location: '전시 열차 1호차', title: '냉동공조 실험실' },
+  { code: 'B02', location: '2번 승강장', title: '무더운 여름' },
+  { code: 'B03', location: '3번 승강장', title: '동물들을 구하라' },
+  { code: 'E01', location: '전시 열차 2호차', title: '초고속 냉동사이클' },
+  { code: 'B04', location: '4번 승강장', title: '나비효과' },
+  { code: 'R01', location: '전시 열차 3호차', title: '굿즈샵' },
 ]
 
-export function MyProfile({ profile, balance, totalEarnedPoints, completedBooths, orders, onLogout, onDeleteAccount }: MyProfileProps) {
+export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLogout, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const passportReady = completedBooths.size === stampBooths.length
+  const ticketComplete = visitedRoadViewGates.size === roadViewTickets.length
 
   async function deleteAccount() {
     setIsDeleting(true)
@@ -62,19 +63,19 @@ export function MyProfile({ profile, balance, totalEarnedPoints, completedBooths
       </section>
 
       <section className="profile-point-summary" aria-label="포인트 현황">
-        <article><span><Icon name="wallet" /></span><div><small>사용 가능 잔액</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
-        <article><span><Icon name="sparkle" /></span><div><small>누적 포인트</small><strong>{totalEarnedPoints.toLocaleString('ko-KR')} P</strong></div></article>
+        <article><span><Icon name="wallet" /></span><div><small>사용 가능 잔액</small><strong>0원</strong></div></article>
+        <article><span><Icon name="point" /></span><div><small>사용 가능 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
       </section>
 
-      <section className={`eco-passport${passportReady ? ' eco-passport--issued' : ''}`} aria-labelledby="eco-passport-title">
-        <header className="eco-passport__heading">
-          <h2 id="eco-passport-title">CKET TICKET</h2>
-          <strong>{completedBooths.size} / 5</strong>
+      <section className={`cket-ticket-board${ticketComplete ? ' cket-ticket-board--complete' : ''}`} aria-labelledby="cket-ticket-title">
+        <header className="cket-ticket-board__heading">
+          <div><h2 id="cket-ticket-title">CKET TICKET</h2><p>3D 전시관 로드뷰에서 구역을 방문해 티켓을 완성하세요.</p></div>
+          <strong>{visitedRoadViewGates.size} / 7</strong>
         </header>
-        <div className="eco-passport__stamps">
-          {stampBooths.map((booth) => {
-            const completed = completedBooths.has(booth.id)
-            return <article className={completed ? 'is-stamped' : ''} key={booth.id}><span className="eco-stamp__number">{booth.number}</span><span className="eco-stamp__seal"><Icon name={completed ? booth.icon : 'lock'} /></span><p><small>{booth.hall}</small><strong>{booth.title}</strong><em>{completed ? 'STAMPED' : '체험 전'}</em></p></article>
+        <div className="cket-ticket-grid">
+          {roadViewTickets.map((ticket) => {
+            const visited = visitedRoadViewGates.has(ticket.code)
+            return <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code}><span className="cket-ticket__code">{ticket.code}</span><span className="cket-ticket__icon"><Icon name={visited ? 'train' : 'lock'} /></span><p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p></article>
           })}
         </div>
       </section>
@@ -97,7 +98,7 @@ export function MyProfile({ profile, balance, totalEarnedPoints, completedBooths
 
       <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>
 
-      {showDeleteDialog ? <div className="account-dialog-backdrop" role="presentation"><section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-account-title"><span className="account-dialog__icon"><Icon name="my" /></span><h2 id="delete-account-title">정말 회원탈퇴할까요?</h2><p>현재 참가자의 부스 스탬프, ECO POINT, 굿즈 구매 내역이 모두 삭제됩니다. 이 작업은 되돌릴 수 없어요.</p>{deleteError ? <p className="account-dialog__error" role="alert">{deleteError}</p> : null}<div><button type="button" className="secondary-button" autoFocus onClick={() => setShowDeleteDialog(false)}>계속 이용하기</button><button type="button" className="account-delete-button" disabled={isDeleting} onClick={deleteAccount}>{isDeleting ? '삭제 중...' : '모든 데이터 삭제'}</button></div></section></div> : null}
+      {showDeleteDialog ? <div className="account-dialog-backdrop" role="presentation"><section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-account-title"><span className="account-dialog__icon"><Icon name="my" /></span><h2 id="delete-account-title">정말 회원탈퇴할까요?</h2><p>현재 참가자의 CKET TICKET 방문 기록, 포인트, 굿즈 구매 내역이 모두 삭제됩니다. 이 작업은 되돌릴 수 없어요.</p>{deleteError ? <p className="account-dialog__error" role="alert">{deleteError}</p> : null}<div><button type="button" className="secondary-button" autoFocus onClick={() => setShowDeleteDialog(false)}>계속 이용하기</button><button type="button" className="account-delete-button" disabled={isDeleting} onClick={deleteAccount}>{isDeleting ? '삭제 중...' : '모든 데이터 삭제'}</button></div></section></div> : null}
     </main>
   )
 }
