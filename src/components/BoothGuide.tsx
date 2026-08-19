@@ -170,33 +170,15 @@ export function BoothGuide({ section }: BoothGuideProps) {
 
       {academyStep !== null && currentAcademyContent ? (
         <div className="academy-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setAcademyStep(null)}>
-          <section className="academy-dialog academy-dialog--kit" role="dialog" aria-modal="true" aria-labelledby="academy-dialog-title">
-            <header>
-              <div>
-                <span>{currentAcademyContent.eyebrow} · 냉·난방 4-WAY 밸브</span>
-                <h2 id="academy-dialog-title">{currentAcademyContent.title}</h2>
-              </div>
-              <button type="button" aria-label="키트 교육 자료 닫기" onClick={() => setAcademyStep(null)} autoFocus>×</button>
-            </header>
-
-            <div className="academy-dialog__stage academy-dialog__stage--image">
-              <figure>
-                <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
-                <figcaption>{currentAcademyContent.description}</figcaption>
-              </figure>
-            </div>
-
-            <footer>
-              <div className="academy-dialog__progress academy-dialog__progress--tabs" aria-label={`전체 4개 자료 중 ${academyStep + 1}번째`}>
-                {academyContents.map((content, index) => (
-                  <button className={index === academyStep ? 'is-current' : ''} type="button" onClick={() => setAcademyStep(index)} key={content.label}>
-                    <i>{index + 1}</i>{content.label}
-                  </button>
-                ))}
-              </div>
-              <button className="academy-dialog__done" type="button" onClick={() => setAcademyStep(null)}>확인 <Icon name="check" /></button>
-            </footer>
-          </section>
+          <button
+            className="academy-image-viewer"
+            type="button"
+            aria-label={`${currentAcademyContent.label} 이미지 닫기`}
+            onClick={() => setAcademyStep(null)}
+            autoFocus
+          >
+            <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
+          </button>
         </div>
       ) : null}
 
