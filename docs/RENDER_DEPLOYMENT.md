@@ -1,6 +1,6 @@
 # Render 배포 가이드
 
-Eco Express는 Vite로 빌드한 정적 웹앱이다. 저장소 루트의 `render.yaml`을 사용하면 Render Static Site 설정을 같은 값으로 재현할 수 있다.
+CKET은 Vite로 빌드한 정적 웹앱이다. 저장소 루트의 `render.yaml`을 사용하면 Render Static Site 설정을 같은 값으로 재현할 수 있다.
 
 ## 1. 배포 전 확인
 
@@ -57,9 +57,9 @@ Blueprint는 다음 설정을 적용한다.
 
 ## 5. 운영 배포 결과
 
-- 운영 URL: `https://eco-express.onrender.com`
-- Render 서비스: `eco-express` Static Site
-- Git 저장소: `https://github.com/bin02y/eco-express` (`main`, private)
+- 운영 URL: `https://cket.onrender.com`
+- Render 서비스: `cket` Static Site
+- Git 저장소: `https://github.com/bin02y/cket` (`main`, private)
 - 빌드 명령: `npm ci && npm run build`
 - Publish Directory: `dist`
 

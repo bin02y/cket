@@ -1,4 +1,4 @@
-# Eco Express Supabase 운영 설정
+# CKET Supabase 운영 설정
 
 PHASE 7에서 `carrier` 프로젝트에 데이터베이스 마이그레이션과 `delete-account` Edge Function을 적용했다. 프런트엔드는 `.env.local`에 프로젝트 URL과 브라우저 공개용 publishable key가 있을 때 Supabase Auth를 사용하고, 값이 없으면 체험용 메모리 인증으로 안전하게 폴백한다.
 

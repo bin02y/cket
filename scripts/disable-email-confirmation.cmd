@@ -9,7 +9,7 @@ if errorlevel 1 (
 
 set "PROJECT_REF=mcqcomorniycolmbbhka"
 
-echo Eco Express Email Confirmation Setup
+echo CKET Email Confirmation Setup
 echo This enables immediate signup without confirmation email.
 echo.
 set /p "SUPABASE_ACCESS_TOKEN=Supabase Personal Access Token: "

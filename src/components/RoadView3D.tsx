@@ -308,7 +308,7 @@ function createFacility(facility: StationFacility) {
   const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'ECO EXPRESS STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'CKET STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
   )
   if (facility.gateCode === 'F01') {
     addIntegratedDoorFacade(group, wall)
@@ -398,7 +398,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainHeight * 0.34); context.fill(); context.stroke()
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
-  context.fillStyle = '#335469'; context.font = `900 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.textAlign = 'center'; context.fillText('ECO EXPRESS EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
+  context.fillStyle = '#335469'; context.font = `900 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
     const x = worldToMap(zone.x - zoneDimensions.width / 2); const y = worldToMap(zone.z - zoneDimensions.depth / 2)

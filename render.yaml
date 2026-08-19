@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: eco-express
+    name: cket
     runtime: static
     autoDeploy: yes
     buildCommand: npm ci && npm run build

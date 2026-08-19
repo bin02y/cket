@@ -1100,7 +1100,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .refrigeration-film.is-playing .refrigerant-dot, .control-film.is-playing .control-film__sky i, .control-film.is-playing .air-duct i { animation: none !important; }
 }
 
-/* Simplified top cards and the supplied ECO EXPRESS identity. */
+/* Simplified top cards and the supplied CKET identity. */
 .brand > .brand-logo,
 .auth-brand > .brand-logo,
 .auth-panel__mobile-brand > .brand-logo { width: 165px; height: 56px; padding: 0; overflow: visible; background: transparent; border-radius: 0; transform: none; }
