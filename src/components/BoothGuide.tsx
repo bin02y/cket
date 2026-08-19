@@ -12,7 +12,6 @@ import { Icon } from './Icon'
 
 type BoothGuideProps = {
   completedBooths: ReadonlySet<MissionId>
-  onOpenShop: () => void
 }
 
 type EnvironmentBooth = {
@@ -97,7 +96,7 @@ const environmentBooths: readonly EnvironmentBooth[] = [
   },
 ]
 
-export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
+export function BoothGuide({ completedBooths }: BoothGuideProps) {
   const [selectedBooth, setSelectedBooth] = useState<EnvironmentBooth | null>(null)
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const currentAcademySlide = academyStep ? academySlides[academyStep - 1] : null
@@ -130,14 +129,6 @@ export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
           <p className="booth-hero__description">달리는 열차 속 공조 기술부터 환경 부스, 리워드관까지 순서대로 즐겨보세요.</p>
         </div>
       </section>
-
-      <nav className="booth-route" aria-label="전시관 체험 순서">
-        <span><i>01</i><strong>1관</strong><small>초고속 냉동사이클</small></span>
-        <Icon name="arrow" />
-        <span><i>02</i><strong>2관</strong><small>환경 부스 4종</small></span>
-        <Icon name="arrow" />
-        <span><i>03</i><strong>리워드관</strong><small>포인트 굿즈 교환</small></span>
-      </nav>
 
       <section className="booth-hall booth-hall--train" aria-labelledby="hall-one-title">
         <button className="booth-hall__trigger" type="button" aria-haspopup="dialog" aria-label="초고속 냉동사이클 영상과 키트 제작 과정 보기" onClick={() => setAcademyStep(0)} />
@@ -187,12 +178,6 @@ export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
             )
           })}
         </div>
-      </section>
-
-      <section className="reward-hall" aria-labelledby="reward-hall-title">
-        <div className="reward-hall__icon"><Icon name="shop" /><i /><i /></div>
-        <div><h2 id="reward-hall-title">체험 포인트를 원하는 굿즈로</h2><p>부스에서 모은 ECO POINT를 확인하고 일상 속 친환경 실천을 돕는 굿즈로 교환하세요.</p></div>
-        <button className="primary-button" type="button" onClick={onOpenShop}>리워드관 입장 <Icon name="arrow" /></button>
       </section>
 
       {selectedBooth ? (

@@ -3,19 +3,11 @@ import { rewardProducts } from '../data/rewards'
 import type { RewardPaymentMethod, RewardProduct, RewardRedemptionResult } from '../types'
 import { Icon } from './Icon'
 
-type RewardFilter = 'all' | RewardProduct['category']
-
 type RewardShopProps = {
   balance: number
   completedStamps: number
   onRedeem: (rewardId: RewardProduct['id'], paymentMethod: RewardPaymentMethod) => Promise<RewardRedemptionResult>
 }
-
-const filters: readonly { id: RewardFilter; label: string }[] = [
-  { id: 'all', label: '전체 8종' },
-  { id: 'tech', label: '공조 기술' },
-  { id: 'lifestyle', label: '생활·ESG' },
-]
 
 function defaultPaymentMethod(reward: RewardProduct): RewardPaymentMethod {
   if (reward.points !== null) return 'points'
@@ -30,13 +22,10 @@ function requiredStampCount(reward: RewardProduct) {
 }
 
 export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopProps) {
-  const [filter, setFilter] = useState<RewardFilter>('all')
   const [selectedReward, setSelectedReward] = useState<RewardProduct | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<RewardPaymentMethod>('points')
   const [redemption, setRedemption] = useState<RewardRedemptionResult | null>(null)
   const [isRedeeming, setIsRedeeming] = useState(false)
-  const visibleRewards = filter === 'all' ? rewardProducts : rewardProducts.filter((reward) => reward.category === filter)
-
   function openReward(reward: RewardProduct) {
     setSelectedReward(reward)
     setPaymentMethod(defaultPaymentMethod(reward))
@@ -72,28 +61,18 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
 
   return (
     <main id="main-content" className="page reward-shop-page">
-      <section className="reward-shop-hero" aria-labelledby="reward-shop-title">
-        <div className="reward-shop-hero__copy">
-          <h1 id="reward-shop-title">지구를 위한 마음을<br /><em>일상의 리워드로</em></h1>
-          <p>굿즈를 현금 또는 포인트로 선택할 수 있습니다.<br />결제와 수령은 현장 리워드 스테이션에서 진행합니다.</p>
-          <div className="shop-wallet-chip">
+      <section className="reward-catalog" aria-labelledby="reward-catalog-title">
+        <header className="reward-catalog__heading">
+          <h1 id="reward-catalog-title">굿즈샵</h1>
+          <div className="shop-wallet-chip" aria-label={`현재 에코 포인트 ${balance}점`}>
             <span><Icon name="wallet" /></span>
             <small>MY ECO POINT</small>
             <strong>{balance.toLocaleString('ko-KR')} P</strong>
           </div>
-        </div>
-      </section>
-
-      <section className="reward-catalog" aria-labelledby="reward-catalog-title">
-        <header className="reward-catalog__heading">
-          <div><h2 id="reward-catalog-title">냉동공조 리워드 컬렉션</h2><p>카드를 선택하면 굿즈 설명과 현금·포인트 구매 방법을 확인할 수 있습니다.</p></div>
-          <div className="reward-filters" role="group" aria-label="리워드 카테고리 필터">
-            {filters.map((item) => <button type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)} key={item.id}>{item.label}</button>)}
-          </div>
         </header>
 
         <div className="reward-product-grid">
-          {visibleRewards.map((reward) => {
+          {rewardProducts.map((reward) => {
             const requiredStamps = requiredStampCount(reward)
             const unlocked = completedStamps >= requiredStamps
             const affordable = reward.points !== null && balance >= reward.points
