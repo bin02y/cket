@@ -59,7 +59,7 @@ function nearestGate(player: Player) {
     const dx = booth.gate.x - player.x
     const dz = booth.gate.z - player.z
     const distance = Math.hypot(dx, dz)
-    const lookingTowardGate = (dx / distance) * Math.sin(player.yaw) + (dz / distance) * -Math.cos(player.yaw)
+    const lookingTowardGate = (dx / distance) * -Math.sin(player.yaw) + (dz / distance) * -Math.cos(player.yaw)
     if (lookingTowardGate < 0.58) continue
     if (distance < nearestDistance) { result = booth; nearestDistance = distance }
   }
@@ -236,7 +236,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   }
   const x = worldToMap(player.x); const y = worldToMap(player.z)
   context.fillStyle = '#fff'; context.shadowColor = '#17c9ff'; context.shadowBlur = 10; context.beginPath(); context.arc(x, y, Math.max(4, size * 0.012), 0, Math.PI * 2); context.fill()
-  context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x + Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
+  context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x - Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
 }
 
 export default function RoadView3D({ onClose }: RoadView3DProps) {
@@ -294,7 +294,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       if (!overlayRef.current.introOpen && !overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         player.yaw += (Number(movement.turnLeft) - Number(movement.turnRight)) * delta * 1.9
         const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = 5.15 * delta
-        const moveX = (Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) / magnitude * speed; const moveZ = (-Math.cos(player.yaw) * forward + Math.sin(player.yaw) * side) / magnitude * speed
+        const moveX = (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) / magnitude * speed; const moveZ = (-Math.cos(player.yaw) * forward - Math.sin(player.yaw) * side) / magnitude * speed
         if (isWalkable(player.x + moveX, player.z)) player.x += moveX; if (isWalkable(player.x, player.z + moveZ)) player.z += moveZ
       }
       camera.position.set(player.x, 1.68 + Math.sin(elapsed * 8) * (movement.forward || movement.backward ? 0.018 : 0), player.z); camera.rotation.set(player.pitch, player.yaw, 0)
