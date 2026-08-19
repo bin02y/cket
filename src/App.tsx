@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { AppHeader } from './components/AppHeader'
 import { AuthScreen } from './components/AuthScreen'
 import { BottomNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
@@ -158,7 +157,6 @@ function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
-      <AppHeader activeTab={activeTab} />
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'home' ? (
         <HomeDashboard balance={balance} completedBooths={completedBooths} />
