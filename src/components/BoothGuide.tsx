@@ -175,7 +175,7 @@ export function BoothGuide({ completedBooths, section }: BoothGuideProps) {
             </div>
             <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
               <span><Icon name="map" /></span>
-              <span><strong>3D 로드뷰</strong><small>전시장을 먼저 걸어보세요</small></span>
+              <span><strong>3D 로드뷰</strong></span>
               <Icon name="arrow" />
             </button>
           </section>

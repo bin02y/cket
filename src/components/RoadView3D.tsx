@@ -10,31 +10,33 @@ type StationGate = { x: number; z: number; side: GateSide }
 type RoadViewBooth = { id: number; gateCode: string; label: string; title: string; description: string; color: string; x: number; z: number; gate: StationGate; trainCar?: boolean }
 type StationFacility = Omit<RoadViewBooth, 'id' | 'description'>
 type Player = { x: number; z: number; yaw: number; pitch: number }
-type Movement = { forward: boolean; backward: boolean; left: boolean; right: boolean; turnLeft: boolean; turnRight: boolean }
+type Movement = { forward: boolean; backward: boolean; left: boolean; right: boolean; turnLeft: boolean; turnRight: boolean; sprint: boolean }
 type Collider = { x1: number; x2: number; z1: number; z2: number }
 
 const BOOTH_WIDTH = 8.4
 const BOOTH_DEPTH = 5.4
-const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false }
+const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -14, z: -12, gate: { x: -14, z: -9.3, side: 'south' } },
-  { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: 0, z: -12, gate: { x: 3, z: -12, side: 'east' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 14, z: -12, gate: { x: 14, z: -9.3, side: 'south' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -14, z: 0, gate: { x: -14, z: 2.7, side: 'south' } },
-  { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: 0, gate: { x: 3, z: 0, side: 'east' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 14, z: 0, gate: { x: 14, z: 2.7, side: 'south' } },
-  { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 0, z: 12, gate: { x: 3, z: 12, side: 'east' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -18, z: -12, gate: { x: -15.3, z: -12, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: 0, gate: { x: -9.4, z: 3, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 18, z: -12, gate: { x: 15.3, z: -12, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -18, z: 0, gate: { x: -15.3, z: 0, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: 0, gate: { x: 0, z: 3, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 18, z: 0, gate: { x: 15.3, z: 0, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: 0, gate: { x: 9.4, z: 3, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
-  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -14, z: 12, gate: { x: -14, z: 9.3, side: 'north' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 14, z: 12, gate: { x: 14, z: 9.3, side: 'north' } },
+  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -18, z: 12, gate: { x: -15.3, z: 12, side: 'east' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 18, z: 12, gate: { x: 15.3, z: 12, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 
 function zoneSize(zone: RoadViewBooth | StationFacility) {
-  return zone.trainCar ? { width: 5.6, depth: 9.2 } : { width: BOOTH_WIDTH, depth: BOOTH_DEPTH }
+  if (zone.trainCar) return { width: 9.2, depth: 5.6 }
+  if (zone.gate.side === 'east' || zone.gate.side === 'west') return { width: BOOTH_DEPTH, depth: BOOTH_WIDTH }
+  return { width: BOOTH_WIDTH, depth: BOOTH_DEPTH }
 }
 
 const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
@@ -146,6 +148,7 @@ function createGate(zone: RoadViewBooth | StationFacility) {
 
 function createTrainCarBooth(zone: RoadViewBooth | StationFacility) {
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
+  group.rotation.y = -Math.PI / 2
   const accent = new THREE.Color(zone.color)
   const white = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
   const silver = new THREE.MeshStandardMaterial({ color: '#b8c7d0', metalness: 0.8, roughness: 0.2 })
@@ -191,12 +194,15 @@ function createTrainCarBooth(zone: RoadViewBooth | StationFacility) {
 function createBooth(zone: RoadViewBooth | StationFacility) {
   if (zone.trainCar) return createTrainCarBooth(zone)
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
+  if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
+  else if (zone.gate.side === 'north') group.rotation.y = Math.PI
   const accent = new THREE.Color(zone.color)
   const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.24, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const panel = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.7), emissive: accent, emissiveIntensity: 0.12, metalness: 0.16, roughness: 0.4 })
   const glow = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.62, metalness: 0.22, roughness: 0.3 })
   const halfWidth = BOOTH_WIDTH / 2; const halfDepth = BOOTH_DEPTH / 2
-  const backLocalZ = zone.gate.side === 'south' ? -halfDepth : halfDepth
+  const backLocalZ = -halfDepth
   addRoundedBox(group, [BOOTH_WIDTH + 0.3, 0.32, BOOTH_DEPTH + 0.3], [0, 0.12, 0], shell, 0.14)
   addRoundedBox(group, [BOOTH_WIDTH, 4.9, 0.3], [0, 2.52, backLocalZ], panel, 0.1)
   addRoundedBox(group, [0.3, 4.9, BOOTH_DEPTH], [-halfWidth, 2.52, 0], shell, 0.1)
@@ -205,7 +211,7 @@ function createBooth(zone: RoadViewBooth | StationFacility) {
   for (const x of [-3.2, -1.6, 0, 1.6, 3.2]) addRoundedBox(group, [0.08, 0.1, BOOTH_DEPTH - 0.5], [x, 4.84, 0], glow, 0.025)
   addRoundedBox(group, [BOOTH_WIDTH - 0.7, 0.08, 1.25], [0, 0.34, backLocalZ * 0.58], glow, 0.03)
   const portal = new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.055, 12, 72), new THREE.MeshBasicMaterial({ color: accent }))
-  portal.position.set(0, 2.45, backLocalZ * 0.78); portal.userData.spin = zone.gate.side === 'south' ? 1 : -1; group.add(portal)
+  portal.position.set(0, 2.45, backLocalZ * 0.78); portal.userData.spin = 1; group.add(portal)
   const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.48, 1), new THREE.MeshStandardMaterial({ color: '#dffffa', emissive: accent, emissiveIntensity: 1.25, metalness: 0.65, roughness: 0.18 }))
   core.position.copy(portal.position); core.userData.float = true; core.userData.baseY = core.position.y; group.add(core)
   const name = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, depthWrite: false }))
@@ -232,9 +238,9 @@ function buildMetaverseStation(scene: THREE.Scene) {
   }
   for (const zone of ZONES) { scene.add(createBooth(zone)); const gate = createGate(zone); scene.add(gate); animated.push(gate) }
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
-  addRoundedBox(scene, [0.14, 0.1, 40], [-2.3, 0.11, 0], rail, 0.03)
-  addRoundedBox(scene, [0.14, 0.1, 40], [2.3, 0.11, 0], rail, 0.03)
-  for (const z of [-6, 6]) addRoundedBox(scene, [5.1, 3.4, 1.7], [0, 2.15, z], structure, 0.34)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -2.3], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, 2.3], rail, 0.03)
+  for (const x of [-4.7, 4.7]) addRoundedBox(scene, [1.7, 3.4, 5.1], [x, 2.15, 0], structure, 0.34)
   const positions = new Float32Array(130 * 3)
   for (let index = 0; index < 130; index += 1) {
     positions[index * 3] = (Math.random() - 0.5) * 43; positions[index * 3 + 1] = 1.1 + Math.random() * 7; positions[index * 3 + 2] = (Math.random() - 0.5) * 45
@@ -257,13 +263,12 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.beginPath(); context.moveTo(point, padding); context.lineTo(point, size - padding); context.stroke()
     context.beginPath(); context.moveTo(padding, point); context.lineTo(size - padding, point); context.stroke()
   }
-  const trainX = worldToMap(-3.15); const trainY = worldToMap(-17)
-  const trainWidth = worldToMap(3.15) - trainX; const trainHeight = worldToMap(17) - trainY
+  const trainX = worldToMap(-14.1); const trainY = worldToMap(-3.15)
+  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(3.15) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
-  context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainWidth * 0.34); context.fill(); context.stroke()
-  context.fillStyle = '#1874aa'; context.fillRect(trainX + trainWidth * 0.14, trainY + 5, trainWidth * 0.12, trainHeight - 10)
-  context.save(); context.translate(trainX + trainWidth * 0.72, trainY + trainHeight / 2); context.rotate(Math.PI / 2)
-  context.fillStyle = '#335469'; context.font = `900 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.textAlign = 'center'; context.fillText('ECO EXPRESS EXHIBITION TRAIN', 0, 0); context.restore()
+  context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainHeight * 0.34); context.fill(); context.stroke()
+  context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
+  context.fillStyle = '#335469'; context.font = `900 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.textAlign = 'center'; context.fillText('ECO EXPRESS EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
     const x = worldToMap(zone.x - zoneDimensions.width / 2); const y = worldToMap(zone.z - zoneDimensions.depth / 2)
@@ -284,11 +289,11 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 
 export default function RoadView3D({ onClose }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
-  const playerRef = useRef<Player>({ x: 9.2, z: 0, yaw: Math.PI / 2, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
-  const overlayRef = useRef({ introOpen: true, mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
-  const [introOpen, setIntroOpen] = useState(true); const [mapOpen, setMapOpen] = useState(false)
+  const playerRef = useRef<Player>({ x: 0, z: 8.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
+  const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
+  const [mapOpen, setMapOpen] = useState(false)
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [nearGate, setNearGate] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
-  overlayRef.current = { introOpen, mapOpen, selectedBooth }
+  overlayRef.current = { mapOpen, selectedBooth }
 
   useEffect(() => { const previousOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = previousOverflow } }, [])
 
@@ -306,7 +311,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     for (const [x, z, color] of [[-18, -8, '#dff5ff'], [18, -8, '#dff5ff'], [-18, 8, '#eef8ff'], [18, 8, '#eef8ff']] as const) {
       const light = new THREE.PointLight(color, 3.2, 22, 2); light.position.set(x, 4.8, z); scene.add(light)
     }
-    const animated = buildMetaverseStation(scene); const clock = new THREE.Clock()
+    const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
     let animationFrame = 0; let previousNearGateId: number | null = null; let dragging = false; let pointerX = 0; let pointerY = 0
     const resize = () => {
       const width = canvas.clientWidth; const height = canvas.clientHeight
@@ -318,29 +323,38 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
     const handleKey = (event: KeyboardEvent, pressed: boolean) => {
       const key = event.key.toLowerCase(); const overlay = overlayRef.current
       if (pressed && key === 'escape') {
-        event.preventDefault(); if (overlay.selectedBooth) setSelectedBooth(null); else if (overlay.mapOpen) setMapOpen(false); else if (overlay.introOpen) setIntroOpen(false); else onClose(); return
+        event.preventDefault(); if (overlay.selectedBooth) setSelectedBooth(null); else if (overlay.mapOpen) setMapOpen(false); else onClose(); return
       }
       if (pressed && key === 'm') { event.preventDefault(); setMapOpen((current) => !current); return }
-      const keyMap: Record<string, keyof Movement> = { w: 'forward', arrowup: 'forward', s: 'backward', arrowdown: 'backward', a: 'left', d: 'right', arrowleft: 'turnLeft', arrowright: 'turnRight' }
+      if (pressed && key === ' ' && !event.repeat && !overlay.mapOpen && !overlay.selectedBooth && jump.height === 0) {
+        event.preventDefault(); jump.velocity = 6.2; return
+      }
+      const keyMap: Record<string, keyof Movement> = { w: 'forward', arrowup: 'forward', s: 'backward', arrowdown: 'backward', a: 'left', d: 'right', arrowleft: 'turnLeft', arrowright: 'turnRight', shift: 'sprint' }
       const movementKey = keyMap[key]; if (movementKey) { event.preventDefault(); movementRef.current[movementKey] = pressed }
     }
     const handleKeyDown = (event: KeyboardEvent) => handleKey(event, true); const handleKeyUp = (event: KeyboardEvent) => handleKey(event, false)
     const handlePointerDown = (event: PointerEvent) => { if (event.pointerType === 'mouse' && event.button !== 0) return; dragging = true; pointerX = event.clientX; pointerY = event.clientY; canvas.setPointerCapture(event.pointerId) }
     const handlePointerMove = (event: PointerEvent) => {
-      if (!dragging || overlayRef.current.introOpen) return
+      if (!dragging || overlayRef.current.mapOpen || overlayRef.current.selectedBooth) return
       const player = playerRef.current; player.yaw -= (event.clientX - pointerX) * 0.0042; player.pitch = THREE.MathUtils.clamp(player.pitch - (event.clientY - pointerY) * 0.0028, -0.42, 0.42)
       pointerX = event.clientX; pointerY = event.clientY
     }
     const handlePointerUp = (event: PointerEvent) => { dragging = false; if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId) }
     const frame = () => {
       const delta = Math.min(clock.getDelta(), 0.04); const elapsed = clock.elapsedTime; const player = playerRef.current; const movement = movementRef.current
-      if (!overlayRef.current.introOpen && !overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
+      if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         player.yaw += (Number(movement.turnLeft) - Number(movement.turnRight)) * delta * 1.9
-        const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = 5.15 * delta
+        const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = (movement.sprint ? 8.6 : 5.15) * delta
         const moveX = (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) / magnitude * speed; const moveZ = (-Math.cos(player.yaw) * forward - Math.sin(player.yaw) * side) / magnitude * speed
         if (isWalkable(player.x + moveX, player.z)) player.x += moveX; if (isWalkable(player.x, player.z + moveZ)) player.z += moveZ
       }
-      camera.position.set(player.x, 1.68 + Math.sin(elapsed * 8) * (movement.forward || movement.backward ? 0.018 : 0), player.z); camera.rotation.set(player.pitch, player.yaw, 0)
+      if (jump.height > 0 || jump.velocity > 0) {
+        jump.velocity -= 15.5 * delta; jump.height += jump.velocity * delta
+        if (jump.height < 0) { jump.height = 0; jump.velocity = 0 }
+      }
+      const walking = movement.forward || movement.backward || movement.left || movement.right
+      const bob = walking && jump.height === 0 ? Math.sin(elapsed * (movement.sprint ? 13 : 8)) * (movement.sprint ? 0.035 : 0.018) : 0
+      camera.position.set(player.x, 1.68 + jump.height + bob, player.z); camera.rotation.set(player.pitch, player.yaw, 0)
       for (const object of animated) {
         if (object.type === 'Points') object.rotation.y = elapsed * 0.012
         if (object.children.some((child) => child.userData.ring)) { object.rotation.y = elapsed * 0.25; object.children.forEach((child, index) => { child.rotation.z = elapsed * (0.2 + index * 0.12) }) }
@@ -357,7 +371,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       })
       const gate = nearestGate(player); const nearGateId = gate?.id ?? null
       if (nearGateId !== previousNearGateId) { previousNearGateId = nearGateId; setNearGate(gate) }
-      if (!overlayRef.current.introOpen && !overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
+      if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
         if (!passedBooth) lastGateRef.current = null
         else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBooth(passedBooth) }
@@ -390,9 +404,8 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
         <div className="roadview__top-actions"><button type="button" onClick={() => setMapOpen(true)} aria-label="전시장 지도 열기">역사 지도</button><button type="button" className="roadview__close" onClick={onClose} aria-label="3D 로드뷰 닫기">×</button></div>
       </header>
       <div className="roadview__crosshair" aria-hidden="true"><i /><i /></div>
-      <p className="roadview__location"><span /> ECO EXPRESS WHITE STATION · 3-CAR EXHIBITION TRAIN</p>
-      {nearGate && !introOpen && !mapOpen && !selectedBooth ? <div className="roadview__gate-notice" role="status"><span><Icon name="train" /></span><p><strong>{nearGate.label}</strong><small>{nearGate.gateCode} {nearGate.trainCar ? '객차 출입문' : '스마트 개찰구'}을 통과하면 안내가 자동으로 열립니다.</small></p></div> : null}
-      <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>드래그</kbd> 시점</span><span><kbd>SMART GATE</kbd> 자동 안내</span><span><kbd>M</kbd> 지도</span></div>
+      {nearGate && !mapOpen && !selectedBooth ? <div className="roadview__gate-notice" role="status"><span><Icon name="train" /></span><p><strong>{nearGate.label}</strong><small>{nearGate.gateCode} {nearGate.trainCar ? '객차 출입문' : '스마트 개찰구'}을 통과하면 안내가 자동으로 열립니다.</small></p></div> : null}
+      <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
         <div className="roadview__dpad">
           <button type="button" aria-label="앞으로 이동" onPointerDown={() => setMovement('forward', true)} onPointerUp={() => setMovement('forward', false)} onPointerCancel={() => setMovement('forward', false)}>▲</button>
@@ -402,16 +415,9 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
         </div>
         <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>{nearGate ? nearGate.gateCode : 'AUTO GATE'}</strong><small>개찰구 통과 시 자동 안내</small></span></div>
       </div>
-      {introOpen ? <div className="roadview__overlay"><section className="roadview__intro" aria-labelledby="roadview-intro-title">
-        <span className="roadview__eyebrow">ECO EXPRESS · WHITE STATION</span><h2 id="roadview-intro-title">하얀 에코 역사와<br /><em>전시 열차에 탑승하세요</em></h2>
-        <p>실제 기차역을 닮은 밝은 역사 중앙에 3칸 전시 열차가 정차해 있습니다. L01·E01·R01 객차 출입문을 통과해 각 칸의 체험을 만나보세요.</p>
-        <div className="roadview__intro-controls"><span><kbd>W A S D</kbd><small>자유롭게 이동</small></span><span><kbd>화면 드래그</kbd><small>360° 시점 이동</small></span><span><kbd>SMART GATE</kbd><small>안내 자동 열림</small></span></div>
-        <div className="roadview__quality"><span>WHITE STATION</span><span>3 TRAIN CARS</span><span>AUTO DOOR</span></div>
-        <button type="button" className="roadview__enter" onClick={() => setIntroOpen(false)} autoFocus>메타버스 역사 입장 <span>→</span></button>
-      </section></div> : null}
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel" role="dialog" aria-modal="true" aria-labelledby="roadview-map-title">
         <header><div><span>METAVERSE STATION DIRECTORY</span><h2 id="roadview-map-title">에코 익스프레스 역사 지도</h2></div><button type="button" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button></header>
-        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 중앙 3칸 전시 열차가 표시된 역사 지도" /><p className="roadview__map-legend"><i /> 현재 위치 <b /> 객차 출입문</p>
+        <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 중앙 가로 3칸 전시 열차가 표시된 역사 지도" /><p className="roadview__map-legend"><i /> 현재 위치 <b /> 객차 출입문</p>
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
