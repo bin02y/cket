@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { AuthActionResult, AuthCredentials, SignUpDetails } from '../types'
+import ecoExpressLogo from '../assets/eco-express-logo.jpg'
 import { Icon } from './Icon'
 
 type AuthMode = 'login' | 'signup'
@@ -71,7 +72,7 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
     <main id="main-content" className="auth-page">
       <section className="auth-scene" aria-label="풀밭 위를 달리는 에코 익스프레스" role="img">
         <a className="auth-brand" href="#main-content" aria-label="Eco Express">
-          <span><Icon name="leaf" /></span><strong>ECO EXPRESS<small>YOUTH ESG ACADEMY</small></strong>
+          <span className="brand-logo brand-logo--auth"><img src={ecoExpressLogo} alt="ECO EXPRESS" /></span>
         </a>
         <div className="auth-scene__copy">
           <h1>배우고, 실천하고,<br /><em>더 푸른 내일로</em></h1>
@@ -86,7 +87,7 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
       </section>
 
       <section className="auth-panel" aria-labelledby="auth-title">
-        <div className="auth-panel__mobile-brand"><span><Icon name="leaf" /></span><strong>ECO EXPRESS</strong></div>
+        <div className="auth-panel__mobile-brand"><span className="brand-logo"><img src={ecoExpressLogo} alt="ECO EXPRESS" /></span></div>
         <h2 id="auth-title">{mode === 'signup' ? '에코 여정을 시작해요' : '다시 만나 반가워요'}</h2>
         <p>{mode === 'signup' ? '간편 가입 후 부스 스탬프와 나의 ESG 변화를 기록할 수 있어요.' : '가입한 이메일로 에코 익스프레스에 다시 탑승하세요.'}</p>
 

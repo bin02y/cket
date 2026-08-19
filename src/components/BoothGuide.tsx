@@ -129,15 +129,6 @@ export function BoothGuide({ completedBooths, onOpenShop }: BoothGuideProps) {
           <h1 id="booth-hero-title">배우고 선택하며<br /><em>지구를 지키는 여정</em></h1>
           <p className="booth-hero__description">달리는 열차 속 공조 기술부터 환경 부스, 리워드관까지 순서대로 즐겨보세요.</p>
         </div>
-        <div className="booth-hero__map" aria-label="1관, 2관 환경 부스, 리워드관으로 이어지는 체험 동선" role="img">
-          <div className="booth-hero__art">
-            <div className="booth-map__rail" />
-            <span className="booth-map__station booth-map__station--one"><i>1</i><strong>1관</strong><small>냉동사이클</small></span>
-            <span className="booth-map__station booth-map__station--two"><i>2</i><strong>2관</strong><small>환경 부스</small></span>
-            <span className="booth-map__station booth-map__station--three"><i><Icon name="shop" /></i><strong>리워드관</strong><small>굿즈 교환</small></span>
-            <span className="booth-map__train"><Icon name="train" /></span>
-          </div>
-        </div>
       </section>
 
       <nav className="booth-route" aria-label="전시관 체험 순서">

@@ -82,15 +82,6 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
             <strong>{balance.toLocaleString('ko-KR')} P</strong>
           </div>
         </div>
-        <div className="reward-shop-hero__scene" aria-hidden="true">
-          <span className="shop-sun" />
-          <span className="shop-cloud shop-cloud--one" />
-          <span className="shop-cloud shop-cloud--two" />
-          <div className="reward-shop-hero__art">
-            <div className="reward-station"><span className="reward-station__sign">ECO REWARD</span><i /><i /><i /><Icon name="shop" /></div>
-            <div className="shop-track"><Icon name="train" /></div>
-          </div>
-        </div>
       </section>
 
       <section className="reward-catalog" aria-labelledby="reward-catalog-title">

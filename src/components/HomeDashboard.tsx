@@ -7,11 +7,8 @@ type HomeDashboardProps = {
   onOpenBooths: () => void
 }
 
-const routeStops = ['1관', '빙하', '여름', '동물', '나비효과']
-
 export function HomeDashboard({ balance, completedBooths, onOpenBooths }: HomeDashboardProps) {
   const completedCount = completedBooths.size
-  const progress = (completedCount / 5) * 100
   const passportReady = completedCount === 5
 
   return (
@@ -23,46 +20,9 @@ export function HomeDashboard({ balance, completedBooths, onOpenBooths }: HomeDa
           <button className="primary-button" type="button" onClick={onOpenBooths}>부스 체험 시작하기 <Icon name="arrow" /></button>
         </div>
 
-        <div className="hero__scene" aria-label="푸른 하늘과 초원을 달리는 에코 익스프레스 일러스트레이션" role="img">
-          <div className="sun" />
-          <div className="cloud cloud--one" />
-          <div className="cloud cloud--two" />
-          <div className="hill hill--back" />
-          <div className="hill hill--front" />
-          <div className="hero__art">
-            <div className="train">
-              <span className="train__light" />
-              <span className="train__window train__window--one" />
-              <span className="train__window train__window--two" />
-              <span className="train__window train__window--three" />
-              <span className="train__stripe" />
-            </div>
-            <div className="rail" />
-            <div className="speed-line speed-line--one" />
-            <div className="speed-line speed-line--two" />
-          </div>
-        </div>
       </section>
 
       <section className="dashboard-grid" aria-label="나의 에코 익스프레스 현황">
-        <article className="card journey-card">
-          <div className="section-heading">
-            <h2>오늘의 스탬프 여정</h2>
-            <span className="progress-number"><strong>{completedCount}</strong> / 5</span>
-          </div>
-          <div className="progress-track" aria-label={`전체 스탬프 5개 중 ${completedCount}개 완료`}>
-            <span className="progress-track__fill" style={{ width: `${Math.max(completedCount === 0 ? 4 : progress, 4)}%` }} />
-          </div>
-          <div className="route-stops">
-            {routeStops.map((stop, index) => (
-              <div className={`${index < completedCount ? 'route-stop route-stop--completed' : 'route-stop'}`} key={stop}>
-                <span className="route-stop__dot">{index < completedCount ? <Icon name="check" /> : index + 1}</span>
-                <span>{stop}</span>
-              </div>
-            ))}
-          </div>
-        </article>
-
         <article className={`card passport-card${passportReady ? ' passport-card--issued' : ''}`}>
           <div className="passport-card__icon"><Icon name={passportReady ? 'check' : 'sparkle'} /></div>
           <div>
