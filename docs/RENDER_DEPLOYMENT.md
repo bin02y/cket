@@ -57,7 +57,7 @@ Blueprint는 다음 설정을 적용한다.
 
 ## 5. 운영 배포 결과
 
-- 운영 URL: `https://cket.onrender.com`
+- 운영 URL: `https://cket-ck.onrender.com`
 - Render 서비스: `cket` Static Site
 - Git 저장소: `https://github.com/bin02y/cket` (`main`, private)
 - 빌드 명령: `npm ci && npm run build`
