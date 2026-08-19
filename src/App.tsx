@@ -9,7 +9,7 @@ import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
 import { loadParticipantData, saveRewardRedemption, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult, SignUpDetails, TabId } from './types'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
@@ -132,10 +132,10 @@ function App() {
     return loadRemoteState(data.session.user)
   }
 
-  async function redeemReward(rewardId: RewardId, paymentMethod: RewardPaymentMethod): Promise<RewardRedemptionResult> {
+  async function redeemReward(rewardId: RewardId, pointsToUse: number): Promise<RewardRedemptionResult> {
     try {
-      const result = await saveRewardRedemption(rewardId, paymentMethod)
-      if (result.status === 'success') await refreshCurrentParticipant()
+      const result = await saveRewardRedemption(rewardId, pointsToUse)
+      if (result.status === 'success' || result.status === 'insufficient') await refreshCurrentParticipant()
       return result
     } catch (error) {
       return { status: 'error', message: translateDataError(error) }

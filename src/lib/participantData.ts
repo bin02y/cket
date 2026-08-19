@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js'
-import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardPaymentMethod, RewardRedemptionResult } from '../types'
+import type { MissionId, ParticipantProfile, PointTransaction, RewardId, RewardRedemptionResult } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
@@ -87,15 +87,25 @@ export async function saveBoothCompletion(missionId: MissionId, bonusPoints: num
   return data.status === 'completed' || data.status === 'already_completed'
 }
 
-export async function saveRewardRedemption(rewardId: RewardId, paymentMethod: RewardPaymentMethod): Promise<RewardRedemptionResult> {
+export async function saveRewardRedemption(rewardId: RewardId, pointsToUse: number): Promise<RewardRedemptionResult> {
   if (!supabase) return { status: 'error', message: 'Supabase 연결 정보가 없습니다.' }
 
-  const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: rewardId, p_payment_method: paymentMethod })
+  const { data, error } = await supabase.rpc('redeem_reward', { p_reward_id: rewardId, p_points_to_use: pointsToUse })
   if (error) throw error
   if (!isJsonObject(data)) return { status: 'error', message: '굿즈 교환 응답을 확인하지 못했습니다.' }
 
-  if (data.status === 'success' && typeof data.pickup_code === 'string') {
-    return { status: 'success', orderCode: data.pickup_code, paymentMethod }
+  if (
+    data.status === 'success'
+    && typeof data.pickup_code === 'string'
+    && typeof data.points_spent === 'number'
+    && typeof data.cash_paid === 'number'
+  ) {
+    return {
+      status: 'success',
+      orderCode: data.pickup_code,
+      pointsSpent: data.points_spent,
+      cashPaid: data.cash_paid,
+    }
   }
   if (data.status === 'insufficient' && typeof data.shortage === 'number') {
     return { status: 'insufficient', shortage: data.shortage }
@@ -110,6 +120,7 @@ export async function saveRewardRedemption(rewardId: RewardId, paymentMethod: Re
 export function translateDataError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error)
   if (message.includes('Invalid mission bonus')) return '체험 보너스 점수를 확인해 주세요.'
+  if (message.includes('Invalid point discount') || message.includes('Point discount unavailable')) return '사용할 포인트를 다시 확인해 주세요.'
   if (message.includes('Reward out of stock')) return '현재 굿즈 재고가 모두 소진됐어요.'
   if (message.includes('Authentication required') || message.includes('JWT')) return '로그인 세션이 만료됐습니다. 다시 로그인해 주세요.'
   return '데이터를 저장하지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도해 주세요.'

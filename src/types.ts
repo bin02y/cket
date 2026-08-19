@@ -33,8 +33,6 @@ export type RewardId =
   | 'eco-power-bank'
   | 'mini-fan'
 
-export type RewardPaymentMethod = 'points' | 'cash' | 'free'
-
 export type RewardProduct = {
   id: RewardId
   name: string
@@ -50,7 +48,7 @@ export type RewardProduct = {
 }
 
 export type RewardRedemptionResult =
-  | { status: 'success'; orderCode: string; paymentMethod: RewardPaymentMethod }
+  | { status: 'success'; orderCode: string; pointsSpent: number; cashPaid: number }
   | { status: 'insufficient'; shortage: number }
   | { status: 'locked'; requiredStamps: number }
   | { status: 'already_claimed' }

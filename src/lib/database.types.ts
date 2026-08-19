@@ -305,7 +305,7 @@ export type Database = {
         Returns: Json
       }
       redeem_reward: {
-        Args: { p_payment_method: string; p_reward_id: string }
+        Args: { p_points_to_use?: number; p_reward_id: string }
         Returns: Json
       }
     }
