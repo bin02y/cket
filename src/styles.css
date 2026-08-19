@@ -1344,7 +1344,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .academy-dialog__done { width: 100%; min-height: 42px; }
 }
 
-.roadview-entry { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 28px; margin-top: 18px; padding: 27px 30px; overflow: hidden; background: radial-gradient(circle at 85% 15%,rgba(79,222,188,.16),transparent 13rem),linear-gradient(135deg,#092d49,#075f72); border: 1px solid rgba(85,201,218,.25); border-radius: 27px; box-shadow: 0 15px 36px rgba(8,57,82,.13); }
+.roadview-entry { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 28px; margin-top: 18px; padding: 27px 30px; overflow: hidden; background: radial-gradient(circle at 85% 15%,rgba(79,222,188,.16),transparent 13rem),linear-gradient(135deg,#092d49,#075f72); border: 1px solid rgba(85,201,218,.25); border-radius: 0; box-shadow: 0 15px 36px rgba(8,57,82,.13); }
 .roadview-entry__copy > span { color: #6ae3c3; font-size: 8px; font-weight: 850; letter-spacing: .16em; }
 .roadview-entry__copy h1 { margin: 7px 0 7px; color: white; font-size: 25px; letter-spacing: -.035em; }
 .roadview-entry__copy p { max-width: 560px; margin: 0; color: rgba(255,255,255,.61); font-size: 11px; line-height: 1.65; word-break: keep-all; }
@@ -1368,7 +1368,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .passport-card__copy h2 { font-size: 17px; }
   .passport-card__copy p { font-size: 9px; line-height: 1.45; }
   .passport-card__stamp { display: none; }
-  .roadview-entry { padding: 23px 19px; border-radius: 23px; }
+  .roadview-entry { padding: 23px 19px; border-radius: 0; }
   .roadview-entry__copy h1 { font-size: 22px; }
 }
 

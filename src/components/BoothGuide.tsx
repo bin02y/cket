@@ -14,13 +14,6 @@ type BoothGuideProps = {
 
 type BoothSection = 'education' | 'booths'
 
-type EnvironmentBooth = {
-  id: number
-  number: string
-  title: string
-  theme: 'blue' | 'red' | 'green' | 'yellow'
-}
-
 type AcademyContent = {
   label: string
   eyebrow: string
@@ -62,33 +55,6 @@ const academyContents: readonly AcademyContent[] = [
     description: '4-way 밸브가 냉매 이동 경로를 바꾸어 실내기와 실외기의 역할을 전환하는 원리를 비교해 보세요.',
     image: kitPrincipleImage,
     imageAlt: '냉각 운전과 가열 운전에서 4-way 밸브와 냉매 흐름이 바뀌는 작동원리',
-  },
-]
-
-const environmentBooths: readonly EnvironmentBooth[] = [
-  {
-    id: 5,
-    number: '01',
-    title: '녹는 빙하 위에서 펭귄을 구해내라!',
-    theme: 'blue',
-  },
-  {
-    id: 2,
-    number: '02',
-    title: '무더운 여름에서 살아남기',
-    theme: 'red',
-  },
-  {
-    id: 3,
-    number: '03',
-    title: '기후 위기에서 동물들을 구하라',
-    theme: 'green',
-  },
-  {
-    id: 4,
-    number: '04',
-    title: '나비효과로부터 지구를 지켜라',
-    theme: 'yellow',
   },
 ]
 
@@ -152,19 +118,6 @@ export function BoothGuide({ section }: BoothGuideProps) {
             </button>
           </section>
 
-          <section className="environment-hall" aria-labelledby="environment-hall-title">
-            <header className="environment-hall__heading">
-              <h2 id="environment-hall-title">환경 부스 체험관</h2>
-            </header>
-            <div className="environment-booth-grid">
-              {environmentBooths.map((booth) => (
-                  <article className={`environment-booth environment-booth--${booth.theme}`} key={booth.id}>
-                    <div className="environment-booth__topline"><span>BOOTH {booth.number}</span></div>
-                    <span className="environment-booth__title">{booth.title}</span>
-                  </article>
-              ))}
-            </div>
-          </section>
         </div>
       )}
 
