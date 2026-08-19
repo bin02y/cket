@@ -55,14 +55,6 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
 
   return (
     <main id="main-content" className="page my-page">
-      <section className="profile-top-cards" aria-label="MY 메뉴">
-        <article className="profile-journey-card">
-          <div className="profile-avatar"><Icon name="leaf" /></div>
-          <h1 id="profile-title">{profile.name}님의 에코여정</h1>
-          <button className="profile-journey-logout" type="button" onClick={onLogout}>로그아웃</button>
-        </article>
-      </section>
-
       <section className="profile-point-summary" aria-label="포인트 현황">
         <article><span><Icon name="wallet" /></span><div><small>사용 가능 잔액</small><strong>0원</strong></div></article>
         <article><span><Icon name="point" /></span><div><small>사용 가능 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
@@ -98,7 +90,13 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
         ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>쇼핑에서 굿즈를 구매하면 이곳에서 배송 상태를 확인할 수 있어요.</p></div>}
       </section>
 
-      <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>
+      <section className="profile-account-card" aria-label="계정 정보">
+        <div className="profile-account-card__info"><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div>
+        <div className="profile-account-actions">
+          <button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button>
+          <button className="profile-account-logout" type="button" onClick={onLogout}>로그아웃</button>
+        </div>
+      </section>
 
       {showDeleteDialog ? <div className="account-dialog-backdrop" role="presentation"><section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-account-title"><span className="account-dialog__icon"><Icon name="my" /></span><h2 id="delete-account-title">정말 회원탈퇴할까요?</h2><p>현재 참가자의 CKET TICKET 방문 기록, 포인트, 굿즈 구매 내역이 모두 삭제됩니다. 이 작업은 되돌릴 수 없어요.</p>{deleteError ? <p className="account-dialog__error" role="alert">{deleteError}</p> : null}<div><button type="button" className="secondary-button" autoFocus onClick={() => setShowDeleteDialog(false)}>계속 이용하기</button><button type="button" className="account-delete-button" disabled={isDeleting} onClick={deleteAccount}>{isDeleting ? '삭제 중...' : '모든 데이터 삭제'}</button></div></section></div> : null}
     </main>
