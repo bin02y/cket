@@ -123,10 +123,9 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
 
   return (
     <main id="main-content" className="page reward-shop-page">
-      <section className="reward-catalog" aria-labelledby="reward-catalog-title">
-        <header className="reward-catalog__heading shop-catalog-heading">
+      <section className="reward-catalog" aria-label="굿즈">
+        <header className="shop-catalog-heading">
           <div className="shop-catalog-heading__main">
-            <h1 id="reward-catalog-title">굿즈샵</h1>
             <label className="shop-search">
               <Icon name="search" />
               <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="굿즈 검색" aria-label="굿즈 검색" />
@@ -135,11 +134,6 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
           <div className="shop-catalog-heading__tools">
             <button className={`shop-collection-button${activeCollection === 'wishlist' ? ' is-active' : ''}`} type="button" aria-expanded={activeCollection === 'wishlist'} onClick={() => showCollection('wishlist')}><Icon name="heart" /><span>찜</span><strong>{preferences.wishlist.length}</strong></button>
             <button className={`shop-collection-button${activeCollection === 'cart' ? ' is-active' : ''}`} type="button" aria-expanded={activeCollection === 'cart'} onClick={() => showCollection('cart')}><Icon name="cart" /><span>장바구니</span><strong>{preferences.cart.length}</strong></button>
-            <div className="shop-wallet-chip" aria-label={`현재 에코 포인트 ${balance}점`}>
-              <span><Icon name="wallet" /></span>
-              <small>MY ECO POINT</small>
-              <strong>{balance.toLocaleString('ko-KR')} P</strong>
-            </div>
           </div>
         </header>
 
@@ -152,11 +146,11 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
               <div className="shop-collection-list">
                 {collectionProducts.map((reward) => {
                   const unlocked = completedStamps >= requiredStampCount(reward)
-                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" disabled={!unlocked} onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" disabled={!unlocked} onClick={() => { openReward(reward); setActiveCollection(null) }}>구매</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
+                  return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" disabled={!unlocked} onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" disabled={!unlocked} onClick={() => { openReward(reward); setActiveCollection(null) }}>온라인 주문</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
                 })}
               </div>
             ) : <p className="shop-collection-empty">{activeCollection === 'wishlist' ? '찜한 굿즈가 아직 없어요.' : '장바구니가 비어 있어요.'}</p>}
-            {activeCollection === 'cart' && cartProducts.length > 0 ? <footer><span>총 상품 금액</span><strong>{cartProducts.reduce((total, reward) => total + reward.cashPrice, 0).toLocaleString('ko-KR')}원</strong><small>상품별 구매 시 포인트 할인을 선택할 수 있어요.</small></footer> : null}
+            {activeCollection === 'cart' && cartProducts.length > 0 ? <footer><span>총 상품 금액</span><strong>{cartProducts.reduce((total, reward) => total + reward.cashPrice, 0).toLocaleString('ko-KR')}원</strong><small>상품별 온라인 주문 시 포인트 할인을 선택할 수 있어요.</small></footer> : null}
           </aside>
         ) : null}
 
@@ -196,11 +190,11 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
             {redemption?.status === 'success' ? (() => {
               return <div className="reward-result reward-result--success">
                 <span className="reward-result__icon"><Icon name="check" /></span>
-                <h2 id="reward-dialog-title">{selectedReward.cashPrice === 0 ? '무료 굿즈가 준비됐어요!' : redemption.cashPaid === 0 ? '포인트 전액 구매가 완료됐어요!' : '현장 구매 신청이 완료됐어요!'}</h2>
+                <h2 id="reward-dialog-title">{selectedReward.cashPrice === 0 ? '무료 굿즈가 준비됐어요!' : '온라인 주문이 완료됐어요!'}</h2>
                 <p><strong>{selectedReward.name}</strong>을 준비하고 있습니다.<br />아래 코드를 현장 스태프에게 보여주세요.</p>
                 <div className="pickup-code"><small>PICK-UP CODE</small><strong>{redemption.orderCode}</strong></div>
-                <div className="reward-result__summary"><div><span>{redemption.cashPaid > 0 ? '현장 현금 결제' : '현장 결제 금액'}</span>{redemption.pointsSpent > 0 ? <small>{redemption.pointsSpent.toLocaleString('ko-KR')} P 사용</small> : null}</div><strong>{redemption.cashPaid.toLocaleString('ko-KR')}원</strong></div>
-                <p className="reward-result__note"><Icon name="shop" /> {redemption.cashPaid > 0 ? '표시된 금액을 현장에서 현금 결제한 뒤 상품을 수령해 주세요.' : selectedReward.pickupNote}</p>
+                <div className="reward-result__summary"><div><span>주문 금액</span>{redemption.pointsSpent > 0 ? <small>{redemption.pointsSpent.toLocaleString('ko-KR')} P 사용</small> : null}</div><strong>{redemption.cashPaid.toLocaleString('ko-KR')}원</strong></div>
+                <p className="reward-result__note"><Icon name="shop" /> 온라인 주문이 접수됐어요. 수령 시 주문 코드를 제시해 주세요.</p>
                 <div className="reward-result__actions"><button type="button" className="secondary-button" onClick={closeDialog}>계속 둘러보기</button><button type="button" className="primary-button" onClick={closeDialog}>확인 <Icon name="arrow" /></button></div>
               </div>
             })() : redemption?.status === 'insufficient' ? (
@@ -240,8 +234,8 @@ export function RewardShop({ participantId, balance, completedStamps, onRedeem }
                   {selectedReward.cashPrice > 0 ? <label className={`point-discount-option${usePoints ? ' is-selected' : ''}`}><input type="checkbox" checked={usePoints} disabled={availableDiscountPoints === 0} onChange={(event) => setUsePoints(event.target.checked)} /><span className="point-discount-option__icon"><Icon name="wallet" /></span><span><small>ECO POINT 할인</small><strong>{availableDiscountPoints > 0 ? `${availableDiscountPoints.toLocaleString('ko-KR')} P 사용 · ${(availableDiscountPoints * WON_PER_POINT).toLocaleString('ko-KR')}원 할인` : '사용 가능한 포인트가 없어요'}</strong></span></label> : null}
                   {selectedReward.cashPrice > 0 ? <div className="reward-payment-breakdown"><span><small>상품 금액</small><strong>{selectedReward.cashPrice.toLocaleString('ko-KR')}원</strong></span><span><small>포인트 할인</small><strong>-{(pointsToUse * WON_PER_POINT).toLocaleString('ko-KR')}원</strong></span></div> : null}
                   <div className="reward-dialog__checkout">
-                    <div><small>{cashToPay > 0 ? '현장 결제 금액' : selectedReward.cashPrice > 0 ? '포인트 전액 결제' : '무료 지급'}</small><strong>{cashToPay.toLocaleString('ko-KR')}원</strong></div>
-                    <button type="button" onClick={redeemSelectedReward} disabled={isRedeeming}>{isRedeeming ? '처리 중...' : selectedReward.cashPrice === 0 ? '받기' : '구매'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
+                    <div><small>{cashToPay > 0 ? '온라인 주문 금액' : selectedReward.cashPrice > 0 ? '포인트 전액 결제' : '무료 지급'}</small><strong>{cashToPay.toLocaleString('ko-KR')}원</strong></div>
+                    <button type="button" onClick={redeemSelectedReward} disabled={isRedeeming}>{isRedeeming ? '처리 중...' : selectedReward.cashPrice === 0 ? '받기' : '온라인 주문'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
                   </div>
                 </div>
               </>

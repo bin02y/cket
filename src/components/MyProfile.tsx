@@ -64,7 +64,7 @@ export function MyProfile({ profile, completedBooths, orders, onLogout, onDelete
       </section>
 
       <section className="order-history" aria-labelledby="order-history-title">
-        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>굿즈 구매와 현장 수령 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
+        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>굿즈 온라인 주문과 수령 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
         {orders.length > 0 ? (
           <div className="order-history__list">
             {orders.map((order) => {
@@ -76,7 +76,7 @@ export function MyProfile({ profile, completedBooths, orders, onLogout, onDelete
               </article>
             })}
           </div>
-        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>굿즈를 구매하면 이곳에서 수령 상태를 확인할 수 있어요.</p></div>}
+        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>굿즈를 온라인으로 주문하면 이곳에서 수령 상태를 확인할 수 있어요.</p></div>}
       </section>
 
       <section className="profile-account-card" aria-label="계정 정보"><div><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div><button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button></section>
