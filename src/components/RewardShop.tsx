@@ -72,19 +72,16 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
             const requiredStamps = requiredStampCount(reward)
             const unlocked = completedStamps >= requiredStamps
             return (
-              <article className={`reward-product-card${unlocked ? '' : ' is-locked'}`} key={reward.id}>
+              <button className={`reward-product-card${unlocked ? '' : ' is-locked'}`} type="button" disabled={!unlocked} onClick={() => openReward(reward)} key={reward.id}>
                 <div className={`reward-product-card__visual reward-product-card__visual--${reward.theme}`}>
                   <img className="reward-product-image" src={reward.image} alt={reward.imageAlt} loading="lazy" decoding="async" />
                 </div>
                 <div className="reward-product-card__body">
                   <h3>{reward.name}</h3>
-                  <div className="reward-price-options">
-                    {reward.cashPrice > 0 ? <button type="button" disabled={!unlocked} onClick={() => openReward(reward)}><small>판매가</small><strong>{reward.cashPrice.toLocaleString('ko-KR')}원</strong></button> : null}
-                    {reward.cashPrice === 0 && reward.points === null ? <button className="is-free" type="button" disabled={!unlocked} onClick={() => openReward(reward)}><small>참가 혜택</small><strong>무료 지급</strong></button> : null}
-                  </div>
+                  <span className="reward-product-card__price">{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</span>
                   {!unlocked ? <p className="reward-product-card__locked"><Icon name="lock" /> 스탬프 {requiredStamps}개 필요</p> : null}
                 </div>
-              </article>
+              </button>
             )
           })}
         </div>
@@ -142,7 +139,7 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
                   {selectedReward.cashPrice > 0 ? <div className="reward-payment-breakdown"><span><small>상품 금액</small><strong>{selectedReward.cashPrice.toLocaleString('ko-KR')}원</strong></span><span><small>포인트 할인</small><strong>-{(pointsToUse * WON_PER_POINT).toLocaleString('ko-KR')}원</strong></span></div> : null}
                   <div className="reward-dialog__checkout">
                     <div><small>{cashToPay > 0 ? '현장 결제 금액' : selectedReward.cashPrice > 0 ? '포인트 전액 결제' : '무료 지급'}</small><strong>{cashToPay.toLocaleString('ko-KR')}원</strong></div>
-                    <button type="button" onClick={redeemSelectedReward} disabled={isRedeeming}>{isRedeeming ? '신청 처리 중...' : selectedReward.cashPrice === 0 ? '무료로 받기' : cashToPay === 0 ? '포인트로 전액 구매하기' : pointsToUse > 0 ? '할인받아 구매 신청하기' : '현금 구매 신청하기'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
+                    <button type="button" onClick={redeemSelectedReward} disabled={isRedeeming}>{isRedeeming ? '처리 중...' : selectedReward.cashPrice === 0 ? '받기' : '구매'} {!isRedeeming ? <Icon name="arrow" /> : null}</button>
                   </div>
                 </div>
               </>
