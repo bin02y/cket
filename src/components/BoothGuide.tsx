@@ -16,7 +16,6 @@ type BoothSection = 'education' | 'booths'
 
 type AcademyContent = {
   label: string
-  eyebrow: string
   title: string
   description: string
   image: string
@@ -26,7 +25,6 @@ type AcademyContent = {
 const academyContents: readonly AcademyContent[] = [
   {
     label: '완성품',
-    eyebrow: 'FINAL KIT',
     title: '최종 완성본',
     description: '냉방과 난방의 냉매 흐름을 빨간색과 파란색 배관으로 표현한 교육용 키트의 완성 모습을 살펴보세요.',
     image: kitFinalImage,
@@ -34,7 +32,6 @@ const academyContents: readonly AcademyContent[] = [
   },
   {
     label: '구성품',
-    eyebrow: 'KIT MATERIALS',
     title: '키트 재료 구성',
     description: '베이스판, 압축기, 4-way 밸브, 열교환기와 제어 부품 등 키트 제작에 필요한 재료를 확인해 보세요.',
     image: kitMaterialsImage,
@@ -42,7 +39,6 @@ const academyContents: readonly AcademyContent[] = [
   },
   {
     label: '제작과정',
-    eyebrow: 'BUILD PROCESS',
     title: '키트 제작 과정',
     description: '베이스판 준비부터 부품 조립, 배관 연결, 작동 테스트까지 전체 제작 순서를 한눈에 확인해 보세요.',
     image: kitProcessImage,
@@ -50,7 +46,6 @@ const academyContents: readonly AcademyContent[] = [
   },
   {
     label: '작동원리',
-    eyebrow: 'HOW IT WORKS',
     title: '냉방·난방 작동원리',
     description: '4-way 밸브가 냉매 이동 경로를 바꾸어 실내기와 실외기의 역할을 전환하는 원리를 비교해 보세요.',
     image: kitPrincipleImage,
@@ -89,7 +84,6 @@ export function BoothGuide({ section }: BoothGuideProps) {
           <section className="kit-education__board">
             <header className="kit-education__header">
               <div>
-                <span>HVAC EDUCATION KIT</span>
                 <h1 id="kit-education-title">냉·난방 4-way 밸브 교육용 키트</h1>
               </div>
             </header>
@@ -97,7 +91,7 @@ export function BoothGuide({ section }: BoothGuideProps) {
               {academyContents.map((content, index) => (
                 <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(index)} key={content.label}>
                   <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
-                  <span className="kit-education-card__copy"><small>{content.eyebrow}</small><strong>{content.label}</strong></span>
+                  <span className="kit-education-card__copy"><strong>{content.label}</strong></span>
                   <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
                 </button>
               ))}
@@ -108,13 +102,10 @@ export function BoothGuide({ section }: BoothGuideProps) {
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <section className="roadview-entry" aria-labelledby="roadview-entry-title">
             <div className="roadview-entry__copy">
-              <span>VIRTUAL EXHIBITION</span>
               <h1 id="roadview-entry-title">3D 전시장 로드뷰</h1>
             </div>
-            <button className="roadview-launch" type="button" onClick={() => setRoadViewOpen(true)}>
-              <span><Icon name="map" /></span>
-              <span><strong>3D 로드뷰</strong></span>
-              <Icon name="arrow" />
+            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시장 로드뷰 열기" onClick={() => setRoadViewOpen(true)}>
+              <span><Icon name="arrow" /></span>
             </button>
           </section>
 
