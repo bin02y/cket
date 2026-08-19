@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js'
-import type { CheckoutDetails, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SimulatedPaymentMethod } from '../types'
+import type { CheckoutDetails, MissionId, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SimulatedPaymentMethod } from '../types'
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
@@ -123,6 +123,19 @@ export async function saveBoothCompletion(missionId: MissionId, bonusPoints: num
   if (error) throw error
   if (!isJsonObject(data)) throw new Error('부스 체험 저장 응답 형식이 올바르지 않습니다.')
   return data.status === 'completed' || data.status === 'already_completed'
+}
+
+export async function saveRoadViewGateVisit(gateCode: RoadViewGateCode): Promise<RoadViewGateRewardResult> {
+  if (!supabase) return { status: 'error', message: 'Supabase 연결 정보가 없습니다.' }
+
+  const { data, error } = await supabase.rpc('claim_roadview_gate', { p_gate_code: gateCode })
+  if (error) throw error
+  if (!isJsonObject(data) || typeof data.awarded_points !== 'number') {
+    return { status: 'error', message: '로드뷰 포인트 적립 결과를 확인하지 못했습니다.' }
+  }
+  if (data.status === 'completed') return { status: 'completed', awardedPoints: data.awarded_points }
+  if (data.status === 'already_completed') return { status: 'already_completed', awardedPoints: 0 }
+  return { status: 'error', message: '로드뷰 포인트 적립 결과를 확인하지 못했습니다.' }
 }
 
 export async function saveRewardRedemption(rewardId: RewardId, pointsToUse: number, checkout: CheckoutDetails): Promise<RewardRedemptionResult> {

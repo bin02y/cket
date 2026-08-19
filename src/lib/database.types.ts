@@ -318,6 +318,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_roadview_gate: {
+        Args: { p_gate_code: string }
+        Returns: Json
+      }
       complete_mission: {
         Args: { p_bonus_points?: number; p_mission_id: number }
         Returns: Json

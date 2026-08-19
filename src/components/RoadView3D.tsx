@@ -7,16 +7,21 @@ import boothOneImage from '../assets/roadview/booth-1.png'
 import boothTwoImage from '../assets/roadview/booth-2.png'
 import boothThreeImage from '../assets/roadview/booth-3.png'
 import boothFourImage from '../assets/roadview/booth-4.png'
+import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
 
-type RoadView3DProps = { onClose: () => void }
+type RoadView3DProps = {
+  onClose: () => void
+  onGatePassed: (gateCode: RoadViewGateCode) => Promise<RoadViewGateRewardResult>
+}
 type GateSide = 'north' | 'south' | 'east' | 'west'
 type StationGate = { x: number; z: number; side: GateSide }
-type RoadViewBooth = { id: number; gateCode: string; label: string; title: string; description: string; color: string; x: number; z: number; gate: StationGate; trainCar?: boolean }
-type StationFacility = Omit<RoadViewBooth, 'id' | 'description'>
+type RoadViewBooth = { id: number; gateCode: RoadViewGateCode; label: string; title: string; description: string; color: string; x: number; z: number; gate: StationGate; trainCar?: boolean }
+type StationFacility = Omit<RoadViewBooth, 'id' | 'description' | 'gateCode'> & { gateCode: string }
 type Player = { x: number; z: number; yaw: number; pitch: number }
 type Movement = { forward: boolean; backward: boolean; left: boolean; right: boolean; turnLeft: boolean; turnRight: boolean; sprint: boolean }
 type Collider = { x1: number; x2: number; z1: number; z2: number }
+type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadViewGateRewardResult['status']; points: number }
 
 const BOOTH_WIDTH = 8.4
 const BOOTH_DEPTH = 5.4
@@ -430,13 +435,34 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x - Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
 }
 
-export default function RoadView3D({ onClose }: RoadView3DProps) {
+export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
   const playerRef = useRef<Player>({ x: 0, z: 20.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
+  const onGatePassedRef = useRef(onGatePassed); const gateRewardCacheRef = useRef(new Map<RoadViewGateCode, GateRewardNotice>())
   const [mapOpen, setMapOpen] = useState(false)
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
+  const [gateRewardNotice, setGateRewardNotice] = useState<GateRewardNotice | null>(null)
+  onGatePassedRef.current = onGatePassed
   overlayRef.current = { mapOpen, selectedBooth }
+
+  const claimGateReward = (booth: RoadViewBooth) => {
+    const cached = gateRewardCacheRef.current.get(booth.gateCode)
+    if (cached) {
+      setGateRewardNotice(cached)
+      return
+    }
+
+    const pending: GateRewardNotice = { gateCode: booth.gateCode, status: 'pending', points: 500 }
+    gateRewardCacheRef.current.set(booth.gateCode, pending)
+    setGateRewardNotice(pending)
+    void onGatePassedRef.current(booth.gateCode).then((result) => {
+      const notice: GateRewardNotice = { gateCode: booth.gateCode, status: result.status, points: result.status === 'error' ? 0 : result.awardedPoints }
+      if (result.status === 'error') gateRewardCacheRef.current.delete(booth.gateCode)
+      else gateRewardCacheRef.current.set(booth.gateCode, notice)
+      setGateRewardNotice(notice)
+    })
+  }
 
   useEffect(() => {
     const root = document.documentElement
@@ -535,7 +561,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
         if (!passedBooth) lastGateRef.current = null
-        else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBooth(passedBooth) }
+        else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBooth(passedBooth); claimGateReward(passedBooth) }
       }
       if (overlayRef.current.mapOpen && mapRef.current) drawMap(mapRef.current, player)
       renderer.render(scene, camera); animationFrame = requestAnimationFrame(frame)
@@ -587,6 +613,7 @@ export default function RoadView3D({ onClose }: RoadView3DProps) {
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
+        {gateRewardNotice?.gateCode === selectedBooth.gateCode ? <div className={`roadview__gate-reward roadview__gate-reward--${gateRewardNotice.status}`} role="status"><Icon name={gateRewardNotice.status === 'error' ? 'warning' : 'wallet'} /><span><small>{selectedBooth.gateCode} VISIT REWARD</small><strong>{gateRewardNotice.status === 'pending' ? '500 P 적립 중…' : gateRewardNotice.status === 'completed' ? `+${gateRewardNotice.points.toLocaleString('ko-KR')} P 적립 완료` : gateRewardNotice.status === 'already_completed' ? '이미 500 P를 받은 구역이에요' : '포인트 적립을 확인하지 못했어요'}</strong></span></div> : null}
         {BOOTH_IMAGES[selectedBooth.id] ? <figure className="roadview__booth-image"><img src={BOOTH_IMAGES[selectedBooth.id]?.src} alt={BOOTH_IMAGES[selectedBooth.id]?.alt} /></figure> : <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div>}<p>{selectedBooth.description}</p>
         <button type="button" className="roadview__panel-action" onClick={() => setSelectedBooth(null)}>메타버스 역사로 돌아가기</button>
       </section></div> : null}

@@ -4,12 +4,14 @@ import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
 import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
 import kitProcessImage from '../assets/academy/kit-process-4way.png'
+import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
 
 const RoadView3D = lazy(() => import('./RoadView3D'))
 
 type BoothGuideProps = {
   section: BoothSection
+  onRoadViewGatePassed: (gateCode: RoadViewGateCode) => Promise<RoadViewGateRewardResult>
 }
 
 type BoothSection = 'education' | 'booths'
@@ -53,7 +55,7 @@ const academyContents: readonly AcademyContent[] = [
   },
 ]
 
-export function BoothGuide({ section }: BoothGuideProps) {
+export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const roadViewHistoryEntry = useRef(false)
@@ -157,7 +159,7 @@ export function BoothGuide({ section }: BoothGuideProps) {
 
       {roadViewOpen ? createPortal(
         <Suspense fallback={<div className="roadview-loading" role="status">3D 전시장을 준비하고 있습니다…</div>}>
-          <RoadView3D onClose={closeRoadView} />
+          <RoadView3D onClose={closeRoadView} onGatePassed={onRoadViewGatePassed} />
         </Suspense>,
         document.body,
       ) : null}

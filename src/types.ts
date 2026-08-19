@@ -2,6 +2,13 @@ export type TabId = 'education' | 'experiment' | 'booths' | 'shop' | 'my'
 
 export type MissionId = 1 | 2 | 3 | 4 | 5
 
+export type RoadViewGateCode = 'L01' | 'E01' | 'R01' | 'B01' | 'B02' | 'B03' | 'B04'
+
+export type RoadViewGateRewardResult =
+  | { status: 'completed'; awardedPoints: number }
+  | { status: 'already_completed'; awardedPoints: 0 }
+  | { status: 'error'; message: string }
+
 export type ParticipantProfile = {
   id: string
   name: string

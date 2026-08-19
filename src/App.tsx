@@ -6,9 +6,9 @@ import { BoothGuide } from './components/BoothGuide'
 import { Icon } from './components/Icon'
 import { MyProfile } from './components/MyProfile'
 import { RewardShop } from './components/RewardShop'
-import { loadParticipantData, saveRewardRedemption, translateDataError } from './lib/participantData'
+import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
-import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, SignUpDetails, TabId } from './types'
+import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SignUpDetails, TabId } from './types'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('booths')
@@ -20,6 +20,7 @@ function App() {
   const dataRequestId = useRef(0)
   const completedBooths = new Set(transactions.flatMap((transaction) => transaction.missionId ? [transaction.missionId] : []))
   const balance = transactions.reduce((total, transaction) => total + transaction.amount, 0)
+  const totalEarnedPoints = transactions.reduce((total, transaction) => transaction.amount > 0 ? total + transaction.amount : total, 0)
 
   const loadRemoteState = useCallback(async (user: User) => {
     const requestId = ++dataRequestId.current
@@ -163,6 +164,16 @@ function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }
 
+  async function claimRoadViewGate(gateCode: RoadViewGateCode): Promise<RoadViewGateRewardResult> {
+    try {
+      const result = await saveRoadViewGateVisit(gateCode)
+      if (result.status === 'completed') await refreshCurrentParticipant()
+      return result
+    } catch (error) {
+      return { status: 'error', message: translateDataError(error) }
+    }
+  }
+
   if (isAuthLoading) return <main className="auth-loading" aria-live="polite"><span><Icon name="leaf" /></span><strong>안전한 탑승 정보를 확인하고 있어요</strong></main>
   if (!currentParticipant) return <AuthScreen onLogin={login} onSignUp={signUp} />
 
@@ -171,15 +182,15 @@ function App() {
       <a className="skip-link" href="#main-content">본문 바로가기</a>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'education' ? (
-        <BoothGuide section="education" />
+        <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'experiment' ? (
         <main id="main-content" className="page empty-tab-page" aria-label="실험" />
       ) : activeTab === 'booths' ? (
-        <BoothGuide section="booths" />
+        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'shop' ? (
         <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (
-        <MyProfile profile={currentParticipant} completedBooths={completedBooths} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
+        <MyProfile profile={currentParticipant} balance={balance} totalEarnedPoints={totalEarnedPoints} completedBooths={completedBooths} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

@@ -5,6 +5,8 @@ import { Icon } from './Icon'
 
 type MyProfileProps = {
   profile: ParticipantProfile
+  balance: number
+  totalEarnedPoints: number
   completedBooths: ReadonlySet<MissionId>
   orders: readonly RewardOrder[]
   onLogout: () => void
@@ -36,7 +38,7 @@ const stampBooths: readonly { id: MissionId; number: string; hall: string; title
   { id: 4, number: '05', hall: '환경 부스 4', title: '나비효과', icon: 'butterfly' },
 ]
 
-export function MyProfile({ profile, completedBooths, orders, onLogout, onDeleteAccount }: MyProfileProps) {
+export function MyProfile({ profile, balance, totalEarnedPoints, completedBooths, orders, onLogout, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -59,9 +61,14 @@ export function MyProfile({ profile, completedBooths, orders, onLogout, onDelete
         </article>
       </section>
 
+      <section className="profile-point-summary" aria-label="포인트 현황">
+        <article><span><Icon name="wallet" /></span><div><small>사용 가능 잔액</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
+        <article><span><Icon name="sparkle" /></span><div><small>누적 포인트</small><strong>{totalEarnedPoints.toLocaleString('ko-KR')} P</strong></div></article>
+      </section>
+
       <section className={`eco-passport${passportReady ? ' eco-passport--issued' : ''}`} aria-labelledby="eco-passport-title">
         <header className="eco-passport__heading">
-          <h2 id="eco-passport-title">ECO PASSPORT</h2>
+          <h2 id="eco-passport-title">CKET TICKET</h2>
           <strong>{completedBooths.size} / 5</strong>
         </header>
         <div className="eco-passport__stamps">

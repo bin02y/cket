@@ -1137,6 +1137,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .profile-journey-card h1 { min-width: 0; margin: 0; color: var(--blue-950); font-size: clamp(26px,3vw,38px); letter-spacing: -.045em; }
 .profile-journey-logout { flex: 0 0 auto; min-height: 36px; margin-left: auto; padding: 0 13px; color: #728692; background: white; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; }
 .profile-journey-logout:hover { color: var(--blue-700); border-color: var(--blue-200); background: var(--blue-50); }
+.profile-point-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.profile-point-summary article { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 19px 20px; background: rgba(255,255,255,.94); border: 1px solid var(--line); box-shadow: 0 10px 26px rgba(20,82,117,.06); }
+.profile-point-summary article > span { display: grid; flex: 0 0 auto; place-items: center; width: 44px; height: 44px; color: white; background: var(--blue-950); }
+.profile-point-summary article:nth-child(2) > span { background: var(--green-700); }
+.profile-point-summary svg { width: 22px; height: 22px; }
+.profile-point-summary div,.profile-point-summary small,.profile-point-summary strong { display: block; min-width: 0; }
+.profile-point-summary small { color: var(--muted); font-size: 8px; font-weight: 800; }
+.profile-point-summary strong { margin-top: 3px; overflow: hidden; color: var(--blue-950); font-size: clamp(20px,3vw,27px); line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 680px) {
   .reward-catalog { margin-top: 0; }
@@ -1145,6 +1153,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .profile-journey-card { min-height: 82px; border-radius: 0; }
   .profile-journey-card h1 { font-size: 24px; }
   .profile-journey-logout { padding-inline: 10px; }
+  .profile-point-summary { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .profile-point-summary article { gap: 10px; padding: 15px 12px; }
+  .profile-point-summary article > span { width: 37px; height: 37px; }
+  .profile-point-summary strong { font-size: 18px; }
 }
 
 /* Experience tab · immersive 3D roadview */
@@ -1172,6 +1184,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .roadview__map { display: block; width: min(100%,516px); aspect-ratio: 1; margin: 0 auto; border: 1px solid rgba(109,211,231,.17); border-radius: 17px; }
 .roadview__map-close { position: absolute; z-index: 2; top: 22px; right: 22px; display: grid; place-items: center; width: 38px; height: 38px; color: white; background: rgba(5,31,47,.82); border: 1px solid rgba(255,255,255,.28); border-radius: 11px; box-shadow: 0 8px 22px rgba(6,35,49,.2); font-size: 23px; cursor: pointer; }
 .roadview__booth-info { max-height: min(90vh,760px); overflow: auto; border-top: 3px solid var(--roadview-accent); }
+.roadview__gate-reward { display: flex; align-items: center; gap: 11px; margin-top: 17px; padding: 12px 14px; color: #176c55; background: #edf9f4; border: 1px solid #b9e5d4; }
+.roadview__gate-reward > svg { flex: 0 0 auto; width: 22px; height: 22px; }
+.roadview__gate-reward span,.roadview__gate-reward small,.roadview__gate-reward strong { display: block; }
+.roadview__gate-reward small { color: #5d8d7d; font-size: 7px; font-weight: 900; letter-spacing: .1em; }
+.roadview__gate-reward strong { margin-top: 2px; font-size: 11px; }
+.roadview__gate-reward--pending { color: #176a92; background: #edf7fb; border-color: #beddeb; }
+.roadview__gate-reward--error { color: #9a4e37; background: #fff4ef; border-color: #f0c9ba; }
 .roadview__booth-image { overflow: hidden; margin: 20px 0 16px; background: #edf4f7; border: 1px solid color-mix(in srgb,var(--roadview-accent) 34%,transparent); border-radius: 18px; box-shadow: 0 14px 34px rgba(4,25,38,.14); }
 .roadview__booth-image img { display: block; width: 100%; max-height: 320px; object-fit: contain; }
 .roadview__booth-symbol { display: grid; place-items: center; width: 120px; height: 120px; margin: 26px auto 20px; color: var(--roadview-accent); background: color-mix(in srgb,var(--roadview-accent) 12%,transparent); border: 1px solid color-mix(in srgb,var(--roadview-accent) 40%,transparent); border-radius: 32px; box-shadow: 0 0 44px color-mix(in srgb,var(--roadview-accent) 15%,transparent); }
@@ -1422,7 +1441,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .shop-collection-empty { margin: 0; padding: 33px 10px 18px; color: var(--muted); text-align: center; font-size: 10px; }
 .reward-product-card-shell { position: relative; display: flex; min-width: 0; }
 .reward-product-card-shell .reward-product-card { height: 100%; }
-.reward-product-card__quick-actions { position: absolute; z-index: 3; top: 11px; right: 11px; display: grid; gap: 7px; }
+.reward-product-card-shell .reward-product-card__body { padding-bottom: 62px; }
+.reward-product-card__quick-actions { position: absolute; z-index: 3; right: 11px; bottom: 11px; display: flex; flex-direction: row; gap: 7px; }
 .reward-product-card__quick-actions button { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: #627d8d; background: white; border: 1px solid #c8d8e0; border-radius: 0; box-shadow: 0 5px 14px rgba(18,69,97,.12); cursor: pointer; }
 .reward-product-card__quick-actions button:hover,.reward-product-card__quick-actions button.is-active { color: white; background: var(--blue-950); border-color: var(--blue-950); }
 .reward-product-card__quick-actions button:first-child.is-active svg { fill: currentColor; }
@@ -1443,8 +1463,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .order-history > header > strong { color: var(--blue-800); font-size: 11px; }
 .order-history__list { display: grid; gap: 9px; margin-top: 16px; }
 .order-history__list article { display: grid; grid-template-columns: 82px minmax(0,1fr) minmax(210px,auto); align-items: center; gap: 16px; padding: 10px; background: #f8fafb; border: 1px solid #e4edf1; }
-.order-history__image { display: grid; place-items: center; width: 82px; height: 72px; color: var(--blue-500); background: white; }
-.order-history__image img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.order-history__image { position: relative; display: grid; place-items: center; width: 82px; height: 72px; overflow: hidden; color: var(--blue-500); background: white; }
+.order-history__image img { position: absolute; inset: 6px; display: block; width: calc(100% - 12px); max-width: calc(100% - 12px); height: calc(100% - 12px); max-height: calc(100% - 12px); object-fit: contain; transform: none; }
 .order-history__image svg { width: 25px; height: 25px; }
 .order-history__info { min-width: 0; }
 .order-history__info h3 { margin: 5px 0 2px; overflow: hidden; color: var(--blue-950); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
@@ -1480,7 +1500,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
   .shop-collection-list img { width: 52px; height: 48px; }
   .shop-collection-list article > div:last-child { grid-column: 1 / -1; }
   .shop-collection-list article > div:last-child button { flex: 1 1 50%; }
-  .reward-product-card__quick-actions { top: 8px; right: 8px; gap: 5px; }
+  .reward-product-card__quick-actions { right: 8px; bottom: 8px; gap: 5px; }
   .reward-product-card__quick-actions button { width: 32px; height: 32px; }
   .order-history { padding: 20px 15px; }
   .order-history__list article { grid-template-columns: 65px minmax(0,1fr); gap: 11px; }
