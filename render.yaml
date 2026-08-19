@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: cket
+    name: cket-ck
     runtime: static
     autoDeploy: yes
     buildCommand: npm ci && npm run build
