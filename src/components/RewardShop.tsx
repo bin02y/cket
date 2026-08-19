@@ -164,7 +164,7 @@ export function RewardShop({ participantId, participantName, balance, onRedeem }
           <div className="shop-catalog-heading__main">
             <label className="shop-search">
               <Icon name="search" />
-              <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="굿즈 검색" aria-label="굿즈 검색" />
+              <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="검색" aria-label="검색" />
             </label>
           </div>
           <div className="shop-catalog-heading__tools">
@@ -177,14 +177,14 @@ export function RewardShop({ participantId, participantName, balance, onRedeem }
 
         {activeCollection ? (
           <aside className="shop-collection-panel" aria-labelledby="shop-collection-title">
-            <header><div><Icon name={activeCollection === 'wishlist' ? 'heart' : 'cart'} /><h2 id="shop-collection-title">{activeCollection === 'wishlist' ? '찜한 굿즈' : '장바구니'}</h2><strong>{collectionProducts.length}</strong></div><button type="button" aria-label={`${activeCollection === 'wishlist' ? '찜 목록' : '장바구니'} 닫기`} onClick={() => setActiveCollection(null)}>×</button></header>
+            <header><div><Icon name={activeCollection === 'wishlist' ? 'heart' : 'cart'} /><h2 id="shop-collection-title">{activeCollection === 'wishlist' ? '찜한 상품' : '장바구니'}</h2><strong>{collectionProducts.length}</strong></div><button type="button" aria-label={`${activeCollection === 'wishlist' ? '찜 목록' : '장바구니'} 닫기`} onClick={() => setActiveCollection(null)}>×</button></header>
             {collectionProducts.length > 0 ? (
               <div className="shop-collection-list">
                 {collectionProducts.map((reward) => {
                   return <article key={reward.id}><img src={reward.image} alt="" /><div><strong>{reward.name}</strong><small>{reward.cashPrice > 0 ? `${reward.cashPrice.toLocaleString('ko-KR')}원` : '무료 지급'}</small></div><div>{activeCollection === 'wishlist' ? <button type="button" onClick={() => togglePreference('cart', reward)}>{preferences.cart.includes(reward.id) ? '장바구니 빼기' : '장바구니 담기'}</button> : <button type="button" onClick={() => { openReward(reward); setActiveCollection(null) }}>구매</button>}<button className="shop-collection-list__remove" type="button" onClick={() => togglePreference(activeCollection, reward)}>삭제</button></div></article>
                 })}
               </div>
-            ) : <p className="shop-collection-empty">{activeCollection === 'wishlist' ? '찜한 굿즈가 아직 없어요.' : '장바구니가 비어 있어요.'}</p>}
+            ) : <p className="shop-collection-empty">{activeCollection === 'wishlist' ? '찜한 상품이 아직 없어요.' : '장바구니가 비어 있어요.'}</p>}
             {activeCollection === 'cart' && cartProducts.length > 0 ? <footer><span>총 상품 금액</span><strong>{cartProducts.reduce((total, reward) => total + reward.cashPrice, 0).toLocaleString('ko-KR')}원</strong><small>상품별 구매 시 포인트 할인을 선택할 수 있어요.</small></footer> : null}
           </aside>
         ) : null}
@@ -257,9 +257,11 @@ export function RewardShop({ participantId, participantName, balance, onRedeem }
               </div>
             ) : (
               <>
-                <div className={`reward-dialog__visual reward-product-card__visual--${selectedReward.theme}`}><img className="reward-product-image" src={selectedReward.image} alt={selectedReward.imageAlt} decoding="async" /></div>
-                <div className="reward-dialog__content">
+                <div className="reward-dialog__product">
+                  <div className={`reward-dialog__visual reward-product-card__visual--${selectedReward.theme}`}><img className="reward-product-image" src={selectedReward.image} alt={selectedReward.imageAlt} decoding="async" /></div>
                   <h2 id="reward-dialog-title">{selectedReward.name}</h2>
+                </div>
+                <div className="reward-dialog__content">
                   <form className="reward-checkout-form" onSubmit={redeemSelectedReward}>
                     <fieldset className="reward-checkout-section">
                       <legend>배송 정보</legend>
