@@ -33,17 +33,17 @@ export function MyProfile({ profile, completedBooths, onLogout, onDeleteAccount,
 
   return (
     <main id="main-content" className="page my-page">
-      <section className="profile-hero" aria-labelledby="profile-title">
-        <div className="profile-identity">
+      <section className="profile-top-cards" aria-label="MY 메뉴">
+        <article className="profile-journey-card">
           <div className="profile-avatar"><Icon name="leaf" /></div>
-          <div><h1 id="profile-title">{profile.name}님의 에코 여정</h1><p>{profile.email} · {profile.joinedAt} 탑승</p></div>
-        </div>
-        <div className="profile-hero__actions"><button type="button" onClick={onLogout}>로그아웃</button></div>
+          <h1 id="profile-title">{profile.name}님의 에코여정</h1>
+        </article>
+        <button className="profile-logout-card" type="button" onClick={onLogout}><span>로그아웃</span><Icon name="arrow" /></button>
       </section>
 
       <section className={`eco-passport${passportReady ? ' eco-passport--issued' : ''}`} aria-labelledby="eco-passport-title">
         <header className="eco-passport__heading">
-          <div><h2 id="eco-passport-title">ECO PASSPORT</h2><p>{passportReady ? '모든 부스를 완주해 에코 패스포트가 발급되었습니다.' : `스탬프 ${5 - completedBooths.size}개를 더 모으면 에코 패스포트가 완성됩니다.`}</p></div>
+          <h2 id="eco-passport-title">ECO PASSPORT</h2>
           <strong>{completedBooths.size} / 5</strong>
         </header>
         <div className="eco-passport__stamps">

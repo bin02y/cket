@@ -159,13 +159,13 @@ function App() {
       <a className="skip-link" href="#main-content">본문 바로가기</a>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'home' ? (
-        <HomeDashboard balance={balance} completedBooths={completedBooths} />
+        <HomeDashboard />
       ) : activeTab === 'education' ? (
-        <BoothGuide section="education" completedBooths={completedBooths} />
+        <BoothGuide section="education" />
       ) : activeTab === 'experiment' ? (
         <main id="main-content" className="page empty-tab-page" aria-label="실험" />
       ) : activeTab === 'booths' ? (
-        <BoothGuide section="booths" completedBooths={completedBooths} />
+        <BoothGuide section="booths" />
       ) : activeTab === 'shop' ? (
         <RewardShop balance={balance} completedStamps={completedBooths.size} onRedeem={redeemReward} />
       ) : (

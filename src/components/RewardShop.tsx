@@ -97,12 +97,6 @@ export function RewardShop({ balance, completedStamps, onRedeem }: RewardShopPro
         </div>
       </section>
 
-      <section className="reward-pickup-guide" aria-label="리워드 결제 및 수령 방법">
-        <span className="reward-pickup-guide__icon"><Icon name="shop" /></span>
-        <div><h2>현금 또는 ECO POINT 선택 후 현장에서 수령</h2><p>신청 완료 화면의 6자리 코드를 스태프에게 보여주세요. 현금 구매는 리워드 스테이션에서 결제합니다.</p></div>
-        <ol><li><strong>01</strong><span>리워드 선택</span></li><li><strong>02</strong><span>결제 방식 선택</span></li><li><strong>03</strong><span>코드 제시</span></li></ol>
-      </section>
-
       {selectedReward ? (
         <div className="reward-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && closeDialog()}>
           <section className={`reward-dialog${redemption ? ' reward-dialog--result' : ''}`} role="dialog" aria-modal="true" aria-labelledby="reward-dialog-title">
