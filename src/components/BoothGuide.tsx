@@ -1,5 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.png'
+import aerodynamicRoofMaterialsImage from '../assets/academy/aerodynamic-roof-materials.png'
+import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-principle.png'
+import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.png'
 import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
 import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
@@ -86,6 +90,34 @@ const academyContents: readonly AcademyContent[] = [
     image: vibrationPrincipleImage,
     imageAlt: '일반 고정과 스프링 및 고무 방진 마운트의 진동 전달 차이를 설명하는 동작원리',
   },
+  {
+    label: '완성품',
+    title: '공기역학적 지붕 커버 최종 완성본',
+    description: '일반형과 유선형 지붕 커버의 압력 차이를 센서로 측정하고 LED와 OLED로 비교하는 키트의 완성 모습을 살펴보세요.',
+    image: aerodynamicRoofFinalImage,
+    imageAlt: '일반형과 유선형 지붕 커버, 송풍팬, 압력 센서, 아두이노, LED와 OLED가 조립된 공기역학 교육용 키트 완성본',
+  },
+  {
+    label: '구성재료',
+    title: '공기역학적 지붕 커버 키트 구성재료',
+    description: '송풍팬, 공조기 모형, 압력 센서, Arduino Nano와 OLED 등 제작에 필요한 17가지 재료를 확인해 보세요.',
+    image: aerodynamicRoofMaterialsImage,
+    imageAlt: '공기역학적 지붕 커버 교육용 키트 제작에 필요한 17가지 구성재료와 예상 비용',
+  },
+  {
+    label: '제작과정',
+    title: '공기역학적 지붕 커버 키트 제작과정',
+    description: '베이스 준비와 센서 배선부터 프로그램 업로드, 압력값 비교 실험까지 12단계 제작 순서를 확인해 보세요.',
+    image: aerodynamicRoofProcessImage,
+    imageAlt: '공기역학적 지붕 커버 교육용 키트를 완성하는 12단계 제작 과정',
+  },
+  {
+    label: '작동원리',
+    title: '공기저항 감소 작동원리',
+    description: '유선형 커버가 흐름 분리와 후류를 줄여 압력저항을 감소시키고, 센서와 Arduino가 그 차이를 표시하는 원리를 알아보세요.',
+    image: aerodynamicRoofPrincipleImage,
+    imageAlt: '일반형과 유선형 지붕 커버의 공기 흐름과 압력저항 차이 및 센서 측정 과정을 설명하는 작동원리',
+  },
 ]
 
 const academyKits = [
@@ -100,6 +132,12 @@ const academyKits = [
     title: '방진 마운트 교육용 키트',
     description: '스프링과 고무가 진동을 줄이는 원리를 직접 비교해 보세요.',
     contents: academyContents.slice(4, 8),
+  },
+  {
+    eyebrow: 'AERODYNAMICS LAB',
+    title: '공기역학적 지붕 커버 교육용 키트',
+    description: '유선형 커버가 공기저항을 줄이는 과정을 압력값으로 비교해 보세요.',
+    contents: academyContents.slice(8, 12),
   },
 ] as const
 
