@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { AuthScreen } from './components/AuthScreen'
 import { BottomNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
 import { Icon } from './components/Icon'
-import { MyProfile } from './components/MyProfile'
-import { RewardShop } from './components/RewardShop'
 import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
 import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SignUpDetails, TabId } from './types'
+
+const MyProfile = lazy(() => import('./components/MyProfile').then(({ MyProfile: component }) => ({ default: component })))
+const RewardShop = lazy(() => import('./components/RewardShop').then(({ RewardShop: component }) => ({ default: component })))
+
+const tabLoadingFallback = <main id="main-content" className="page tab-loading" aria-live="polite">화면을 불러오고 있습니다…</main>
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('booths')
@@ -182,14 +185,16 @@ function App() {
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'education' ? (
         <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
-      ) : activeTab === 'experiment' ? (
-        <main id="main-content" className="page empty-tab-page" aria-label="실험" />
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'shop' ? (
-        <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} onRedeem={redeemReward} />
+        <Suspense fallback={tabLoadingFallback}>
+          <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} onRedeem={redeemReward} />
+        </Suspense>
       ) : (
-        <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
+        <Suspense fallback={tabLoadingFallback}>
+          <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
+        </Suspense>
       )}
       <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>

@@ -1,9 +1,8 @@
-import { Icon } from './Icon'
+import { Icon, type IconName } from './Icon'
 import type { TabId } from '../types'
 
-const navigationItems: ReadonlyArray<{ id: TabId; label: string; icon: 'home' | TabId }> = [
+const navigationItems: ReadonlyArray<{ id: TabId; label: string; icon: IconName }> = [
   { id: 'education', label: '교육', icon: 'education' },
-  { id: 'experiment', label: '실험', icon: 'experiment' },
   { id: 'booths', label: '홈', icon: 'home' },
   { id: 'shop', label: '쇼핑', icon: 'shop' },
   { id: 'my', label: 'MY', icon: 'my' },

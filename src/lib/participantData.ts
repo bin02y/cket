@@ -3,26 +3,11 @@ import type { CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, R
 import type { Json, Tables } from './database.types'
 import { profileFromAuthUser, supabase } from './supabase'
 
-type ProfileRow = Tables<'profiles'>
-type TransactionRow = Tables<'point_transactions'>
-type RewardOrderRow = Tables<'reward_orders'>
+type ProfileRow = Pick<Tables<'profiles'>, 'id' | 'display_name' | 'email'>
+type TransactionRow = Pick<Tables<'point_transactions'>, 'amount' | 'metadata'>
+type RewardOrderRow = Pick<Tables<'reward_orders'>, 'id' | 'reward_id' | 'points_spent' | 'cash_paid' | 'status' | 'recipient_name' | 'postal_code' | 'shipping_address' | 'shipping_address_detail' | 'payment_method' | 'created_at'>
 
-const rewardIds = new Set<RewardId>([
-  'cycle-parts-keyring',
-  'thermo-sticker',
-  'eco-tumbler',
-  'recycled-plastic-pen',
-  'mini-eco-pouch',
-  'cooling-keycap',
-  'eco-power-bank',
-  'mini-fan',
-])
-const joinedAtFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' })
 const transactionTimeFormatter = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })
-
-function isRewardId(value: string | null): value is RewardId {
-  return value !== null && rewardIds.has(value as RewardId)
-}
 
 function isJsonObject(value: Json): value is { [key: string]: Json | undefined } {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -37,27 +22,17 @@ function toParticipantProfile(row: ProfileRow, fallback: ParticipantProfile): Pa
     id: row.id,
     name: row.display_name || fallback.name,
     email: row.email || fallback.email,
-    joinedAt: joinedAtFormatter.format(new Date(row.created_at)),
   }
 }
 
 function toPointTransaction(row: TransactionRow): PointTransaction {
-  const rewardId = isRewardId(row.reward_id) ? row.reward_id : undefined
   const roadViewGateCode = isJsonObject(row.metadata) && isRoadViewGateCode(row.metadata.roadview_gate_code)
     ? row.metadata.roadview_gate_code
     : undefined
-  const category = row.source === 'reward' ? 'reward' : 'academy'
 
   return {
-    id: row.id,
-    type: row.kind === 'spend' ? 'spend' : 'earn',
     amount: row.amount,
-    title: row.title,
-    description: row.description,
-    category,
-    rewardId,
     roadViewGateCode,
-    createdAt: transactionTimeFormatter.format(new Date(row.created_at)),
   }
 }
 
@@ -86,7 +61,6 @@ function toRewardOrder(row: RewardOrderRow): RewardOrder {
     cashPaid: row.cash_paid,
     status: knownStatus,
     recipientName: row.recipient_name ?? '',
-    recipientPhone: row.recipient_phone ?? '',
     postalCode: row.postal_code ?? '',
     address: row.shipping_address ?? '',
     addressDetail: row.shipping_address_detail ?? '',
@@ -100,9 +74,9 @@ export async function loadParticipantData(user: User) {
 
   const fallbackProfile = profileFromAuthUser(user)
   const [profileResult, transactionResult, orderResult] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-    supabase.from('reward_orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('profiles').select('id, display_name, email').eq('id', user.id).single(),
+    supabase.from('point_transactions').select('amount, metadata').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('reward_orders').select('id, reward_id, points_spent, cash_paid, status, recipient_name, postal_code, shipping_address, shipping_address_detail, payment_method, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
   ])
 
   if (profileResult.error) throw profileResult.error

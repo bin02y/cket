@@ -1,4 +1,4 @@
-export type TabId = 'education' | 'experiment' | 'booths' | 'shop' | 'my'
+export type TabId = 'education' | 'booths' | 'shop' | 'my'
 
 export type RoadViewGateCode = 'L01' | 'E01' | 'R01' | 'B01' | 'B02' | 'B03' | 'B04'
 
@@ -11,7 +11,6 @@ export type ParticipantProfile = {
   id: string
   name: string
   email: string
-  joinedAt: string
 }
 
 export type AuthCredentials = {
@@ -44,11 +43,7 @@ export type RewardProduct = {
   image: string
   imageAlt: string
   cashPrice: number
-  points: number | null
-  category: 'tech' | 'lifestyle' | 'limited'
-  icon: 'leaf' | 'recycle' | 'train' | 'cup' | 'snowflake' | 'thermometer' | 'sparkle' | 'wind'
   theme: 'mint' | 'sky' | 'navy' | 'aqua'
-  pickupNote: string
 }
 
 export type RewardRedemptionResult =
@@ -64,7 +59,6 @@ export type RewardOrder = {
   cashPaid: number
   status: 'paid' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
   recipientName: string
-  recipientPhone: string
   postalCode: string
   address: string
   addressDetail: string
@@ -84,13 +78,6 @@ export type CheckoutDetails = {
 }
 
 export type PointTransaction = {
-  id: string
-  type: 'earn' | 'spend'
   amount: number
-  title: string
-  description: string
-  category: 'academy' | 'popup' | 'reward'
-  rewardId?: RewardId
   roadViewGateCode?: RoadViewGateCode
-  createdAt: string
 }

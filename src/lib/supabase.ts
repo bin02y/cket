@@ -23,7 +23,6 @@ export function profileFromAuthUser(user: User): ParticipantProfile {
     id: user.id,
     name: typeof user.user_metadata.display_name === 'string' ? user.user_metadata.display_name : fallbackName,
     email: user.email ?? '',
-    joinedAt: new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(new Date(user.created_at)),
   }
 }
 
