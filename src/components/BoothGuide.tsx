@@ -141,8 +141,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
             </button>
           </section>
 
-          <section className="carrier-story" aria-labelledby="carrier-story-title">
-            <h2 id="carrier-story-title" className="carrier-story__title">윌리스 캐리어</h2>
+          <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
             <div className="carrier-story__grid">
               <article className="carrier-card carrier-card--profile">
                 <figure className="carrier-card__portrait">
@@ -150,16 +149,12 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                   <figcaption>Willis Haviland Carrier · 1876—1950</figcaption>
                 </figure>
                 <div className="carrier-card__body">
-                  <span className="carrier-card__number" aria-hidden="true">01</span>
                   <p>윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한 미국의 기계공학자이자 발명가입니다.</p>
-                  <strong className="carrier-card__chapter">주요 발명 배경과 원리</strong>
                 </div>
               </article>
 
               <article className="carrier-card">
                 <div className="carrier-card__body">
-                  <span className="carrier-card__number" aria-hidden="true">02</span>
-                  <small>1902 · BROOKLYN</small>
                   <h3>인쇄소의 습기 문제 해결</h3>
                   <p>버펄로 포지 컴퍼니(Buffalo Forge Company) 입사 후, 여름철 고온다습한 날씨로 인해 종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 의뢰받았습니다.</p>
                 </div>
@@ -167,8 +162,6 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
               <article className="carrier-card">
                 <div className="carrier-card__body">
-                  <span className="carrier-card__number" aria-hidden="true">03</span>
-                  <small>4 CORE ELEMENTS</small>
                   <h3>공기조화의 4대 요소 정립</h3>
                   <p>차가운 물 코일을 통해 공기 중 수분을 응결시켜 제습하는 역발상을 고안하여 온도 조절, 습도 조절, 공기 순환/환기, 공기 정화 기능을 갖춘 최초의 에어컨 시스템을 설계했습니다.</p>
                 </div>
@@ -176,8 +169,6 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
               <article className="carrier-card">
                 <div className="carrier-card__body">
-                  <span className="carrier-card__number" aria-hidden="true">04</span>
-                  <small>1906—1911 · STANDARD</small>
                   <h3>특허와 이론 정립</h3>
                   <p>1906년 ‘공기 취급 장치’ 특허를 취득하고, 1911년 온습도와 이슬점 상관관계를 체계화한 논문(캐리어 차트의 기초)을 발표해 공기조화학의 표준을 세웠습니다.</p>
                 </div>
