@@ -4,6 +4,9 @@ import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.
 import aerodynamicRoofMaterialsImage from '../assets/academy/aerodynamic-roof-materials.png'
 import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-principle.png'
 import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.png'
+import carrierFourElementsImage from '../assets/carrier-four-elements.jpg'
+import carrierPatentImage from '../assets/carrier-patent.jpg'
+import carrierPrintingShopImage from '../assets/carrier-printing-shop.png'
 import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
 import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
@@ -141,6 +144,37 @@ const academyKits = [
   },
 ] as const
 
+const carrierCards = [
+  {
+    title: '윌리스 캐리어',
+    description: '윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한 미국의 기계공학자이자 발명가입니다.',
+    image: willisCarrierImage,
+    imageAlt: '윌리스 캐리어 흑백 인물 사진',
+    variant: 'portrait',
+  },
+  {
+    title: '인쇄소의 습기 문제 해결',
+    description: '버펄로 포지 컴퍼니 입사 후, 여름철 고온다습한 날씨로 종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 해결했습니다.',
+    image: carrierPrintingShopImage,
+    imageAlt: '초기 캐리어 공기조화 설비가 설치된 인쇄 공장',
+    variant: 'factory',
+  },
+  {
+    title: '공기조화의 4대 요소 정립',
+    description: '차가운 물 코일로 공기 중 수분을 응결시키는 원리를 이용해 온도, 습도, 청정도, 기류속도를 함께 제어하는 공기조화의 기준을 세웠습니다.',
+    image: carrierFourElementsImage,
+    imageAlt: '온도, 습도, 청정도, 기류속도로 구성된 공기조화의 4대 요소 도표',
+    variant: 'diagram',
+  },
+  {
+    title: '특허와 이론 정립',
+    description: '1906년 공기 취급 장치 특허를 취득하고, 1911년 온습도와 이슬점의 관계를 체계화한 논문을 발표해 공기조화학의 표준을 세웠습니다.',
+    image: carrierPatentImage,
+    imageAlt: '윌리스 캐리어의 1906년 공기 취급 장치 특허 도면',
+    variant: 'patent',
+  },
+] as const
+
 export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
@@ -238,35 +272,17 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
           <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
             <div className="carrier-story__grid">
-              <article className="carrier-card carrier-card--profile" tabIndex={0}>
-                <figure className="carrier-card__portrait">
-                  <img src={willisCarrierImage} alt="윌리스 캐리어 흑백 인물 사진" decoding="async" />
-                </figure>
-                <div className="carrier-card__body">
-                  <p>윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한 미국의 기계공학자이자 발명가입니다.</p>
-                </div>
-              </article>
-
-              <article className="carrier-card">
-                <div className="carrier-card__body">
-                  <h3>인쇄소의 습기 문제 해결</h3>
-                  <p>버펄로 포지 컴퍼니(Buffalo Forge Company) 입사 후, 여름철 고온다습한 날씨로 인해 종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 의뢰받았습니다.</p>
-                </div>
-              </article>
-
-              <article className="carrier-card">
-                <div className="carrier-card__body">
-                  <h3>공기조화의 4대 요소 정립</h3>
-                  <p>차가운 물 코일을 통해 공기 중 수분을 응결시켜 제습하는 역발상을 고안하여 온도 조절, 습도 조절, 공기 순환/환기, 공기 정화 기능을 갖춘 최초의 에어컨 시스템을 설계했습니다.</p>
-                </div>
-              </article>
-
-              <article className="carrier-card">
-                <div className="carrier-card__body">
-                  <h3>특허와 이론 정립</h3>
-                  <p>1906년 ‘공기 취급 장치’ 특허를 취득하고, 1911년 온습도와 이슬점 상관관계를 체계화한 논문(캐리어 차트의 기초)을 발표해 공기조화학의 표준을 세웠습니다.</p>
-                </div>
-              </article>
+              {carrierCards.map((card) => (
+                <article className={`carrier-card carrier-card--visual carrier-card--${card.variant}`} tabIndex={0} key={card.title}>
+                  <figure className="carrier-card__image">
+                    <img src={card.image} alt={card.imageAlt} decoding="async" />
+                  </figure>
+                  <div className="carrier-card__overlay">
+                    <h3>{card.title}</h3>
+                    <p>{card.description}</p>
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
 
