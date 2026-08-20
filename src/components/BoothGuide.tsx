@@ -4,6 +4,10 @@ import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
 import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
 import kitProcessImage from '../assets/academy/kit-process-4way.png'
+import vibrationFinalImage from '../assets/academy/vibration-final.png'
+import vibrationMaterialsImage from '../assets/academy/vibration-materials.png'
+import vibrationPrincipleImage from '../assets/academy/vibration-principle.png'
+import vibrationProcessImage from '../assets/academy/vibration-process.png'
 import willisCarrierImage from '../assets/willis-carrier.jpg'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
@@ -54,7 +58,50 @@ const academyContents: readonly AcademyContent[] = [
     image: kitPrincipleImage,
     imageAlt: '냉각 운전과 가열 운전에서 4-way 밸브와 냉매 흐름이 바뀌는 작동원리',
   },
+  {
+    label: '완성품',
+    title: '방진 마운트 최종 완성본',
+    description: '일반 고정 지지대와 스프링·고무 방진 마운트를 나란히 배치한 진동 비교 키트의 완성 모습을 살펴보세요.',
+    image: vibrationFinalImage,
+    imageAlt: '일반 고정 지지대와 스프링 및 고무 방진 마운트 위에 물컵을 올린 진동 비교 교육용 키트 완성본',
+  },
+  {
+    label: '구성재료',
+    title: '방진 마운트 키트 구성재료',
+    description: '아크릴 베이스판, 진동모터, 압축 스프링, 고무 방진패드 등 제작에 필요한 12가지 재료를 확인해 보세요.',
+    image: vibrationMaterialsImage,
+    imageAlt: '방진 마운트 교육용 키트 제작에 필요한 12가지 구성재료와 예상 비용',
+  },
+  {
+    label: '제작과정',
+    title: '방진 마운트 키트 제작과정',
+    description: '베이스판과 지지대 설치부터 전원 배선, 물을 이용한 진동 비교 실험까지 8단계 제작 순서를 확인해 보세요.',
+    image: vibrationProcessImage,
+    imageAlt: '방진 마운트 교육용 키트를 완성하는 8단계 제작 과정',
+  },
+  {
+    label: '동작원리',
+    title: '진동 흡수 동작원리',
+    description: '스프링이 진동 전달을 줄이고 고무가 진동 에너지를 흡수해 물결을 작게 만드는 원리를 비교해 보세요.',
+    image: vibrationPrincipleImage,
+    imageAlt: '일반 고정과 스프링 및 고무 방진 마운트의 진동 전달 차이를 설명하는 동작원리',
+  },
 ]
+
+const academyKits = [
+  {
+    eyebrow: 'HVAC FLOW LAB',
+    title: '냉·난방 4-way 밸브 교육용 키트',
+    description: '냉매의 흐름이 바뀌는 과정을 4개의 자료로 살펴보세요.',
+    contents: academyContents.slice(0, 4),
+  },
+  {
+    eyebrow: 'VIBRATION LAB',
+    title: '방진 마운트 교육용 키트',
+    description: '스프링과 고무가 진동을 줄이는 원리를 직접 비교해 보세요.',
+    contents: academyContents.slice(4, 8),
+  },
+] as const
 
 export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
@@ -112,23 +159,33 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   return (
     <main id="main-content" className="page booth-page">
       {section === 'education' ? (
-        <div id="experience-panel-education" className="kit-education" role="region" aria-labelledby="kit-education-title">
-          <section className="kit-education__board">
-            <header className="kit-education__header">
-              <div>
-                <h1 id="kit-education-title">냉·난방 4-way 밸브 교육용 키트</h1>
-              </div>
-            </header>
-            <div className="kit-education__grid">
-              {academyContents.map((content, index) => (
-                <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(index)} key={content.label}>
-                  <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
-                  <span className="kit-education-card__copy"><strong>{content.label}</strong></span>
-                  <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
-                </button>
-              ))}
-            </div>
-          </section>
+        <div id="experience-panel-education" className="kit-education" role="region" aria-label="교육용 키트 라이브러리">
+          <div className="kit-education__libraries">
+            {academyKits.map((kit, kitIndex) => (
+              <section className={`kit-education__board kit-education__board--${kitIndex + 1}`} aria-labelledby={`kit-education-title-${kitIndex}`} key={kit.title}>
+                <header className="kit-education__header">
+                  <div>
+                    <span>{kit.eyebrow}</span>
+                    <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
+                  </div>
+                  <p>{kit.description}</p>
+                </header>
+                <div className="kit-education__grid">
+                  {kit.contents.map((content, contentIndex) => {
+                    const globalIndex = kitIndex * 4 + contentIndex
+                    return (
+                      <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(globalIndex)} key={`${kit.title}-${content.label}`}>
+                        <span className="kit-education-card__index">0{contentIndex + 1}</span>
+                        <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
+                        <span className="kit-education-card__copy"><small>{kit.eyebrow}</small><strong>{content.label}</strong></span>
+                        <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       ) : (
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">

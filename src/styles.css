@@ -1242,15 +1242,18 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .experience-section-panel { min-height: 300px; }
 .experience-section-panel > .booth-hall { margin-top: 18px; }
 
-/* Education tab · 4-way valve kit library */
+/* Education tab · kit library */
 .kit-education { min-height: 520px; }
-.kit-education__board { width: min(820px,100%); margin: 0 auto; overflow: hidden; background: #fff; border: 3px solid #17384c; border-radius: 0; box-shadow: 0 18px 48px rgba(20,82,117,.1); }
-.kit-education__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; padding: 28px 34px 24px; border-bottom: 3px solid #17384c; }
+.kit-education__libraries { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 20px; }
+.kit-education__board { width: 100%; min-width: 0; margin: 0; overflow: hidden; background: #fff; border: 3px solid #17384c; border-radius: 0; box-shadow: 0 18px 48px rgba(20,82,117,.1); }
+.kit-education__board--2 { border-color: #0d4d83; }
+.kit-education__header { display: block; min-height: 143px; padding: 25px 27px 22px; border-bottom: 3px solid #17384c; }
+.kit-education__board--2 .kit-education__header { border-bottom-color: #0d4d83; }
 .kit-education__header > div { min-width: 0; }
 .kit-education__header span { display: block; margin-bottom: 7px; color: var(--blue-600); font-size: 8px; font-weight: 900; letter-spacing: .18em; }
 .kit-education__header h1 { margin: 0; color: var(--blue-950); font-size: clamp(24px,2.7vw,32px); line-height: 1.2; letter-spacing: -.04em; word-break: keep-all; }
-.kit-education__header p { max-width: 330px; margin: 0 0 4px; color: var(--muted); font-size: 11px; line-height: 1.65; text-align: right; word-break: keep-all; }
-.kit-education__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 38px 42px; padding: 46px 52px 50px; }
+.kit-education__header p { max-width: 410px; margin: 11px 0 0; color: var(--muted); font-size: 10px; line-height: 1.65; text-align: left; word-break: keep-all; }
+.kit-education__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 17px; padding: 23px; }
 .kit-education-card { position: relative; display: flex; min-width: 0; flex-direction: column; overflow: hidden; padding: 0; color: inherit; text-align: left; background: #fff; border: 2px solid #17384c; border-radius: 0; box-shadow: 0 8px 20px rgba(21,80,113,.06); font: inherit; cursor: pointer; transition: transform 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }
 .kit-education-card:hover { border-color: var(--blue-600); box-shadow: 0 14px 28px rgba(16,104,148,.14); transform: translateY(-4px); }
 .kit-education-card:focus-visible { outline: 4px solid rgba(8,121,219,.28); outline-offset: 3px; }
@@ -1261,7 +1264,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .kit-education-card__copy { display: block; padding: 17px 48px 18px 18px; }
 .kit-education-card__copy small,.kit-education-card__copy strong { display: block; }
 .kit-education-card__copy small { color: var(--green-700); font-size: 7px; font-weight: 900; letter-spacing: .14em; }
-.kit-education-card__copy strong { margin-top: 0; color: var(--blue-950); font-size: 17px; letter-spacing: -.035em; }
+.kit-education-card__copy strong { margin-top: 3px; color: var(--blue-950); font-size: 16px; letter-spacing: -.035em; }
 .kit-education-card__arrow { position: absolute; right: 16px; bottom: 14px; display: grid; place-items: center; width: 29px; height: 29px; color: var(--blue-600); background: #e9f5fa; border-radius: 50%; }
 .kit-education-card__arrow svg { width: 14px; height: 14px; }
 .academy-dialog--kit { width: min(1180px,100%); }
@@ -1278,7 +1281,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .academy-dialog__done svg { width: 13px; height: 13px; }
 
 @media (max-width: 860px) {
-  .kit-education__header { align-items: flex-start; flex-direction: column; gap: 12px; padding: 25px 27px 22px; }
+  .kit-education__libraries { grid-template-columns: 1fr; gap: 22px; }
+  .kit-education__board { width: min(820px,100%); margin: 0 auto; }
+  .kit-education__header { min-height: 0; padding: 25px 27px 22px; }
   .kit-education__header p { max-width: none; text-align: left; }
   .kit-education__grid { gap: 24px; padding: 30px 32px 34px; }
 }
