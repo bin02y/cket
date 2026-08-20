@@ -143,10 +143,9 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
           <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
             <div className="carrier-story__grid">
-              <article className="carrier-card carrier-card--profile">
+              <article className="carrier-card carrier-card--profile" tabIndex={0}>
                 <figure className="carrier-card__portrait">
                   <img src={willisCarrierImage} alt="윌리스 캐리어 흑백 인물 사진" decoding="async" />
-                  <figcaption>Willis Haviland Carrier · 1876—1950</figcaption>
                 </figure>
                 <div className="carrier-card__body">
                   <p>윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한 미국의 기계공학자이자 발명가입니다.</p>
