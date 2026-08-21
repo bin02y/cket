@@ -252,6 +252,13 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         </div>
       ) : (
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
+          <section className="home-video" aria-label="초고속 냉동공조 영상">
+            <video controls playsInline preload="metadata">
+              <source src="/videos/high-speed-refrigeration-hvac.mp4" type="video/mp4" />
+              브라우저에서 영상을 재생할 수 없습니다.
+            </video>
+          </section>
+
           <section className="roadview-entry" aria-labelledby="roadview-entry-title">
             <div className="roadview-entry__copy">
               <h1 id="roadview-entry-title">3D 전시관 로드뷰</h1>
