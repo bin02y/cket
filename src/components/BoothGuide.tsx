@@ -6,7 +6,7 @@ import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-pr
 import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.png'
 import carrierFourElementsImage from '../assets/carrier-four-elements.jpg'
 import carrierPatentImage from '../assets/carrier-patent.jpg'
-import carrierPrintingShopImage from '../assets/carrier-printing-shop.png'
+import carrierPrintingShopImage from '../assets/carrier-printing-shop-hd.png'
 import kitFinalImage from '../assets/academy/kit-final-4way.png'
 import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
 import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
@@ -15,7 +15,7 @@ import vibrationFinalImage from '../assets/academy/vibration-final.png'
 import vibrationMaterialsImage from '../assets/academy/vibration-materials.png'
 import vibrationPrincipleImage from '../assets/academy/vibration-principle.png'
 import vibrationProcessImage from '../assets/academy/vibration-process.png'
-import willisCarrierImage from '../assets/willis-carrier.jpg'
+import willisCarrierImage from '../assets/willis-carrier-hd.png'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
 
@@ -290,7 +290,8 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                     key={card.title}
                   >
                     <figure className="carrier-card__image">
-                      <img src={card.image} alt={card.imageAlt} decoding="async" />
+                      <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" decoding="async" />
+                      <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} decoding="async" />
                     </figure>
                     <div className="carrier-card__overlay">
                       <h3>{card.title}</h3>
@@ -315,7 +316,6 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
               >
                 <Icon name="arrow" />
               </button>
-              <span className="carrier-carousel__status" aria-live="polite">{carrierStep + 1} / {carrierCards.length}</span>
             </div>
           </section>
 
