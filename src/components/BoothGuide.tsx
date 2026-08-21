@@ -272,7 +272,22 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <div className="home-feature-grid">
             <section className="home-video" aria-label="초고속 냉동공조 영상">
-              <video ref={homeVideoRef} autoPlay loop playsInline preload="metadata" onClick={(event) => void event.currentTarget.play()}>
+              <video
+                ref={homeVideoRef}
+                autoPlay
+                loop
+                playsInline
+                preload="metadata"
+                title="클릭하여 영상 재생 또는 일시정지"
+                onClick={(event) => {
+                  const video = event.currentTarget
+                  if (video.paused) {
+                    void video.play().catch(() => undefined)
+                  } else {
+                    video.pause()
+                  }
+                }}
+              >
                 <source src="/videos/high-speed-refrigeration-hvac-720p.mp4" type="video/mp4" />
                 브라우저에서 영상을 재생할 수 없습니다.
               </video>
