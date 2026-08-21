@@ -175,6 +175,18 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
+  const currentAcademyKitIndex = academyStep !== null ? Math.floor(academyStep / 4) : null
+  const currentAcademyKit = currentAcademyKitIndex !== null ? academyKits[currentAcademyKitIndex] : null
+  const currentAcademySlide = academyStep !== null ? academyStep % 4 : 0
+
+  const moveAcademySlide = useCallback((direction: -1 | 1) => {
+    setAcademyStep((current) => {
+      if (current === null) return null
+      const kitStart = Math.floor(current / 4) * 4
+      const nextSlide = (current - kitStart + direction + 4) % 4
+      return kitStart + nextSlide
+    })
+  }, [])
 
   const openRoadView = useCallback(() => {
     if (roadViewOpen) return
@@ -199,6 +211,12 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setAcademyStep(null)
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        moveAcademySlide(-1)
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        moveAcademySlide(1)
       }
     }
 
@@ -209,7 +227,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [academyStep])
+  }, [academyStep, moveAcademySlide])
 
   useEffect(() => {
     if (!roadViewOpen) return
@@ -230,22 +248,13 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
           <div className="kit-education__libraries">
             {academyKits.map((kit, kitIndex) => (
               <section className={`kit-education__board kit-education__board--${kitIndex + 1}`} aria-labelledby={`kit-education-title-${kitIndex}`} key={kit.title}>
-                <header className="kit-education__header">
-                  <div>
-                    <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
-                  </div>
-                </header>
-                <div className="kit-education__grid">
-                  {kit.contents.map((content, contentIndex) => {
-                    const globalIndex = kitIndex * 4 + contentIndex
-                    return (
-                      <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(globalIndex)} key={`${kit.title}-${content.label}`}>
-                        <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
-                        <span className="kit-education-card__copy"><strong>{content.label}</strong></span>
-                        <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
-                      </button>
-                    )
-                  })}
+                <img className="kit-education__cover" src={kit.contents[0].image} alt="" decoding="async" />
+                <div className="kit-education__card-copy">
+                  <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
+                  <button type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(kitIndex * 4)}>
+                    <span>자세히 보기</span>
+                    <Icon name="arrow" />
+                  </button>
                 </div>
               </section>
             ))}
@@ -322,18 +331,44 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         </div>
       )}
 
-      {academyStep !== null && currentAcademyContent ? (
+      {academyStep !== null && currentAcademyContent && currentAcademyKit && currentAcademyKitIndex !== null ? createPortal(
         <div className="academy-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setAcademyStep(null)}>
-          <button
-            className="academy-image-viewer"
-            type="button"
-            aria-label={`${currentAcademyContent.label} 이미지 닫기`}
-            onClick={() => setAcademyStep(null)}
-            autoFocus
-          >
-            <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
-          </button>
-        </div>
+          <section className="academy-image-viewer" role="dialog" aria-modal="true" aria-labelledby="academy-viewer-title">
+            <header>
+              <div>
+                <small>{currentAcademyKit.title}</small>
+                <h2 id="academy-viewer-title">{currentAcademyContent.label} · {currentAcademyContent.title}</h2>
+              </div>
+              <button type="button" aria-label="상세 이미지 닫기" onClick={() => setAcademyStep(null)} autoFocus>×</button>
+            </header>
+            <div className="academy-image-viewer__stage">
+              <button className="academy-image-viewer__nav academy-image-viewer__nav--previous" type="button" aria-label="이전 이미지" onClick={() => moveAcademySlide(-1)}>
+                <Icon name="arrow" />
+              </button>
+              <figure>
+                <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
+              </figure>
+              <button className="academy-image-viewer__nav academy-image-viewer__nav--next" type="button" aria-label="다음 이미지" onClick={() => moveAcademySlide(1)}>
+                <Icon name="arrow" />
+              </button>
+            </div>
+            <footer>
+              <div className="academy-image-viewer__dots" aria-label="상세 이미지 선택">
+                {currentAcademyKit.contents.map((content, contentIndex) => (
+                  <button
+                    type="button"
+                    aria-label={`${content.label} 이미지 보기`}
+                    aria-current={contentIndex === currentAcademySlide ? 'true' : undefined}
+                    onClick={() => setAcademyStep(currentAcademyKitIndex * 4 + contentIndex)}
+                    key={content.label}
+                  />
+                ))}
+              </div>
+              <strong>{currentAcademySlide + 1} / 4</strong>
+            </footer>
+          </section>
+        </div>,
+        document.body,
       ) : null}
 
       {roadViewOpen ? createPortal(
