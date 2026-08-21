@@ -1,5 +1,30 @@
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('./assets/fonts/Paperlogy-3Light.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('./assets/fonts/Paperlogy-5Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('./assets/fonts/Paperlogy-7Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
-  font-family: 'Pretendard', 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Paperlogy', system-ui, sans-serif;
+  font-weight: 500;
   color: #12243a;
   background: #f6fbff;
   font-synthesis: none;
@@ -39,9 +64,12 @@ body {
     linear-gradient(180deg, #fafdff 0%, #f6fbff 70%, #eef9f4 100%);
 }
 
-button, a { font: inherit; }
+button, a, input, textarea, select { font: inherit; }
 button { color: inherit; }
 button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.35); outline-offset: 3px; }
+p { font-weight: 300; }
+small { font-weight: 300 !important; }
+h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .page p, .auth-page p { line-height: 1.72; word-break: keep-all; word-spacing: .04em; }
 
 .skip-link {
@@ -75,7 +103,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 .page { width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); min-height: calc(100dvh - 110px - env(safe-area-inset-bottom)); margin: 0 auto; padding-top: clamp(24px,2vw,34px); }
 .tab-loading { display: grid; place-items: center; color: var(--muted); font-size: 14px; font-weight: 800; }
-.eyebrow { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; color: var(--blue-800); background: rgba(255,255,255,.75); border: 1px solid rgba(120, 193, 229, .38); border-radius: 999px; font-family: 'Segoe UI', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.eyebrow { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; color: var(--blue-800); background: rgba(255,255,255,.75); border: 1px solid rgba(120, 193, 229, .38); border-radius: 999px; font-size: 10px; font-weight: 500; letter-spacing: .1em; }
 
 .primary-button, .secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 50px; padding: 0 22px; border: 0; border-radius: 15px; font-weight: 700; cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease; }
 .primary-button { color: white; background: linear-gradient(135deg, var(--blue-600), var(--blue-500)); box-shadow: 0 12px 24px rgba(8, 121, 219, .25); }
@@ -221,7 +249,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .cket-ticket { position: relative; min-width: 0; overflow: hidden; background: #e4e7e9; border: 2px solid #c9cfd3; border-radius: 18px; box-shadow: 0 9px 22px rgba(54,72,83,.1); transition: background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }
 .cket-ticket.is-visited { background: var(--ticket-color); border-color: color-mix(in srgb,var(--ticket-color),#263d45 24%); box-shadow: 0 9px 22px color-mix(in srgb,var(--ticket-color),transparent 70%); }
 .cket-ticket__header { display: flex; align-items: center; justify-content: space-between; height: 35px; padding: 0 16px; color: #152a3a; }
-.cket-ticket__header strong { font-family: 'Segoe UI',sans-serif; font-size: 14px; font-weight: 900; letter-spacing: -.03em; }
+.cket-ticket__header strong { font-size: 14px; font-weight: 700; letter-spacing: -.03em; }
 .cket-ticket__header small { font-size: 8px; font-weight: 900; letter-spacing: .14em; }
 .cket-ticket__body { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 108px; min-height: 126px; margin: 0 6px 6px; background: #f2eee8; }
 .cket-ticket p,.cket-ticket p small,.cket-ticket p strong,.cket-ticket p em { display: block; min-width: 0; }

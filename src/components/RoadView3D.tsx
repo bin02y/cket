@@ -153,9 +153,9 @@ function makeLabelTexture(title: string, subtitle: string, accent: string, foote
   gradient.addColorStop(0, 'rgba(3,18,34,.96)'); gradient.addColorStop(1, 'rgba(10,37,55,.9)')
   context.fillStyle = gradient; context.beginPath(); context.roundRect(16, 16, 992, 328, 54); context.fill()
   context.strokeStyle = accent; context.lineWidth = 10; context.stroke()
-  context.fillStyle = accent; context.font = '800 52px system-ui, sans-serif'; context.textAlign = 'center'; context.fillText(subtitle, 512, 122)
-  context.fillStyle = '#fff'; context.font = '900 74px system-ui, sans-serif'; context.fillText(title, 512, 225, 870)
-  context.fillStyle = 'rgba(255,255,255,.58)'; context.font = '700 30px system-ui, sans-serif'; context.fillText(footer, 512, 292)
+  context.fillStyle = accent; context.font = '500 52px Paperlogy, sans-serif'; context.textAlign = 'center'; context.fillText(subtitle, 512, 122)
+  context.fillStyle = '#fff'; context.font = '700 74px Paperlogy, sans-serif'; context.fillText(title, 512, 225, 870)
+  context.fillStyle = 'rgba(255,255,255,.58)'; context.font = '300 30px Paperlogy, sans-serif'; context.fillText(footer, 512, 292)
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
   return texture
@@ -238,13 +238,14 @@ function createGate(zone: RoadViewBooth) {
   const glowMaterial = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.72, metalness: 0.35, roughness: 0.25 })
   const glassMaterial = new THREE.MeshPhysicalMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.45, roughness: 0.08, metalness: 0.15, side: THREE.DoubleSide })
   for (const x of [-1.35, 1.35]) {
-    addRoundedBox(group, [0.46, 1.45, 0.62], [x, 0.72, 0], darkMaterial, 0.16)
-    addRoundedBox(group, [0.33, 0.12, 0.46], [x, 1.37, 0], glowMaterial, 0.06)
+    addRoundedBox(group, [0.62, 0.1, 0.76], [x, 0.05, 0], darkMaterial, 0.03)
+    addRoundedBox(group, [0.46, 1.42, 0.62], [x, 0.81, 0], darkMaterial, 0.14)
+    addRoundedBox(group, [0.33, 0.12, 0.46], [x, 1.48, 0], glowMaterial, 0.06)
     const scanner = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), new THREE.MeshBasicMaterial({ color: '#dffff8' }))
-    scanner.rotation.x = -Math.PI / 2; scanner.position.set(x, 1.45, 0); group.add(scanner)
+    scanner.rotation.x = -Math.PI / 2; scanner.position.set(x, 1.55, 0); group.add(scanner)
   }
   const leftWing = new THREE.Mesh(new RoundedBoxGeometry(0.82, 0.72, 0.05, 3, 0.06), glassMaterial)
-  leftWing.position.set(-0.66, 0.8, 0)
+  leftWing.position.set(-0.66, 0.87, 0)
   const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
   return group
@@ -261,9 +262,9 @@ function createTrainDoor(zone: RoadViewBooth) {
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
-  const leftDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [-0.7, 1.66, -0.28], doorMaterial, 0.05)
-  const rightDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [0.7, 1.66, -0.28], doorMaterial, 0.05)
-  for (const [x, door] of [[-0.7, leftDoor], [0.7, rightDoor]] as const) {
+  const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71, -0.28], doorMaterial, 0.02)
+  const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71, -0.28], doorMaterial, 0.02)
+  for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
     door.userData.openX = Math.sign(x) * 1.38
@@ -474,7 +475,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainHeight * 0.34); context.fill(); context.stroke()
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
-  context.fillStyle = '#335469'; context.font = `900 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
+  context.fillStyle = '#335469'; context.font = `300 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
     const x = worldToMap(zone.x - zoneDimensions.width / 2); const y = worldToMap(zone.z - zoneDimensions.depth / 2)
@@ -482,8 +483,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.fillStyle = zone.trainCar ? '#ffffff' : zone.color; context.globalAlpha = zone.trainCar ? 0.95 : 0.72
     context.beginPath(); context.roundRect(x, y, width, height, Math.max(5, size * 0.014)); context.fill(); context.globalAlpha = 1
     context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.stroke()
-    context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `900 ${Math.max(7, size * 0.019)}px system-ui, sans-serif`; context.fillText(zone.gateCode, x + width / 2, y + height * 0.44)
-    context.font = `800 ${Math.max(5, size * 0.014)}px system-ui, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
+    context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `700 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zone.gateCode, x + width / 2, y + height * 0.44)
+    context.font = `500 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
     if ('id' in zone) {
       context.fillStyle = '#143e57'
       if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
