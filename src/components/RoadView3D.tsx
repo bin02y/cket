@@ -42,6 +42,8 @@ const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const TRAIN_BODY_BASE_Y = 0.28
 const TRAIN_ROOF_TOP_Y = 4.45
 const TRAIN_WINDOW_CENTER_Y = 2.55
+const TRAIN_SEAT_LOCAL_XS = [-1.38, 1.05] as const
+const TRAIN_SEAT_LOCAL_ZS = [-2.9, -1.45, 1.45, 2.9] as const
 const FACILITY_DOOR_WIDTH = 2.08
 const FACILITY_DOOR_HEIGHT = 3.05
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -73,6 +75,15 @@ const FACILITIES: readonly StationFacility[] = [
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const TRAIN_NOSE_COLLIDER: Collider = { x1: -20.72, x2: -14, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 }
+const TRAIN_SEAT_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => booth.trainCar).flatMap((booth) =>
+  TRAIN_SEAT_LOCAL_ZS.flatMap((localZ) =>
+    TRAIN_SEAT_LOCAL_XS.map((localX) => {
+      const worldX = booth.x - localZ
+      const worldZ = booth.z + localX
+      return { x1: worldX - 0.46, x2: worldX + 0.46, z1: worldZ - 0.66, z2: worldZ + 0.66 }
+    }),
+  ),
+)
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
   3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
@@ -134,7 +145,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     { x1: zone.x - halfWidth, x2: zone.x - 1.42, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
     { x1: zone.x + 1.42, x2: zone.x + halfWidth, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
   ]
-}), TRAIN_NOSE_COLLIDER]
+}), TRAIN_NOSE_COLLIDER, ...TRAIN_SEAT_COLLIDERS]
 
 function isWalkable(x: number, z: number) {
   const radius = 0.32
@@ -314,6 +325,7 @@ function createTrainDoor(zone: RoadViewBooth) {
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
+  addRoundedBox(group, [2.96, 0.82, 0.42], [0, 3.59, -0.33], frame, 0.04)
   const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
   const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
   for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
@@ -345,7 +357,6 @@ function createIntegratedTrainShell() {
   const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#29485a', transparent: true, opacity: 0.9, metalness: 0.3, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.05 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
   const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
-  const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
   const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
   const trainLength = 28.2
   const halfLength = trainLength / 2
@@ -375,7 +386,6 @@ function createIntegratedTrainShell() {
   for (const [start, end] of frontSections) {
     addShellPart([end - start, wallHeight, 0.24], [(start + end) / 2, wallCenterY, halfDepth])
   }
-  for (const center of doorCenters) addShellPart([openingWidth, 0.82, 0.24], [center, 3.78, halfDepth])
 
   const geometry = mergeGeometries(geometries, false)
   geometries.forEach((part) => part.dispose())
@@ -409,10 +419,10 @@ function createIntegratedTrainShell() {
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.14; group.add(blueNose)
   const windshieldShape = new THREE.Shape()
-  windshieldShape.moveTo(-18.25, 2.58)
-  windshieldShape.quadraticCurveTo(-17.55, 3.2, -15.96, 3.64)
-  windshieldShape.lineTo(-16.08, 3.18)
-  windshieldShape.quadraticCurveTo(-17.3, 2.88, -18.05, 2.42)
+  windshieldShape.moveTo(-18.2, 2.3)
+  windshieldShape.quadraticCurveTo(-17.5, 3.05, -15.98, 3.84)
+  windshieldShape.lineTo(-16.1, 3.5)
+  windshieldShape.quadraticCurveTo(-17.35, 2.86, -18.02, 2.24)
   windshieldShape.closePath()
   const windshield = new THREE.Mesh(new THREE.ShapeGeometry(windshieldShape), cockpitGlass)
   windshield.position.z = halfDepth + 0.16; group.add(windshield)
@@ -421,20 +431,13 @@ function createIntegratedTrainShell() {
     headlight.scale.set(0.48, 0.72, 1); headlight.position.set(-20.12, 1.03, z); group.add(headlight)
   }
 
-  for (const x of [-6.65, -3.15, 3.15, 6.65, 12.05]) {
+  for (const x of [-12.56, -6.15, -3.25, 3.25, 6.15, 12.56]) {
     for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, TRAIN_WINDOW_CENTER_Y, z], windowMaterial, 0.12)
-  }
-  for (const x of [-4.7, 4.7]) {
-    for (const z of [-halfDepth - 0.18, halfDepth + 0.18]) addRoundedBox(group, [0.18, 3.86, 0.09], [x, 2.15, z], undercarriage, 0.02)
   }
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
   ktxMark.position.set(-16.45, 2.5, halfDepth + 0.2); group.add(ktxMark)
 
-  for (const x of [-4.7, 4.7]) {
-    for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
-  }
   for (const x of [-10.8, -1.2, 8.4]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
-  for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, TRAIN_BODY_BASE_Y + 0.15, 0], undercarriage, 0.08)
   return group
 }
 
@@ -443,10 +446,9 @@ function createTrainCarBooth(zone: RoadViewBooth) {
   group.rotation.y = -Math.PI / 2
   const seatMaterial = new THREE.MeshStandardMaterial({ color: '#244f70', metalness: 0.15, roughness: 0.55 })
   const seatTrim = new THREE.MeshStandardMaterial({ color: '#c8d5dc', metalness: 0.62, roughness: 0.24 })
-  for (const z of [-2.9, -1.45, 1.45, 2.9]) {
+  for (const z of TRAIN_SEAT_LOCAL_ZS) {
     const backDirection = z < 0 ? -1 : 1
-    addTrainSeat(group, -1.38, z, backDirection, seatMaterial, seatTrim)
-    addTrainSeat(group, 1.05, z, backDirection, seatMaterial, seatTrim)
+    for (const x of TRAIN_SEAT_LOCAL_XS) addTrainSeat(group, x, z, backDirection, seatMaterial, seatTrim)
   }
   return group
 }
