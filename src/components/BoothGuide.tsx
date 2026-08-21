@@ -142,28 +142,28 @@ const academyKits = [
 const carrierCards = [
   {
     title: '윌리스 캐리어',
-    description: '윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한 미국의 기계공학자이자 발명가입니다.',
+    description: <>윌리스 캐리어(Willis Haviland Carrier, 1876~1950)는 현대식 공기조화 시스템(에어컨)을 발명하고 상용화한<br />미국의 기계공학자이자 발명가입니다.</>,
     image: willisCarrierImage,
     imageAlt: '윌리스 캐리어 흑백 인물 사진',
     variant: 'portrait',
   },
   {
     title: '인쇄소의 습기 문제 해결',
-    description: '버펄로 포지 컴퍼니 입사 후, 여름철 고온다습한 날씨로 종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 해결했습니다.',
+    description: <>버펄로 포지 컴퍼니 입사 후, 여름철 고온다습한 날씨로<br />종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 해결했습니다.</>,
     image: carrierPrintingShopImage,
     imageAlt: '초기 캐리어 공기조화 설비가 설치된 인쇄 공장',
     variant: 'factory',
   },
   {
     title: '공기조화의 4대 요소 정립',
-    description: '차가운 물 코일로 공기 중 수분을 응결시키는 원리를 이용해 온도, 습도, 청정도, 기류속도를 함께 제어하는 공기조화의 기준을 세웠습니다.',
+    description: <>차가운 물 코일로 공기 중 수분을 응결시키는 원리를 이용해 온도, 습도, 청정도, 기류속도를 함께 제어하는<br />공기조화의 기준을 세웠습니다.</>,
     image: carrierFourElementsImage,
     imageAlt: '온도, 습도, 청정도, 기류속도로 구성된 공기조화의 4대 요소 도표',
     variant: 'diagram',
   },
   {
     title: '특허와 이론 정립',
-    description: '1906년 공기 취급 장치 특허를 취득하고, 1911년 온습도와 이슬점의 관계를 체계화한 논문을 발표해 공기조화학의 표준을 세웠습니다.',
+    description: <>1906년 공기 취급 장치 특허를 취득하고,<br />1911년 온습도와 이슬점의 관계를 체계화한 논문을 발표해 공기조화학의 표준을 세웠습니다.</>,
     image: carrierPatentImage,
     imageAlt: '윌리스 캐리어의 1906년 공기 취급 장치 특허 도면',
     variant: 'patent',
