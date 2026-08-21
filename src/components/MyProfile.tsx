@@ -67,7 +67,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
                 <span className="cket-ticket__cutout cket-ticket__cutout--top" aria-hidden="true">
                   <svg viewBox="0 0 25 15" preserveAspectRatio="none">
                     <path className="cket-ticket__cutout-fill" d="M0 0H25C18 0 14 3.5 13.5 11.5V15H11.5V11.5C11 3.5 7 0 0 0Z" />
-                    <path className="cket-ticket__cutout-line" d="M25 0C18 0 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 0 0 0" />
+                    <path className="cket-ticket__cutout-line" d="M25 1C18 1 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 1 0 1" />
                   </svg>
                 </span>
                 <header className="cket-ticket__header">
@@ -84,7 +84,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
                 <span className="cket-ticket__cutout cket-ticket__cutout--bottom" aria-hidden="true">
                   <svg viewBox="0 0 25 15" preserveAspectRatio="none">
                     <path className="cket-ticket__cutout-fill" d="M0 0H25C18 0 14 3.5 13.5 11.5V15H11.5V11.5C11 3.5 7 0 0 0Z" />
-                    <path className="cket-ticket__cutout-line" d="M25 0C18 0 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 0 0 0" />
+                    <path className="cket-ticket__cutout-line" d="M25 1C18 1 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 1 0 1" />
                   </svg>
                 </span>
               </article>
