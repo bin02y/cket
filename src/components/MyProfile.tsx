@@ -30,14 +30,14 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
   cash: '현금',
 }
 
-const roadViewTickets: readonly { code: RoadViewGateCode; location: string; title: string; color: string }[] = [
-  { code: 'E01', location: '전시 열차 2호차', title: '초고속 냉동사이클', color: '#e69a35' },
-  { code: 'L01', location: '전시 열차 1호차', title: '교육용 키트', color: '#73b62f' },
-  { code: 'R01', location: '전시 열차 3호차', title: '굿즈샵', color: '#e45575' },
-  { code: 'B01', location: '부스 1 · 1번 승강장', title: '빙하 위 펭귄 구조', color: '#45aee8' },
-  { code: 'B02', location: '부스 2 · 2번 승강장', title: '무더운 여름', color: '#35b981' },
-  { code: 'B03', location: '부스 3 · 3번 승강장', title: '동물들을 구하라', color: '#ae7cff' },
-  { code: 'B04', location: '부스 4 · 4번 승강장', title: '나비효과', color: '#82e76d' },
+const roadViewTickets: readonly { code: RoadViewGateCode; title: string; color: string }[] = [
+  { code: 'E01', title: '초고속 냉동사이클', color: '#e69a35' },
+  { code: 'L01', title: '교육용 키트', color: '#73b62f' },
+  { code: 'R01', title: '굿즈샵', color: '#e45575' },
+  { code: 'B01', title: '빙하 위 펭귄 구조', color: '#45aee8' },
+  { code: 'B02', title: '무더운 여름', color: '#35b981' },
+  { code: 'B03', title: '동물들을 구하라', color: '#ae7cff' },
+  { code: 'B04', title: '나비효과', color: '#82e76d' },
 ]
 
 export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLogout, onDeleteAccount }: MyProfileProps) {
@@ -66,10 +66,10 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
               <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={{ '--ticket-color': ticket.color } as CSSProperties}>
                 <header className="cket-ticket__header">
                   <strong>TRAIN TICKET</strong>
-                  <small>{ticket.code}</small>
+                  <small>{visited ? 'VISITED · 500 P' : '방문 전'}</small>
                 </header>
                 <div className="cket-ticket__body">
-                  <p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p>
+                  <p><strong>{ticket.title}</strong></p>
                   <span className="cket-ticket__stub" aria-hidden="true"><i /></span>
                 </div>
               </article>

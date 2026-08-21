@@ -85,6 +85,12 @@ function boothImageForVisit(booth: RoadViewBooth) {
   return BOOTH_IMAGES[booth.id] ?? null
 }
 
+function zoneDisplayLabel(zone: RoadViewBooth | StationFacility) {
+  if (zone.gateCode === 'F01') return 'RESTROOM'
+  if (zone.gateCode === 'F02') return 'INFORMATION'
+  return zone.label
+}
+
 function keepVideoWithinPreview(video: HTMLVideoElement) {
   if (video.currentTime < REFRIGERATION_VIDEO_LIMIT_SECONDS) return
   video.pause()
@@ -388,10 +394,10 @@ function createFacility(facility: StationFacility) {
   const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
   const { interiorBackZ } = addIntegratedBoothShell(group, shell)
   addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], wall, 0.04)
-  const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
+  const englishTitle = zoneDisplayLabel(facility)
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, facility.gateCode === 'F01' ? '' : 'CKET STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, ''), transparent: true, side: THREE.DoubleSide }),
   )
   if (facility.gateCode === 'F01') {
     addIntegratedDoorFacade(group, wall)
@@ -473,7 +479,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const trainX = worldToMap(-14.1); const trainY = worldToMap(-18.15)
   const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-11.85) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
-  context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, trainHeight * 0.34); context.fill(); context.stroke()
+  context.fillRect(trainX, trainY, trainWidth, trainHeight); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
   context.fillStyle = '#335469'; context.font = `300 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
   for (const zone of ZONES) {
@@ -481,9 +487,9 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     const x = worldToMap(zone.x - zoneDimensions.width / 2); const y = worldToMap(zone.z - zoneDimensions.depth / 2)
     const width = worldToMap(zone.x + zoneDimensions.width / 2) - x; const height = worldToMap(zone.z + zoneDimensions.depth / 2) - y
     context.fillStyle = zone.trainCar ? '#ffffff' : zone.color; context.globalAlpha = zone.trainCar ? 0.95 : 0.72
-    context.beginPath(); context.roundRect(x, y, width, height, Math.max(5, size * 0.014)); context.fill(); context.globalAlpha = 1
-    context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.stroke()
-    context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `700 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zone.gateCode, x + width / 2, y + height * 0.44)
+    context.fillRect(x, y, width, height); context.globalAlpha = 1
+    context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.strokeRect(x, y, width, height)
+    context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `700 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zoneDisplayLabel(zone), x + width / 2, y + height * 0.44, width * 0.9)
     context.font = `500 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
     if ('id' in zone) {
       context.fillStyle = '#143e57'
@@ -492,8 +498,10 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     }
   }
   const x = worldToMap(player.x); const y = worldToMap(player.z)
-  context.fillStyle = '#fff'; context.shadowColor = '#17c9ff'; context.shadowBlur = 10; context.beginPath(); context.arc(x, y, Math.max(4, size * 0.012), 0, Math.PI * 2); context.fill()
-  context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(x, y); context.lineTo(x - Math.sin(player.yaw) * size * 0.035, y - Math.cos(player.yaw) * size * 0.035); context.stroke(); context.shadowBlur = 0
+  const arrowSize = Math.max(5, size * 0.016)
+  context.save(); context.translate(x, y); context.rotate(-player.yaw)
+  context.fillStyle = '#ffffff'; context.strokeStyle = '#0879db'; context.lineWidth = Math.max(1.5, size * 0.005); context.shadowColor = '#17c9ff'; context.shadowBlur = 10
+  context.beginPath(); context.moveTo(0, -arrowSize * 1.45); context.lineTo(arrowSize * 0.78, arrowSize * 0.72); context.lineTo(arrowSize * 0.25, arrowSize * 0.46); context.lineTo(arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 0.46); context.lineTo(-arrowSize * 0.78, arrowSize * 0.72); context.closePath(); context.fill(); context.stroke(); context.restore()
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
@@ -673,14 +681,11 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>AUTO GATE</strong><small>개찰구 통과 시 자동 안내</small></span></div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
-        <button type="button" className="roadview__map-close" onClick={() => setMapOpen(false)} aria-label="지도 닫기">×</button>
         <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />
       </section></div> : null}
-      {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
-        <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
+      {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-label={`${selectedBooth.title} 방문 미디어와 포인트 획득 결과`} style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
+        {selectedBooth.gateCode === 'E01' ? <figure className="roadview__booth-image roadview__booth-video"><video src={ultraFastRefrigerationVideo} aria-label="초고속 냉동공조 소개 영상" autoPlay muted playsInline controls preload="metadata" onPlay={(event) => { if (event.currentTarget.currentTime >= REFRIGERATION_VIDEO_LIMIT_SECONDS) event.currentTarget.currentTime = 0 }} onTimeUpdate={(event) => keepVideoWithinPreview(event.currentTarget)} onSeeking={(event) => keepVideoWithinPreview(event.currentTarget)} /></figure> : selectedBoothImage ? <figure className="roadview__booth-image"><img src={selectedBoothImage.src} alt={selectedBoothImage.alt} /></figure> : null}
         {gateRewardNotice?.gateCode === selectedBooth.gateCode ? <div className={`roadview__gate-reward roadview__gate-reward--${gateRewardNotice.status}`} role="status"><Icon name={gateRewardNotice.status === 'error' ? 'warning' : 'wallet'} /><span><small>{selectedBooth.gateCode} VISIT REWARD</small><strong>{gateRewardNotice.status === 'pending' ? '500 P 적립 중…' : gateRewardNotice.status === 'completed' ? `+${gateRewardNotice.points.toLocaleString('ko-KR')} P 적립 완료` : gateRewardNotice.status === 'already_completed' ? '이미 500 P를 받은 구역이에요' : '포인트 적립을 확인하지 못했어요'}</strong></span></div> : null}
-        {selectedBooth.gateCode === 'E01' ? <figure className="roadview__booth-image roadview__booth-video"><video src={ultraFastRefrigerationVideo} aria-label="초고속 냉동공조 소개 영상" autoPlay muted playsInline controls preload="metadata" onPlay={(event) => { if (event.currentTarget.currentTime >= REFRIGERATION_VIDEO_LIMIT_SECONDS) event.currentTarget.currentTime = 0 }} onTimeUpdate={(event) => keepVideoWithinPreview(event.currentTarget)} onSeeking={(event) => keepVideoWithinPreview(event.currentTarget)} /></figure> : selectedBoothImage ? <figure className="roadview__booth-image"><img src={selectedBoothImage.src} alt={selectedBoothImage.alt} /></figure> : <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div>}<p>{selectedBooth.description}</p>
-        <button type="button" className="roadview__panel-action" onClick={() => setSelectedBooth(null)}>메타버스 역사로 돌아가기</button>
       </section></div> : null}
     </section>
   )
