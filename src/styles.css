@@ -59,10 +59,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 .skip-link:focus { transform: translateY(0); }
 
-.app-shell { min-height: 100vh; padding-top: 132px; background: #fff; }
+.app-shell { min-height: 100vh; padding-top: calc(132px + clamp(40px,8.333vw,120px)); background: #fff; }
 
 .app-header { position: fixed; z-index: 19; top: 0; left: 0; width: 100%; background: #fff; border-bottom: 1px solid #e6e8e5; box-shadow: 0 5px 18px rgba(20,65,92,.05); }
-.app-header__inner { display: grid; grid-template-rows: 72px 59px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: 131px; margin: 0 auto; }
+.app-header__inner { display: grid; grid-template-rows: 72px 59px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: calc(131px + clamp(40px,8.333vw,120px)); margin: 0 auto; padding-block: clamp(20px,4.1665vw,60px); }
 .app-header__brand-row { display: flex; align-items: center; }
 .app-header__logo { display: flex; align-items: center; justify-content: center; width: 190px; height: 55px; overflow: hidden; padding: 0; background: #fff; border: 0; cursor: pointer; }
 .app-header__logo img { display: block; flex: 0 0 auto; width: 245px; max-width: none; height: auto; filter: contrast(1.04) brightness(1.01); }
@@ -168,8 +168,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 }
 
 @media (max-width: 680px) {
-  .app-shell { padding-top: 111px; }
-  .app-header__inner { grid-template-rows: 60px 50px; width: min(100% - 28px,1440px); height: 110px; }
+  .app-shell { padding-top: 139px; }
+  .app-header__inner { grid-template-rows: 60px 50px; width: min(100% - 28px,1440px); height: 138px; padding-block: 14px; }
   .app-header__logo { width: 156px; height: 46px; }
   .app-header__logo img { width: 202px; }
   .top-navigation { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; }
