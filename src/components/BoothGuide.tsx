@@ -252,21 +252,31 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         </div>
       ) : (
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
-          <section className="home-video" aria-label="초고속 냉동공조 영상">
-            <video controls playsInline preload="metadata">
-              <source src="/videos/high-speed-refrigeration-hvac.mp4" type="video/mp4" />
-              브라우저에서 영상을 재생할 수 없습니다.
-            </video>
-          </section>
+          <div className="home-feature-grid">
+            <section className="home-video" aria-label="초고속 냉동공조 영상">
+              <video controls playsInline preload="metadata">
+                <source src="/videos/high-speed-refrigeration-hvac.mp4" type="video/mp4" />
+                브라우저에서 영상을 재생할 수 없습니다.
+              </video>
+            </section>
 
-          <section className="roadview-entry" aria-labelledby="roadview-entry-title">
-            <div className="roadview-entry__copy">
-              <h1 id="roadview-entry-title">3D 전시관 로드뷰</h1>
-            </div>
-            <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 열기" onClick={openRoadView}>
-              <span><Icon name="arrow" /></span>
-            </button>
-          </section>
+            <section className="roadview-entry" aria-labelledby="roadview-entry-title">
+              <div className="roadview-entry__copy">
+                <small>CKET EXHIBITION</small>
+                <h1 id="roadview-entry-title">3D 전시관<br />로드뷰</h1>
+              </div>
+              <div className="roadview-entry__map" aria-hidden="true">
+                <span className="roadview-entry__route" />
+                <span className="roadview-entry__station roadview-entry__station--1" />
+                <span className="roadview-entry__station roadview-entry__station--2" />
+                <span className="roadview-entry__station roadview-entry__station--3" />
+                <span className="roadview-entry__train"><i /><i /><i /></span>
+              </div>
+              <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 열기" onClick={openRoadView}>
+                <span><em>입장하러 가기</em><Icon name="arrow" /></span>
+              </button>
+            </section>
+          </div>
 
           <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
             <div className="carrier-story__grid">
