@@ -64,14 +64,29 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
             const visited = visitedRoadViewGates.has(ticket.code)
             return (
               <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={{ '--ticket-color': ticket.color } as CSSProperties}>
+                <span className="cket-ticket__cutout cket-ticket__cutout--top" aria-hidden="true">
+                  <svg viewBox="0 0 25 15" preserveAspectRatio="none">
+                    <path className="cket-ticket__cutout-fill" d="M0 0H25C18 0 14 3.5 13.5 11.5V15H11.5V11.5C11 3.5 7 0 0 0Z" />
+                    <path className="cket-ticket__cutout-line" d="M25 0C18 0 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 0 0 0" />
+                  </svg>
+                </span>
                 <header className="cket-ticket__header">
                   <strong>TRAIN TICKET</strong>
-                  <small>{visited ? 'VISITED · 500 P' : '방문 전'}</small>
+                  <small>{visited ? 'VISITED' : '방문 전'}</small>
                 </header>
                 <div className="cket-ticket__body">
                   <p><strong>{ticket.title}</strong></p>
-                  <span className="cket-ticket__stub" aria-hidden="true"><i /></span>
+                  <span className="cket-ticket__stub" aria-hidden="true">
+                    {visited ? <b className="cket-ticket__points">500P</b> : null}
+                    <i />
+                  </span>
                 </div>
+                <span className="cket-ticket__cutout cket-ticket__cutout--bottom" aria-hidden="true">
+                  <svg viewBox="0 0 25 15" preserveAspectRatio="none">
+                    <path className="cket-ticket__cutout-fill" d="M0 0H25C18 0 14 3.5 13.5 11.5V15H11.5V11.5C11 3.5 7 0 0 0Z" />
+                    <path className="cket-ticket__cutout-line" d="M25 0C18 0 14 3.5 13.5 11.5V15M11.5 15V11.5C11 3.5 7 0 0 0" />
+                  </svg>
+                </span>
               </article>
             )
           })}
