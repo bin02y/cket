@@ -187,6 +187,33 @@ function makeTrainMarkTexture(primary: string, secondary = '') {
   return texture
 }
 
+function makeTrainBoothSignTexture(title: string, subtitle: string, accent: string) {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1024; canvas.height = 360
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+
+  context.save(); context.beginPath(); context.roundRect(16, 16, 992, 328, 42); context.clip()
+  context.fillStyle = '#f8fafc'; context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#174d98'; context.fillRect(0, 0, canvas.width, 62)
+  context.fillStyle = '#edf2f7'; context.fillRect(0, 276, canvas.width, 84)
+  context.fillStyle = '#174d98'
+  context.beginPath(); context.moveTo(0, 276); context.lineTo(180, 276); context.lineTo(250, 360); context.lineTo(0, 360); context.closePath(); context.fill()
+  context.fillStyle = accent; context.fillRect(790, 286, 170, 15)
+
+  context.fillStyle = accent; context.font = '700 48px Paperlogy, sans-serif'; context.textAlign = 'center'
+  context.fillText(subtitle, 512, 135)
+  context.fillStyle = '#173655'; context.font = '800 78px Paperlogy, sans-serif'
+  context.fillText(title, 512, 235, 860)
+
+  context.restore()
+  context.beginPath(); context.roundRect(16, 16, 992, 328, 42)
+  context.strokeStyle = '#244f99'; context.lineWidth = 10; context.stroke()
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
 function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], position: [number, number, number], material: THREE.Material, radius = 0.12) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, radius), material)
   mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
@@ -293,12 +320,12 @@ function createTrainDoor(zone: RoadViewBooth) {
   for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
-    door.userData.openX = Math.sign(x) * 1.38
+    door.userData.openX = Math.sign(x) * 2.3
   }
   group.userData.slidingDoors = [leftDoor, rightDoor]
   const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.75, 0.97),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, ''), transparent: true, side: THREE.DoubleSide }),
+    new THREE.PlaneGeometry(3.05, 1.07),
+    new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
   sign.position.set(0, 4.15, 0); group.add(sign)
   return group
@@ -324,7 +351,7 @@ function createIntegratedTrainShell() {
   const trainLength = 28.2
   const halfLength = trainLength / 2
   const halfDepth = 2.8
-  const openingWidth = 2.6
+  const openingWidth = 4.2
   const wallHeight = 4.05
   const wallCenterY = 2.18
   const geometries: THREE.BoxGeometry[] = []
@@ -337,7 +364,6 @@ function createIntegratedTrainShell() {
   addShellPart([trainLength, 0.3, 5.8], [0, 0.16, 0])
   addShellPart([trainLength, 0.34, 5.8], [0, 4.28, 0])
   addShellPart([trainLength, wallHeight, 0.24], [0, wallCenterY, -halfDepth])
-  addShellPart([0.26, wallHeight, 5.6], [-halfLength, wallCenterY, 0])
   addShellPart([0.26, wallHeight, 5.6], [halfLength, wallCenterY, 0])
 
   const doorCenters = [-9.4, 0, 9.4]
@@ -364,9 +390,6 @@ function createIntegratedTrainShell() {
   for (const [start, end] of frontSections) {
     addRoundedBox(group, [end - start - 0.16, 1.02, 0.06], [(start + end) / 2, 2.52, halfDepth + 0.13], blue, 0.02)
   }
-  addRoundedBox(group, [27.9, 0.18, 0.08], [0, 4.2, -halfDepth - 0.14], blue, 0.025)
-  addRoundedBox(group, [27.9, 0.18, 0.08], [0, 4.2, halfDepth + 0.14], blue, 0.025)
-
   const noseShape = new THREE.Shape()
   noseShape.moveTo(-20.6, 0.28)
   noseShape.quadraticCurveTo(-20.45, 0.72, -19.55, 1.42)
@@ -380,9 +403,9 @@ function createIntegratedTrainShell() {
 
   const blueNoseShape = new THREE.Shape()
   blueNoseShape.moveTo(-19.35, 1.7)
-  blueNoseShape.quadraticCurveTo(-17.35, 3.62, -14.08, 4.02)
-  blueNoseShape.lineTo(-14.08, 3.13)
-  blueNoseShape.quadraticCurveTo(-17.22, 2.98, -18.82, 1.48)
+  blueNoseShape.quadraticCurveTo(-17.35, 3.14, -14.08, 3.03)
+  blueNoseShape.lineTo(-14.08, 2.01)
+  blueNoseShape.quadraticCurveTo(-17.15, 2.05, -18.82, 1.48)
   blueNoseShape.closePath()
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.1; group.add(blueNose)
@@ -403,10 +426,6 @@ function createIntegratedTrainShell() {
   }
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.75, 0.96), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
   ktxMark.position.set(-16.45, 1.72, halfDepth + 0.19); group.add(ktxMark)
-  for (const x of [-2.1, 11.35]) {
-    const carMark = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.52), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX'), transparent: true }))
-    carMark.position.set(x, 3.6, halfDepth + 0.19); group.add(carMark)
-  }
 
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
@@ -713,7 +732,9 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
           slidingDoors.forEach((door) => {
             const closedX = door.userData.closedX as number
             const openX = door.userData.openX as number
-            door.position.x = THREE.MathUtils.lerp(door.position.x, open ? openX : closedX, 0.1)
+            const targetX = open ? openX : closedX
+            door.position.x = THREE.MathUtils.lerp(door.position.x, targetX, 0.16)
+            if (Math.abs(door.position.x - targetX) < 0.01) door.position.x = targetX
           })
         }
         const hingedDoor = object.userData.hingedDoor as THREE.Group | undefined
