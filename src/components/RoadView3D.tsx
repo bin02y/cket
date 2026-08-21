@@ -3,10 +3,15 @@ import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.png'
+import kitFinalImage from '../assets/academy/kit-final-4way.png'
+import vibrationFinalImage from '../assets/academy/vibration-final.png'
 import boothOneImage from '../assets/roadview/booth-1.png'
 import boothTwoImage from '../assets/roadview/booth-2.png'
 import boothThreeImage from '../assets/roadview/booth-3.png'
 import boothFourImage from '../assets/roadview/booth-4.png'
+import ultraFastRefrigerationVideo from '../assets/roadview/ultra-fast-refrigeration-cycle.mp4'
+import { rewardProducts } from '../data/rewards'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
 
@@ -22,9 +27,13 @@ type Player = { x: number; z: number; yaw: number; pitch: number }
 type Movement = { forward: boolean; backward: boolean; left: boolean; right: boolean; turnLeft: boolean; turnRight: boolean; sprint: boolean }
 type Collider = { x1: number; x2: number; z1: number; z2: number }
 type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadViewGateRewardResult['status']; points: number }
+type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 8.4
 const BOOTH_DEPTH = 5.4
+const FACILITY_DOOR_WIDTH = 2.08
+const FACILITY_DOOR_HEIGHT = 3.05
+const REFRIGERATION_VIDEO_LIMIT_SECONDS = 13
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
 const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
   w: 'forward',
@@ -53,11 +62,33 @@ const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 19.1, z: 15, gate: { x: 16.4, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
-const BOOTH_IMAGES: Readonly<Partial<Record<number, { src: string; alt: string }>>> = {
+const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
   3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
   4: { src: boothThreeImage, alt: '기후 위기에서 동물을 구하는 3번 부스 안내 이미지' },
   6: { src: boothFourImage, alt: '생활 속 선택으로 지구를 지키는 4번 부스 안내 이미지' },
+}
+const EDUCATIONAL_KIT_IMAGES: readonly BoothImage[] = [
+  { src: kitFinalImage, alt: '빨간색과 파란색 냉매 배관, 압축기와 4-way 밸브가 조립된 교육용 키트 완성품' },
+  { src: vibrationFinalImage, alt: '일반 고정 지지대와 방진 마운트를 나란히 배치한 진동 비교 교육용 키트 완성품' },
+  { src: aerodynamicRoofFinalImage, alt: '고속 열차 지붕의 공기 저항을 비교하는 공기역학 교육용 키트 완성품' },
+]
+const GOODS_IMAGES: readonly BoothImage[] = rewardProducts.map((reward) => ({ src: reward.image, alt: reward.imageAlt }))
+
+function pickRandomImage(images: readonly BoothImage[]) {
+  return images[Math.floor(Math.random() * images.length)]
+}
+
+function boothImageForVisit(booth: RoadViewBooth) {
+  if (booth.gateCode === 'L01') return pickRandomImage(EDUCATIONAL_KIT_IMAGES)
+  if (booth.gateCode === 'R01') return pickRandomImage(GOODS_IMAGES)
+  return BOOTH_IMAGES[booth.id] ?? null
+}
+
+function keepVideoWithinPreview(video: HTMLVideoElement) {
+  if (video.currentTime < REFRIGERATION_VIDEO_LIMIT_SECONDS) return
+  video.pause()
+  if (video.currentTime > REFRIGERATION_VIDEO_LIMIT_SECONDS) video.currentTime = REFRIGERATION_VIDEO_LIMIT_SECONDS
 }
 
 function zoneSize(zone: RoadViewBooth | StationFacility) {
@@ -178,8 +209,8 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
 
 function addIntegratedDoorFacade(parent: THREE.Object3D, material: THREE.Material) {
   const facadeHeight = 4.86
-  const openingWidth = 2.08
-  const openingHeight = 3.05
+  const openingWidth = FACILITY_DOOR_WIDTH
+  const openingHeight = FACILITY_DOOR_HEIGHT
   const sideWidth = (BOOTH_WIDTH - openingWidth) / 2
   const depth = 0.24
   const frontZ = BOOTH_DEPTH / 2 - depth / 2
@@ -240,7 +271,7 @@ function createTrainDoor(zone: RoadViewBooth) {
   group.userData.slidingDoors = [leftDoor, rightDoor]
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(2.75, 0.97),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, 'AUTOMATIC SLIDING DOOR'), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, ''), transparent: true, side: THREE.DoubleSide }),
   )
   sign.position.set(0, 4.15, 0); group.add(sign)
   return group
@@ -253,30 +284,64 @@ function addTrainSeat(parent: THREE.Object3D, x: number, z: number, backDirectio
   for (const armX of [x - 0.58, x + 0.58]) addRoundedBox(parent, [0.12, 0.5, 0.7], [armX, 0.92, z], trimMaterial, 0.05)
 }
 
+function createIntegratedTrainShell() {
+  const group = new THREE.Group()
+  group.position.set(0, 0, -15)
+  const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
+  const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
+  const trainLength = 28.2
+  const halfLength = trainLength / 2
+  const halfDepth = 2.8
+  const openingWidth = 2.6
+  const wallHeight = 4.05
+  const wallCenterY = 2.18
+  const geometries: THREE.BoxGeometry[] = []
+  const addShellPart = (size: [number, number, number], position: [number, number, number]) => {
+    const geometry = new THREE.BoxGeometry(...size)
+    geometry.translate(...position)
+    geometries.push(geometry)
+  }
+
+  addShellPart([trainLength, 0.3, 5.8], [0, 0.16, 0])
+  addShellPart([trainLength, 0.34, 5.8], [0, 4.28, 0])
+  addShellPart([trainLength, wallHeight, 0.24], [0, wallCenterY, -halfDepth])
+  addShellPart([0.26, wallHeight, 5.6], [-halfLength, wallCenterY, 0])
+  addShellPart([0.26, wallHeight, 5.6], [halfLength, wallCenterY, 0])
+
+  const doorCenters = [-9.4, 0, 9.4]
+  const frontSections = [
+    [-halfLength, doorCenters[0] - openingWidth / 2],
+    [doorCenters[0] + openingWidth / 2, doorCenters[1] - openingWidth / 2],
+    [doorCenters[1] + openingWidth / 2, doorCenters[2] - openingWidth / 2],
+    [doorCenters[2] + openingWidth / 2, halfLength],
+  ] as const
+  for (const [start, end] of frontSections) {
+    addShellPart([end - start, wallHeight, 0.24], [(start + end) / 2, wallCenterY, halfDepth])
+  }
+  for (const center of doorCenters) addShellPart([openingWidth, 0.82, 0.24], [center, 3.78, halfDepth])
+
+  const geometry = mergeGeometries(geometries, false)
+  geometries.forEach((part) => part.dispose())
+  geometry.computeVertexNormals()
+  const shell = new THREE.Mesh(geometry, shellMaterial)
+  shell.castShadow = true
+  shell.receiveShadow = true
+  group.add(shell)
+
+  addRoundedBox(group, [27.9, 0.25, 0.06], [0, 0.95, -halfDepth - 0.13], blue, 0.02)
+  for (const [start, end] of frontSections) {
+    addRoundedBox(group, [end - start - 0.16, 0.25, 0.06], [(start + end) / 2, 0.95, halfDepth + 0.13], blue, 0.02)
+  }
+  return group
+}
+
 function createTrainCarBooth(zone: RoadViewBooth) {
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
   group.rotation.y = -Math.PI / 2
-  const white = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
-  const silver = new THREE.MeshStandardMaterial({ color: '#b8c7d0', metalness: 0.8, roughness: 0.2 })
-  const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#9dd8ee', transparent: true, opacity: 0.58, roughness: 0.08, metalness: 0.22, side: THREE.DoubleSide })
   const seatMaterial = new THREE.MeshStandardMaterial({ color: '#244f70', metalness: 0.15, roughness: 0.55 })
   const seatTrim = new THREE.MeshStandardMaterial({ color: '#c8d5dc', metalness: 0.62, roughness: 0.24 })
-  const halfWidth = 2.8; const halfDepth = 4.6
-
-  addRoundedBox(group, [5.8, 0.3, 9.4], [0, 0.16, 0], silver, 0.14)
-  addRoundedBox(group, [5.8, 0.34, 9.4], [0, 4.28, 0], white, 0.18)
-  addRoundedBox(group, [0.24, 4.05, 9.2], [-halfWidth, 2.18, 0], white, 0.1)
-  addRoundedBox(group, [5.6, 4.05, 0.26], [0, 2.18, -halfDepth], white, 0.1)
-  addRoundedBox(group, [5.6, 4.05, 0.26], [0, 2.18, halfDepth], white, 0.1)
-  const sideSectionDepth = (9.2 - 2.6) / 2
-  const sideOffset = (9.2 + 2.6) / 4
-  addRoundedBox(group, [0.24, 4.05, sideSectionDepth], [halfWidth, 2.18, -sideOffset], white, 0.1)
-  addRoundedBox(group, [0.24, 4.05, sideSectionDepth], [halfWidth, 2.18, sideOffset], white, 0.1)
-  addRoundedBox(group, [0.24, 0.82, 2.6], [halfWidth, 3.78, 0], white, 0.08)
-
-  addRoundedBox(group, [0.06, 0.25, 9], [-halfWidth - 0.13, 0.95, 0], blue, 0.02)
-  for (const z of [-3.05, 3.05]) addRoundedBox(group, [0.06, 0.25, 2.9], [halfWidth + 0.13, 0.95, z], blue, 0.02)
+  const halfWidth = 2.8
   for (const z of [-3.45, -2.25, 2.25, 3.45]) {
     addRoundedBox(group, [0.06, 1.0, 0.86], [-halfWidth - 0.13, 2.55, z], windowMaterial, 0.08)
     addRoundedBox(group, [0.06, 1.0, 0.86], [halfWidth + 0.13, 2.55, z], windowMaterial, 0.08)
@@ -325,14 +390,16 @@ function createFacility(facility: StationFacility) {
   const englishTitle = facility.gateCode === 'F01' ? 'RESTROOM' : 'INFORMATION'
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(4.15, 1.46),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, 'CKET STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, facility.gateCode === 'F01' ? '' : 'CKET STATION FACILITY'), transparent: true, side: THREE.DoubleSide }),
   )
   if (facility.gateCode === 'F01') {
     addIntegratedDoorFacade(group, wall)
     sign.position.set(0, 4.0, halfDepth + 0.18); sign.scale.setScalar(0.7); group.add(sign)
-    const doorPivot = new THREE.Group(); doorPivot.position.set(-0.92, 0, halfDepth - 0.08); group.add(doorPivot)
-    addRoundedBox(doorPivot, [1.82, 2.78, 0.12], [0.91, 1.52, 0], fixture, 0.06)
-    addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [1.56, 1.5, -0.1], dark, 0.03)
+    const doorWidth = FACILITY_DOOR_WIDTH + 0.04
+    const doorHeight = FACILITY_DOOR_HEIGHT + 0.04
+    const doorPivot = new THREE.Group(); doorPivot.position.set(-doorWidth / 2, -0.02, halfDepth - 0.08); group.add(doorPivot)
+    addRoundedBox(doorPivot, [doorWidth, doorHeight, 0.14], [doorWidth / 2, doorHeight / 2, 0], fixture, 0.01)
+    addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [doorWidth * 0.84, doorHeight / 2, -0.11], dark, 0.03)
     group.userData.hingedDoor = doorPivot
 
     addRoundedBox(group, [1.72, 1.5, 0.12], [-2.35, 2.2, interiorBackZ + 0.05], fixture, 0.05)
@@ -370,10 +437,10 @@ function buildMetaverseStation(scene: THREE.Scene) {
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
   const grid = new THREE.GridHelper(46, 46, '#7ea6b9', '#c1d0d8')
   grid.material.transparent = true; grid.material.opacity = 0.32; grid.position.y = 0.015; scene.add(grid)
-  const structure = new THREE.MeshStandardMaterial({ color: '#f4f7f8', metalness: 0.58, roughness: 0.24 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
   const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 47), glass)
   roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, 0); scene.add(roofPanel)
+  scene.add(createIntegratedTrainShell())
   for (const booth of BOOTHS) {
     scene.add(createBooth(booth))
     const entrance = booth.trainCar ? createTrainDoor(booth) : createGate(booth)
@@ -387,14 +454,6 @@ function buildMetaverseStation(scene: THREE.Scene) {
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
   addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
-  for (const x of [-4.7, 4.7]) addRoundedBox(scene, [1.7, 3.4, 5.1], [x, 2.15, -15], structure, 0.34)
-  const positions = new Float32Array(130 * 3)
-  for (let index = 0; index < 130; index += 1) {
-    positions[index * 3] = (Math.random() - 0.5) * 43; positions[index * 3 + 1] = 1.1 + Math.random() * 7; positions[index * 3 + 2] = (Math.random() - 0.5) * 45
-  }
-  const particleGeometry = new THREE.BufferGeometry(); particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: '#6d9aad', size: 0.028, transparent: true, opacity: 0.28, sizeAttenuation: true }))
-  scene.add(particles); animated.push(particles)
   return animated
 }
 
@@ -443,6 +502,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   const onGatePassedRef = useRef(onGatePassed); const gateRewardCacheRef = useRef(new Map<RoadViewGateCode, GateRewardNotice>())
   const [mapOpen, setMapOpen] = useState(false)
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
+  const [selectedBoothImage, setSelectedBoothImage] = useState<BoothImage | null>(null)
   const [gateRewardNotice, setGateRewardNotice] = useState<GateRewardNotice | null>(null)
   onGatePassedRef.current = onGatePassed
   overlayRef.current = { mapOpen, selectedBooth }
@@ -542,7 +602,6 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       const bob = walking && jump.height === 0 ? Math.sin(elapsed * (movement.sprint ? 13 : 8)) * (movement.sprint ? 0.035 : 0.018) : 0
       camera.position.set(player.x, 1.68 + jump.height + bob, player.z); camera.rotation.set(player.pitch, player.yaw, 0)
       for (const object of animated) {
-        if (object.type === 'Points') object.rotation.y = elapsed * 0.012
         const wings = object.userData.wings as THREE.Mesh[] | undefined
         if (wings) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.25
@@ -566,7 +625,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
         if (!passedBooth) lastGateRef.current = null
-        else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBooth(passedBooth); claimGateReward(passedBooth) }
+        else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBoothImage(boothImageForVisit(passedBooth)); setSelectedBooth(passedBooth); claimGateReward(passedBooth) }
       }
       if (overlayRef.current.mapOpen && mapRef.current) drawMap(mapRef.current, player)
       renderer.render(scene, camera); animationFrame = requestAnimationFrame(frame)
@@ -619,7 +678,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-labelledby="roadview-booth-title" style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
         <header><div><span>{selectedBooth.label}</span><h2 id="roadview-booth-title">{selectedBooth.title}</h2></div><button type="button" onClick={() => setSelectedBooth(null)} aria-label="부스 안내 닫기">×</button></header>
         {gateRewardNotice?.gateCode === selectedBooth.gateCode ? <div className={`roadview__gate-reward roadview__gate-reward--${gateRewardNotice.status}`} role="status"><Icon name={gateRewardNotice.status === 'error' ? 'warning' : 'wallet'} /><span><small>{selectedBooth.gateCode} VISIT REWARD</small><strong>{gateRewardNotice.status === 'pending' ? '500 P 적립 중…' : gateRewardNotice.status === 'completed' ? `+${gateRewardNotice.points.toLocaleString('ko-KR')} P 적립 완료` : gateRewardNotice.status === 'already_completed' ? '이미 500 P를 받은 구역이에요' : '포인트 적립을 확인하지 못했어요'}</strong></span></div> : null}
-        {BOOTH_IMAGES[selectedBooth.id] ? <figure className="roadview__booth-image"><img src={BOOTH_IMAGES[selectedBooth.id]?.src} alt={BOOTH_IMAGES[selectedBooth.id]?.alt} /></figure> : <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div>}<p>{selectedBooth.description}</p>
+        {selectedBooth.gateCode === 'E01' ? <figure className="roadview__booth-image roadview__booth-video"><video src={ultraFastRefrigerationVideo} aria-label="초고속 냉동공조 소개 영상" autoPlay muted playsInline controls preload="metadata" onPlay={(event) => { if (event.currentTarget.currentTime >= REFRIGERATION_VIDEO_LIMIT_SECONDS) event.currentTarget.currentTime = 0 }} onTimeUpdate={(event) => keepVideoWithinPreview(event.currentTarget)} onSeeking={(event) => keepVideoWithinPreview(event.currentTarget)} /></figure> : selectedBoothImage ? <figure className="roadview__booth-image"><img src={selectedBoothImage.src} alt={selectedBoothImage.alt} /></figure> : <div className="roadview__booth-symbol" aria-hidden="true"><span>{selectedBooth.gateCode}</span><small>SMART GATE PASSED</small></div>}<p>{selectedBooth.description}</p>
         <button type="button" className="roadview__panel-action" onClick={() => setSelectedBooth(null)}>메타버스 역사로 돌아가기</button>
       </section></div> : null}
     </section>

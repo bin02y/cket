@@ -301,6 +301,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .roadview__gate-reward--error { color: #9a4e37; background: #fff4ef; border-color: #f0c9ba; }
 .roadview__booth-image { overflow: hidden; margin: 20px 0 16px; background: #edf4f7; border: 1px solid color-mix(in srgb,var(--roadview-accent) 34%,transparent); border-radius: 18px; box-shadow: 0 14px 34px rgba(4,25,38,.14); }
 .roadview__booth-image img { display: block; width: 100%; max-height: 320px; object-fit: contain; }
+.roadview__booth-video video { display: block; width: 100%; max-height: 320px; background: #071d2b; object-fit: contain; }
 .roadview__booth-symbol { display: grid; place-items: center; width: 120px; height: 120px; margin: 26px auto 20px; color: var(--roadview-accent); background: color-mix(in srgb,var(--roadview-accent) 12%,transparent); border: 1px solid color-mix(in srgb,var(--roadview-accent) 40%,transparent); border-radius: 32px; box-shadow: 0 0 44px color-mix(in srgb,var(--roadview-accent) 15%,transparent); }
 .roadview__booth-symbol span,.roadview__booth-symbol small { display: block; text-align: center; }
 .roadview__booth-symbol span { font-size: 31px; font-weight: 950; letter-spacing: -.05em; }
