@@ -47,18 +47,18 @@ const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
 }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -20.28, z: -5, gate: { x: -17.58, z: -5, side: 'east' } },
-  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -20.1, gate: { x: -9.4, z: -17.3, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 20.28, z: -5, gate: { x: 17.58, z: -5, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -20.28, z: 5, gate: { x: -17.58, z: 5, side: 'east' } },
-  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -20.1, gate: { x: 0, z: -17.3, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 20.28, z: 5, gate: { x: 17.58, z: 5, side: 'west' } },
-  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -20.1, gate: { x: 9.4, z: -17.3, side: 'south' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 19.1, z: -5, gate: { x: 16.4, z: -5, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -19.1, z: 5, gate: { x: -16.4, z: 5, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 19.1, z: 5, gate: { x: 16.4, z: 5, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
-  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -20.28, z: 15, gate: { x: -17.58, z: 15, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 20.28, z: 15, gate: { x: 17.58, z: 15, side: 'west' } },
+  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -19.1, z: 15, gate: { x: -16.4, z: 15, side: 'east' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 19.1, z: 15, gate: { x: 16.4, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
@@ -126,9 +126,7 @@ const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
 
 function isWalkable(x: number, z: number) {
   const radius = 0.32
-  const horizontalLimit = 23 - radius - 0.05
-  const verticalLimit = 24 - radius - 0.05
-  if (x < -horizontalLimit || x > horizontalLimit || z < -verticalLimit || z > verticalLimit) return false
+  if (x < -21.8 || x > 21.8 || z < -21.8 || z > 21.8) return false
   return !COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)
 }
 
@@ -230,42 +228,24 @@ function addIntegratedDoorFacade(parent: THREE.Object3D, material: THREE.Materia
 
 function createGate(zone: RoadViewBooth) {
   const group = new THREE.Group()
-  const entranceOffset = 0.78
-  const displayX = zone.gate.x + (zone.gate.side === 'east' ? entranceOffset : zone.gate.side === 'west' ? -entranceOffset : 0)
-  const displayZ = zone.gate.z + (zone.gate.side === 'south' ? entranceOffset : zone.gate.side === 'north' ? -entranceOffset : 0)
-  group.position.set(displayX, 0, displayZ)
+  group.position.set(zone.gate.x, 0, zone.gate.z)
   if (zone.gate.side === 'north') group.rotation.y = Math.PI
   else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: '#dce4e8', metalness: 0.7, roughness: 0.22 })
-  const capMaterial = new THREE.MeshStandardMaterial({ color: '#f5f8f9', metalness: 0.42, roughness: 0.24 })
-  const screenMaterial = new THREE.MeshPhysicalMaterial({ color: '#8cbfd0', metalness: 0.2, roughness: 0.12, clearcoat: 0.9, clearcoatRoughness: 0.08 })
-  const arrowMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff', side: THREE.DoubleSide })
-  const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#f4fdff', transparent: true, opacity: 0.2, transmission: 0.72, roughness: 0.04, metalness: 0, thickness: 0.04, side: THREE.DoubleSide, depthWrite: false })
-  for (const x of [-1.3, 1.3]) {
-    addRoundedBox(group, [0.56, 0.12, 0.76], [x, 0.06, 0], frameMaterial, 0.035)
-    addRoundedBox(group, [0.46, 1.62, 0.64], [x, 0.87, 0], frameMaterial, 0.055)
-    const slopedTop = addRoundedBox(group, [0.46, 0.24, 0.76], [x, 1.72, -0.045], capMaterial, 0.045)
-    slopedTop.rotation.x = -0.24
-    addRoundedBox(group, [0.31, 0.4, 0.035], [x, 1.29, 0.337], screenMaterial, 0.025)
-    const arrowShape = new THREE.Shape()
-    arrowShape.moveTo(-0.1, 0.09); arrowShape.lineTo(0.01, 0.09); arrowShape.lineTo(0.01, 0.18); arrowShape.lineTo(0.15, 0); arrowShape.lineTo(0.01, -0.18); arrowShape.lineTo(0.01, -0.09); arrowShape.lineTo(-0.1, -0.09); arrowShape.closePath()
-    const arrow = new THREE.Mesh(new THREE.ShapeGeometry(arrowShape), arrowMaterial)
-    arrow.position.set(x, 1.29, 0.36); arrow.rotation.z = -0.45; group.add(arrow)
+  const accent = new THREE.Color(zone.color)
+  const darkMaterial = new THREE.MeshStandardMaterial({ color: '#d7e1e7', metalness: 0.72, roughness: 0.2 })
+  const glowMaterial = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.72, metalness: 0.35, roughness: 0.25 })
+  const glassMaterial = new THREE.MeshPhysicalMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.45, roughness: 0.08, metalness: 0.15, side: THREE.DoubleSide })
+  for (const x of [-1.35, 1.35]) {
+    addRoundedBox(group, [0.62, 0.1, 0.76], [x, 0.05, 0], darkMaterial, 0.03)
+    addRoundedBox(group, [0.46, 1.42, 0.62], [x, 0.81, 0], darkMaterial, 0.14)
+    addRoundedBox(group, [0.33, 0.12, 0.46], [x, 1.48, 0], glowMaterial, 0.06)
+    const scanner = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), new THREE.MeshBasicMaterial({ color: '#dffff8' }))
+    scanner.rotation.x = -Math.PI / 2; scanner.position.set(x, 1.55, 0); group.add(scanner)
   }
-  const makeWing = (direction: -1 | 1) => {
-    const shape = new THREE.Shape()
-    shape.moveTo(0, 0.16)
-    shape.lineTo(direction * 1.08, 0.24)
-    shape.lineTo(direction * 0.86, 1.16)
-    shape.lineTo(0, 1.36)
-    shape.closePath()
-    const wing = new THREE.Mesh(new THREE.ShapeGeometry(shape), glassMaterial)
-    wing.position.set(direction > 0 ? -1.07 : 1.07, 0.12, 0)
-    return wing
-  }
-  const leftWing = makeWing(1)
-  const rightWing = makeWing(-1)
+  const leftWing = new THREE.Mesh(new RoundedBoxGeometry(0.82, 0.72, 0.05, 3, 0.06), glassMaterial)
+  leftWing.position.set(-0.66, 0.87, 0)
+  const rightWing = leftWing.clone(); rightWing.position.x = 0.66
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
   return group
 }
@@ -277,7 +257,7 @@ function createTrainDoor(zone: RoadViewBooth) {
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   const frame = new THREE.MeshStandardMaterial({ color: '#e8eff2', metalness: 0.68, roughness: 0.22 })
   const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.38, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
-  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#eaf5f8', transparent: true, opacity: 0.24, transmission: 0.46, metalness: 0.05, roughness: 0.06, side: THREE.DoubleSide, depthWrite: false })
+  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#83c6df', transparent: true, opacity: 0.58, metalness: 0.2, roughness: 0.08, side: THREE.DoubleSide })
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
@@ -306,9 +286,14 @@ function addTrainSeat(parent: THREE.Object3D, x: number, z: number, backDirectio
 
 function createIntegratedTrainShell() {
   const group = new THREE.Group()
-  group.position.set(0, 0, -20.1)
+  group.position.set(0, 0, -15)
   const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
   const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
+  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#102d3d', transparent: true, opacity: 0.9, metalness: 0.38, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
+  const roofTrim = new THREE.MeshStandardMaterial({ color: '#cbd7dc', metalness: 0.68, roughness: 0.22 })
+  const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
+  const tireMaterial = new THREE.MeshStandardMaterial({ color: '#172329', metalness: 0.72, roughness: 0.36 })
+  const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
   const trainLength = 28.2
   const halfLength = trainLength / 2
   const halfDepth = 2.8
@@ -348,8 +333,53 @@ function createIntegratedTrainShell() {
   shell.receiveShadow = true
   group.add(shell)
 
+  addRoundedBox(group, [27.9, 0.25, 0.06], [0, 0.95, -halfDepth - 0.13], blue, 0.02)
   for (const [start, end] of frontSections) {
     addRoundedBox(group, [end - start - 0.16, 0.25, 0.06], [(start + end) / 2, 0.95, halfDepth + 0.13], blue, 0.02)
+  }
+
+  const noseProfile = [
+    new THREE.Vector2(0.01, 0),
+    new THREE.Vector2(0.72, 0.42),
+    new THREE.Vector2(1.55, 1.18),
+    new THREE.Vector2(2.25, 2.2),
+    new THREE.Vector2(2.62, 3.45),
+  ]
+  for (const direction of [-1, 1] as const) {
+    const nose = new THREE.Mesh(new THREE.LatheGeometry(noseProfile, 36), shellMaterial)
+    nose.position.set(direction * (halfLength + 3.45), 2.2, 0)
+    nose.rotation.z = direction > 0 ? Math.PI / 2 : -Math.PI / 2
+    nose.scale.set(0.82, 1, 1.05)
+    nose.castShadow = true; nose.receiveShadow = true; group.add(nose)
+
+    const windshield = addRoundedBox(group, [1.72, 0.08, 2.28], [direction * (halfLength + 1.72), 3.88, 0], cockpitGlass, 0.025)
+    windshield.rotation.z = direction > 0 ? -0.2 : 0.2
+    for (const z of [-0.62, 0.62]) {
+      const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 10), headlightMaterial)
+      headlight.scale.set(0.42, 0.78, 1)
+      headlight.position.set(direction * (halfLength + 3.16), 1.48, z)
+      group.add(headlight)
+    }
+  }
+
+  for (const x of [-4.7, 4.7]) {
+    for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
+  }
+  for (const x of doorCenters) addRoundedBox(group, [3.45, 0.22, 1.12], [x, 4.58, 0], roofTrim, 0.08)
+  const leftPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [-0.72, 4.98, 0], undercarriage, 0.025)
+  leftPantographArm.rotation.z = 0.58
+  const rightPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [0.72, 4.98, 0], undercarriage, 0.025)
+  rightPantographArm.rotation.z = -0.58
+  addRoundedBox(group, [1.22, 0.08, 0.1], [0, 5.5, 0], undercarriage, 0.025)
+
+  for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, 0.28, 0], undercarriage, 0.08)
+  for (const x of [-11, -7.8, -1.6, 1.6, 7.8, 11]) {
+    for (const z of [-halfDepth - 0.04, halfDepth + 0.04]) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.2, 22), tireMaterial)
+      wheel.rotation.x = Math.PI / 2
+      wheel.position.set(x, 0.34, z)
+      wheel.castShadow = true; group.add(wheel)
+    }
   }
   return group
 }
@@ -379,15 +409,16 @@ function createBooth(zone: RoadViewBooth) {
   if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
+  const accent = new THREE.Color(zone.color)
   const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.24, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
-  const panel = new THREE.MeshStandardMaterial({ color: '#f4f7f8', metalness: 0.08, roughness: 0.46 })
+  const panel = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.7), emissive: accent, emissiveIntensity: 0.12, metalness: 0.16, roughness: 0.4 })
   const { interiorBackZ } = addIntegratedBoothShell(group, shell)
   addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], panel, 0.04)
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(4.4, 1.55),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, ''), transparent: true, side: THREE.DoubleSide }),
   )
-  name.position.set(0, 4.34, BOOTH_DEPTH / 2 + 0.19); group.add(name)
+  name.position.set(0, 3.4, interiorBackZ + 0.07); group.add(name)
   return group
 }
 
@@ -470,8 +501,8 @@ function buildMetaverseStation(scene: THREE.Scene) {
     if (builtFacility.userData.hingedDoor) animated.push(builtFacility)
   }
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -22.4], rail, 0.03)
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.8], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
   return animated
 }
 
@@ -487,8 +518,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.beginPath(); context.moveTo(point, padding); context.lineTo(point, size - padding); context.stroke()
     context.beginPath(); context.moveTo(padding, point); context.lineTo(size - padding, point); context.stroke()
   }
-  const trainX = worldToMap(-14.1); const trainY = worldToMap(-22.9)
-  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-17.3) - trainY
+  const trainX = worldToMap(-14.1); const trainY = worldToMap(-18.15)
+  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-11.85) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.fillRect(trainX, trainY, trainWidth, trainHeight); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
@@ -509,14 +540,10 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     }
   }
   const x = worldToMap(player.x); const y = worldToMap(player.z)
-  const markerRadius = Math.max(7, size * 0.021)
+  const arrowSize = Math.max(5, size * 0.016)
   context.save(); context.translate(x, y); context.rotate(-player.yaw)
-  const halo = context.createRadialGradient(0, 0, markerRadius * 0.35, 0, 0, markerRadius * 2.7)
-  halo.addColorStop(0, 'rgba(38,126,245,.34)'); halo.addColorStop(0.52, 'rgba(38,126,245,.18)'); halo.addColorStop(1, 'rgba(38,126,245,0)')
-  context.fillStyle = halo; context.beginPath(); context.arc(0, 0, markerRadius * 2.7, 0, Math.PI * 2); context.fill()
-  context.fillStyle = '#1684ed'; context.strokeStyle = '#ffffff'; context.lineWidth = Math.max(2.4, size * 0.007); context.lineJoin = 'round'; context.shadowColor = 'rgba(20,102,219,.7)'; context.shadowBlur = Math.max(7, size * 0.022)
-  context.beginPath(); context.moveTo(0, -markerRadius * 2.18); context.lineTo(markerRadius * 0.74, -markerRadius * 0.82); context.lineTo(-markerRadius * 0.74, -markerRadius * 0.82); context.closePath(); context.fill(); context.stroke()
-  context.beginPath(); context.arc(0, 0, markerRadius, 0, Math.PI * 2); context.fill(); context.stroke(); context.restore()
+  context.fillStyle = '#ffffff'; context.strokeStyle = '#0879db'; context.lineWidth = Math.max(1.5, size * 0.005); context.shadowColor = '#17c9ff'; context.shadowBlur = 10
+  context.beginPath(); context.moveTo(0, -arrowSize * 1.45); context.lineTo(arrowSize * 0.78, arrowSize * 0.72); context.lineTo(arrowSize * 0.25, arrowSize * 0.46); context.lineTo(arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 0.46); context.lineTo(-arrowSize * 0.78, arrowSize * 0.72); context.closePath(); context.fill(); context.stroke(); context.restore()
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
