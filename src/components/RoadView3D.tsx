@@ -170,6 +170,22 @@ function makeLabelTexture(title: string, subtitle: string, accent: string, foote
   return texture
 }
 
+function makeTrainMarkTexture(primary: string, secondary = '') {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512; canvas.height = 180
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#1d4f96'; context.font = 'italic 900 112px Arial, sans-serif'; context.textAlign = 'center'
+  context.fillText(primary, 256, 116)
+  if (secondary) {
+    context.fillStyle = '#244a79'; context.font = '700 28px Arial, sans-serif'; context.fillText(secondary, 256, 158)
+  }
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
 function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], position: [number, number, number], material: THREE.Material, radius = 0.12) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, radius), material)
   mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
@@ -265,9 +281,9 @@ function createTrainDoor(zone: RoadViewBooth) {
   if (zone.gate.side === 'north') group.rotation.y = Math.PI
   else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
-  const frame = new THREE.MeshStandardMaterial({ color: '#e8eff2', metalness: 0.68, roughness: 0.22 })
-  const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.38, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
-  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#83c6df', transparent: true, opacity: 0.58, metalness: 0.2, roughness: 0.08, side: THREE.DoubleSide })
+  const frame = new THREE.MeshStandardMaterial({ color: '#355171', metalness: 0.6, roughness: 0.24 })
+  const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#9ed7e6', metalness: 0.3, roughness: 0.28, clearcoat: 0.65, clearcoatRoughness: 0.22 })
+  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#253a42', transparent: true, opacity: 0.92, metalness: 0.25, roughness: 0.1, side: THREE.DoubleSide })
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
@@ -297,10 +313,11 @@ function addTrainSeat(parent: THREE.Object3D, x: number, z: number, backDirectio
 function createIntegratedTrainShell() {
   const group = new THREE.Group()
   group.position.set(0, 0, TRAIN_CENTER_Z)
-  const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
-  const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
-  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#102d3d', transparent: true, opacity: 0.9, metalness: 0.38, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
-  const roofTrim = new THREE.MeshStandardMaterial({ color: '#cbd7dc', metalness: 0.68, roughness: 0.22 })
+  const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fafb', metalness: 0.16, roughness: 0.3, clearcoat: 0.72, clearcoatRoughness: 0.2 })
+  const blue = new THREE.MeshStandardMaterial({ color: '#244f99', metalness: 0.42, roughness: 0.28 })
+  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#172c36', transparent: true, opacity: 0.94, metalness: 0.32, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
+  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
+  const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
   const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
   const tireMaterial = new THREE.MeshStandardMaterial({ color: '#172329', metalness: 0.72, roughness: 0.36 })
   const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
@@ -343,52 +360,76 @@ function createIntegratedTrainShell() {
   shell.receiveShadow = true
   group.add(shell)
 
-  addRoundedBox(group, [27.9, 0.25, 0.06], [0, 0.95, -halfDepth - 0.13], blue, 0.02)
+  addRoundedBox(group, [27.9, 1.02, 0.06], [0, 2.52, -halfDepth - 0.13], blue, 0.02)
   for (const [start, end] of frontSections) {
-    addRoundedBox(group, [end - start - 0.16, 0.25, 0.06], [(start + end) / 2, 0.95, halfDepth + 0.13], blue, 0.02)
+    addRoundedBox(group, [end - start - 0.16, 1.02, 0.06], [(start + end) / 2, 2.52, halfDepth + 0.13], blue, 0.02)
+  }
+  addRoundedBox(group, [27.9, 0.18, 0.08], [0, 4.2, -halfDepth - 0.14], blue, 0.025)
+  addRoundedBox(group, [27.9, 0.18, 0.08], [0, 4.2, halfDepth + 0.14], blue, 0.025)
+
+  const noseShape = new THREE.Shape()
+  noseShape.moveTo(-20.6, 0.28)
+  noseShape.quadraticCurveTo(-20.45, 0.72, -19.55, 1.42)
+  noseShape.quadraticCurveTo(-17.4, 3.62, -14.1, 4.22)
+  noseShape.lineTo(-14.1, 0.28)
+  noseShape.closePath()
+  const noseGeometry = new THREE.ExtrudeGeometry(noseShape, { depth: 5.56, bevelEnabled: true, bevelSegments: 3, bevelSize: 0.08, bevelThickness: 0.08, curveSegments: 12 })
+  noseGeometry.translate(0, 0, -2.78)
+  const nose = new THREE.Mesh(noseGeometry, shellMaterial)
+  nose.castShadow = true; nose.receiveShadow = true; group.add(nose)
+
+  const blueNoseShape = new THREE.Shape()
+  blueNoseShape.moveTo(-19.35, 1.7)
+  blueNoseShape.quadraticCurveTo(-17.35, 3.62, -14.08, 4.02)
+  blueNoseShape.lineTo(-14.08, 3.13)
+  blueNoseShape.quadraticCurveTo(-17.22, 2.98, -18.82, 1.48)
+  blueNoseShape.closePath()
+  const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
+  blueNose.position.z = halfDepth + 0.1; group.add(blueNose)
+  const windshieldShape = new THREE.Shape()
+  windshieldShape.moveTo(-18.6, 2.45); windshieldShape.lineTo(-17.86, 3.2); windshieldShape.lineTo(-15.8, 3.76); windshieldShape.lineTo(-16, 2.83); windshieldShape.closePath()
+  const windshield = new THREE.Mesh(new THREE.ShapeGeometry(windshieldShape), cockpitGlass)
+  windshield.position.z = halfDepth + 0.16; group.add(windshield)
+  for (const z of [-1.72, 1.72]) {
+    const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 10), headlightMaterial)
+    headlight.scale.set(0.48, 0.72, 1); headlight.position.set(-20.12, 1.03, z); group.add(headlight)
   }
 
-  const noseProfile = [
-    new THREE.Vector2(0.01, 0),
-    new THREE.Vector2(0.72, 0.42),
-    new THREE.Vector2(1.55, 1.18),
-    new THREE.Vector2(2.25, 2.2),
-    new THREE.Vector2(2.62, 3.45),
-  ]
-  for (const direction of [-1, 1] as const) {
-    const nose = new THREE.Mesh(new THREE.LatheGeometry(noseProfile, 36), shellMaterial)
-    nose.position.set(direction * (halfLength + 3.45), 2.2, 0)
-    nose.rotation.z = direction > 0 ? Math.PI / 2 : -Math.PI / 2
-    nose.scale.set(0.82, 1, 1.05)
-    nose.castShadow = true; nose.receiveShadow = true; group.add(nose)
-
-    const windshield = addRoundedBox(group, [1.72, 0.08, 2.28], [direction * (halfLength + 1.72), 3.88, 0], cockpitGlass, 0.025)
-    windshield.rotation.z = direction > 0 ? -0.2 : 0.2
-    for (const z of [-0.62, 0.62]) {
-      const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 10), headlightMaterial)
-      headlight.scale.set(0.42, 0.78, 1)
-      headlight.position.set(direction * (halfLength + 3.16), 1.48, z)
-      group.add(headlight)
-    }
+  for (const x of [-6.65, -3.15, 3.15, 6.65, 12.05]) {
+    for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, 2.55, z], windowMaterial, 0.12)
   }
+  for (const x of [-4.7, 4.7]) {
+    for (const z of [-halfDepth - 0.18, halfDepth + 0.18]) addRoundedBox(group, [0.18, 3.86, 0.09], [x, 2.15, z], undercarriage, 0.02)
+  }
+  const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.75, 0.96), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
+  ktxMark.position.set(-16.45, 1.72, halfDepth + 0.19); group.add(ktxMark)
+  for (const x of [-2.1, 11.35]) {
+    const carMark = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.52), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX'), transparent: true }))
+    carMark.position.set(x, 3.6, halfDepth + 0.19); group.add(carMark)
+  }
+
+  for (let index = 0; index < 10; index += 1) addRoundedBox(group, [0.08, 1.22, 0.05], [-13.55 + index * 0.28, 2.2, halfDepth + 0.18], roofTrim, 0.01)
+  addRoundedBox(group, [2.85, 0.16, 0.06], [-12.29, 2.2, halfDepth + 0.17], roofTrim, 0.01)
 
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
   }
-  for (const x of doorCenters) addRoundedBox(group, [3.45, 0.22, 1.12], [x, 4.58, 0], roofTrim, 0.08)
-  const leftPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [-0.72, 4.98, 0], undercarriage, 0.025)
+  for (const x of [-10.8, -1.2, 8.4]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
+  const leftPantographArm = addRoundedBox(group, [2.35, 0.08, 0.08], [-6.95, 5.12, 0], undercarriage, 0.025)
   leftPantographArm.rotation.z = 0.58
-  const rightPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [0.72, 4.98, 0], undercarriage, 0.025)
+  const rightPantographArm = addRoundedBox(group, [2.35, 0.08, 0.08], [-5.45, 5.12, 0], undercarriage, 0.025)
   rightPantographArm.rotation.z = -0.58
-  addRoundedBox(group, [1.22, 0.08, 0.1], [0, 5.5, 0], undercarriage, 0.025)
+  addRoundedBox(group, [2.2, 0.08, 0.1], [-6.2, 5.8, 0], undercarriage, 0.025)
 
   for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, 0.28, 0], undercarriage, 0.08)
   for (const x of [-11, -7.8, -1.6, 1.6, 7.8, 11]) {
     for (const z of [-halfDepth - 0.04, halfDepth + 0.04]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.2, 22), tireMaterial)
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.22, 24), tireMaterial)
       wheel.rotation.x = Math.PI / 2
-      wheel.position.set(x, 0.34, z)
+      wheel.position.set(x, 0.48, z)
       wheel.castShadow = true; group.add(wheel)
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.24, 20), roofTrim)
+      hub.rotation.x = Math.PI / 2; hub.position.set(x, 0.48, z); group.add(hub)
     }
   }
   return group
@@ -397,14 +438,8 @@ function createIntegratedTrainShell() {
 function createTrainCarBooth(zone: RoadViewBooth) {
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
   group.rotation.y = -Math.PI / 2
-  const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#9dd8ee', transparent: true, opacity: 0.58, roughness: 0.08, metalness: 0.22, side: THREE.DoubleSide })
   const seatMaterial = new THREE.MeshStandardMaterial({ color: '#244f70', metalness: 0.15, roughness: 0.55 })
   const seatTrim = new THREE.MeshStandardMaterial({ color: '#c8d5dc', metalness: 0.62, roughness: 0.24 })
-  const halfWidth = 2.8
-  for (const z of [-3.45, -2.25, 2.25, 3.45]) {
-    addRoundedBox(group, [0.06, 1.0, 0.86], [-halfWidth - 0.13, 2.55, z], windowMaterial, 0.08)
-    addRoundedBox(group, [0.06, 1.0, 0.86], [halfWidth + 0.13, 2.55, z], windowMaterial, 0.08)
-  }
   for (const z of [-2.9, -1.45, 1.45, 2.9]) {
     const backDirection = z < 0 ? -1 : 1
     addTrainSeat(group, -1.38, z, backDirection, seatMaterial, seatTrim)
@@ -547,10 +582,24 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     }
   }
   const x = worldXToMap(player.x); const y = worldZToMap(player.z)
-  const arrowSize = Math.max(5, size * 0.016)
+  const markerRadius = Math.max(9, size * 0.022)
   context.save(); context.translate(x, y); context.rotate(-player.yaw)
-  context.fillStyle = '#ffffff'; context.strokeStyle = '#0879db'; context.lineWidth = Math.max(1.5, size * 0.005); context.shadowColor = '#17c9ff'; context.shadowBlur = 10
-  context.beginPath(); context.moveTo(0, -arrowSize * 1.45); context.lineTo(arrowSize * 0.78, arrowSize * 0.72); context.lineTo(arrowSize * 0.25, arrowSize * 0.46); context.lineTo(arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 1.12); context.lineTo(-arrowSize * 0.25, arrowSize * 0.46); context.lineTo(-arrowSize * 0.78, arrowSize * 0.72); context.closePath(); context.fill(); context.stroke(); context.restore()
+  context.shadowColor = 'rgba(15,113,238,.34)'; context.shadowBlur = markerRadius * 0.7
+  context.fillStyle = '#ffffff'; context.strokeStyle = '#0878e8'; context.lineWidth = Math.max(2.5, size * 0.006); context.lineJoin = 'round'
+  context.beginPath()
+  context.moveTo(0, -markerRadius * 2.05)
+  context.quadraticCurveTo(markerRadius * 0.12, -markerRadius * 2.08, markerRadius * 0.24, -markerRadius * 1.92)
+  context.lineTo(markerRadius * 0.78, -markerRadius * 0.94)
+  context.quadraticCurveTo(markerRadius * 0.9, -markerRadius * 0.7, markerRadius * 0.64, -markerRadius * 0.62)
+  context.lineTo(-markerRadius * 0.64, -markerRadius * 0.62)
+  context.quadraticCurveTo(-markerRadius * 0.9, -markerRadius * 0.7, -markerRadius * 0.78, -markerRadius * 0.94)
+  context.lineTo(-markerRadius * 0.24, -markerRadius * 1.92)
+  context.quadraticCurveTo(-markerRadius * 0.12, -markerRadius * 2.08, 0, -markerRadius * 2.05)
+  context.closePath(); context.fill(); context.stroke()
+  context.fillStyle = '#0878e8'; context.beginPath(); context.arc(0, 0, markerRadius, 0, Math.PI * 2); context.fill()
+  context.shadowColor = 'transparent'; context.fillStyle = '#ffffff'; context.beginPath(); context.arc(0, 0, markerRadius * 0.82, 0, Math.PI * 2); context.fill()
+  context.fillStyle = '#1677ee'; context.beginPath(); context.arc(0, 0, markerRadius * 0.56, 0, Math.PI * 2); context.fill()
+  context.restore()
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
