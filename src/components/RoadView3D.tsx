@@ -39,13 +39,13 @@ const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
 }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01 · 1번 승강장', title: '빙하 위 펭귄 구조', description: '1번 승강장에서 녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
-  { id: 2, gateCode: 'L01', label: 'EXHIBITION TRAIN · 1호차', title: '냉동공조 실험실', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02 · 2번 승강장', title: '무더운 여름', description: '2번 승강장에서 상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 19.1, z: -5, gate: { x: 16.4, z: -5, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03 · 3번 승강장', title: '동물들을 구하라', description: '3번 승강장에서 생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -19.1, z: 5, gate: { x: -16.4, z: 5, side: 'east' } },
-  { id: 5, gateCode: 'E01', label: 'EXHIBITION TRAIN · 2호차', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04 · 4번 승강장', title: '나비효과', description: '4번 승강장에서 작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 19.1, z: 5, gate: { x: 16.4, z: 5, side: 'west' } },
-  { id: 7, gateCode: 'R01', label: 'EXHIBITION TRAIN · 3호차', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '빙하 위 펭귄 구조', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 19.1, z: -5, gate: { x: 16.4, z: -5, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -19.1, z: 5, gate: { x: -16.4, z: 5, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 19.1, z: 5, gate: { x: 16.4, z: 5, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
@@ -230,16 +230,17 @@ function createTrainDoor(zone: RoadViewBooth) {
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
-  const leftDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [-0.7, 1.66, 0], doorMaterial, 0.05)
-  const rightDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [0.7, 1.66, 0], doorMaterial, 0.05)
+  const leftDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [-0.7, 1.66, -0.28], doorMaterial, 0.05)
+  const rightDoor = addRoundedBox(group, [1.38, 3.08, 0.16], [0.7, 1.66, -0.28], doorMaterial, 0.05)
   for (const [x, door] of [[-0.7, leftDoor], [0.7, rightDoor]] as const) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
+    door.userData.openX = Math.sign(x) * 1.38
   }
   group.userData.slidingDoors = [leftDoor, rightDoor]
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(2.75, 0.97),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, `${zone.gateCode} · TRAIN DOOR`, zone.color, 'AUTOMATIC SLIDING DOOR'), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, 'AUTOMATIC SLIDING DOOR'), transparent: true, side: THREE.DoubleSide }),
   )
   sign.position.set(0, 4.15, 0); group.add(sign)
   return group
@@ -301,7 +302,7 @@ function createBooth(zone: RoadViewBooth) {
   addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], panel, 0.04)
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(4.4, 1.55),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(zone.title, zone.label, zone.color, ''), transparent: true, side: THREE.DoubleSide }),
   )
   name.position.set(0, 3.4, interiorBackZ + 0.07); group.add(name)
   return group
@@ -550,7 +551,11 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         const slidingDoors = object.userData.slidingDoors as THREE.Mesh[] | undefined
         if (slidingDoors) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.75
-          slidingDoors.forEach((door) => { const closedX = door.userData.closedX as number; door.position.x = THREE.MathUtils.lerp(door.position.x, open ? closedX * 2.05 : closedX, 0.1) })
+          slidingDoors.forEach((door) => {
+            const closedX = door.userData.closedX as number
+            const openX = door.userData.openX as number
+            door.position.x = THREE.MathUtils.lerp(door.position.x, open ? openX : closedX, 0.1)
+          })
         }
         const hingedDoor = object.userData.hingedDoor as THREE.Group | undefined
         if (hingedDoor) {

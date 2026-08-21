@@ -32,7 +32,7 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
 
 const roadViewTickets: readonly { code: RoadViewGateCode; location: string; title: string; color: string }[] = [
   { code: 'E01', location: '전시 열차 2호차', title: '초고속 냉동사이클', color: '#e69a35' },
-  { code: 'L01', location: '전시 열차 1호차', title: '냉동공조 실험실', color: '#73b62f' },
+  { code: 'L01', location: '전시 열차 1호차', title: '교육용 키트', color: '#73b62f' },
   { code: 'R01', location: '전시 열차 3호차', title: '굿즈샵', color: '#e45575' },
   { code: 'B01', location: '부스 1 · 1번 승강장', title: '빙하 위 펭귄 구조', color: '#45aee8' },
   { code: 'B02', location: '부스 2 · 2번 승강장', title: '무더운 여름', color: '#35b981' },
