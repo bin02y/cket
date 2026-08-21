@@ -69,6 +69,7 @@ const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: SIDE_ZONE_X, z: 15, gate: { x: SIDE_GATE_X, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
+const TRAIN_NOSE_COLLIDER: Collider = { x1: -20.72, x2: -14, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 }
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
   3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
@@ -104,7 +105,7 @@ function zoneSize(zone: RoadViewBooth | StationFacility) {
   return { width: BOOTH_WIDTH, depth: BOOTH_DEPTH }
 }
 
-const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
+const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
   const size = zoneSize(zone)
   const halfWidth = size.width / 2
   const halfDepth = size.depth / 2
@@ -130,7 +131,7 @@ const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
     { x1: zone.x - halfWidth, x2: zone.x - 1.42, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
     { x1: zone.x + 1.42, x2: zone.x + halfWidth, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
   ]
-})
+}), TRAIN_NOSE_COLLIDER]
 
 function isWalkable(x: number, z: number) {
   const radius = 0.32
@@ -282,7 +283,7 @@ function createTrainDoor(zone: RoadViewBooth) {
   else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   const frame = new THREE.MeshStandardMaterial({ color: '#355171', metalness: 0.6, roughness: 0.24 })
-  const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#9ed7e6', metalness: 0.3, roughness: 0.28, clearcoat: 0.65, clearcoatRoughness: 0.22 })
+  const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.22, roughness: 0.3, clearcoat: 0.65, clearcoatRoughness: 0.22 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#253a42', transparent: true, opacity: 0.92, metalness: 0.25, roughness: 0.1, side: THREE.DoubleSide })
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
@@ -319,7 +320,6 @@ function createIntegratedTrainShell() {
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
   const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
   const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
-  const tireMaterial = new THREE.MeshStandardMaterial({ color: '#172329', metalness: 0.72, roughness: 0.36 })
   const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
   const trainLength = 28.2
   const halfLength = trainLength / 2
@@ -408,9 +408,6 @@ function createIntegratedTrainShell() {
     carMark.position.set(x, 3.6, halfDepth + 0.19); group.add(carMark)
   }
 
-  for (let index = 0; index < 10; index += 1) addRoundedBox(group, [0.08, 1.22, 0.05], [-13.55 + index * 0.28, 2.2, halfDepth + 0.18], roofTrim, 0.01)
-  addRoundedBox(group, [2.85, 0.16, 0.06], [-12.29, 2.2, halfDepth + 0.17], roofTrim, 0.01)
-
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
   }
@@ -422,16 +419,6 @@ function createIntegratedTrainShell() {
   addRoundedBox(group, [2.2, 0.08, 0.1], [-6.2, 5.8, 0], undercarriage, 0.025)
 
   for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, 0.28, 0], undercarriage, 0.08)
-  for (const x of [-11, -7.8, -1.6, 1.6, 7.8, 11]) {
-    for (const z of [-halfDepth - 0.04, halfDepth + 0.04]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.22, 24), tireMaterial)
-      wheel.rotation.x = Math.PI / 2
-      wheel.position.set(x, 0.48, z)
-      wheel.castShadow = true; group.add(wheel)
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.24, 20), roofTrim)
-      hub.rotation.x = Math.PI / 2; hub.position.set(x, 0.48, z); group.add(hub)
-    }
-  }
   return group
 }
 
@@ -547,9 +534,26 @@ function buildMetaverseStation(scene: THREE.Scene) {
     scene.add(builtFacility)
     if (builtFacility.userData.hingedDoor) animated.push(builtFacility)
   }
-  const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, TRAIN_CENTER_Z - 2.3], rail, 0.03)
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, TRAIN_CENTER_Z + 2.3], rail, 0.03)
+  const trackLength = 46
+  const trackCenterX = -1
+  const ballast = new THREE.MeshStandardMaterial({ color: '#7d8588', metalness: 0.02, roughness: 0.98 })
+  const sleeperMaterial = new THREE.MeshStandardMaterial({ color: '#5f554c', metalness: 0.04, roughness: 0.9 })
+  const fasteningMaterial = new THREE.MeshStandardMaterial({ color: '#30383c', metalness: 0.72, roughness: 0.3 })
+  const rail = new THREE.MeshStandardMaterial({ color: '#56656d', metalness: 0.92, roughness: 0.16 })
+  addRoundedBox(scene, [trackLength, 0.08, 5.92], [trackCenterX, 0.04, TRAIN_CENTER_Z], ballast, 0.025)
+  const sleeperCount = 48
+  const sleeperGeometry = new RoundedBoxGeometry(0.24, 0.12, 5.34, 2, 0.025)
+  const sleepers = new THREE.InstancedMesh(sleeperGeometry, sleeperMaterial, sleeperCount)
+  const sleeperMatrix = new THREE.Matrix4()
+  for (let index = 0; index < sleeperCount; index += 1) {
+    const x = trackCenterX - trackLength / 2 + 0.48 + index * ((trackLength - 0.96) / (sleeperCount - 1))
+    sleeperMatrix.makeTranslation(x, 0.12, TRAIN_CENTER_Z); sleepers.setMatrixAt(index, sleeperMatrix)
+  }
+  sleepers.castShadow = true; sleepers.receiveShadow = true; sleepers.instanceMatrix.needsUpdate = true; scene.add(sleepers)
+  for (const z of [TRAIN_CENTER_Z - 2.3, TRAIN_CENTER_Z + 2.3]) {
+    addRoundedBox(scene, [trackLength, 0.08, 0.42], [trackCenterX, 0.19, z], fasteningMaterial, 0.025)
+    addRoundedBox(scene, [trackLength, 0.14, 0.18], [trackCenterX, 0.28, z], rail, 0.035)
+  }
   return animated
 }
 
@@ -583,19 +587,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   }
   const x = worldXToMap(player.x); const y = worldZToMap(player.z)
   const markerRadius = Math.max(9, size * 0.022)
-  context.save(); context.translate(x, y); context.rotate(-player.yaw)
+  context.save(); context.translate(x, y)
   context.shadowColor = 'rgba(15,113,238,.34)'; context.shadowBlur = markerRadius * 0.7
-  context.fillStyle = '#ffffff'; context.strokeStyle = '#0878e8'; context.lineWidth = Math.max(2.5, size * 0.006); context.lineJoin = 'round'
-  context.beginPath()
-  context.moveTo(0, -markerRadius * 2.05)
-  context.quadraticCurveTo(markerRadius * 0.12, -markerRadius * 2.08, markerRadius * 0.24, -markerRadius * 1.92)
-  context.lineTo(markerRadius * 0.78, -markerRadius * 0.94)
-  context.quadraticCurveTo(markerRadius * 0.9, -markerRadius * 0.7, markerRadius * 0.64, -markerRadius * 0.62)
-  context.lineTo(-markerRadius * 0.64, -markerRadius * 0.62)
-  context.quadraticCurveTo(-markerRadius * 0.9, -markerRadius * 0.7, -markerRadius * 0.78, -markerRadius * 0.94)
-  context.lineTo(-markerRadius * 0.24, -markerRadius * 1.92)
-  context.quadraticCurveTo(-markerRadius * 0.12, -markerRadius * 2.08, 0, -markerRadius * 2.05)
-  context.closePath(); context.fill(); context.stroke()
   context.fillStyle = '#0878e8'; context.beginPath(); context.arc(0, 0, markerRadius, 0, Math.PI * 2); context.fill()
   context.shadowColor = 'transparent'; context.fillStyle = '#ffffff'; context.beginPath(); context.arc(0, 0, markerRadius * 0.82, 0, Math.PI * 2); context.fill()
   context.fillStyle = '#1677ee'; context.beginPath(); context.arc(0, 0, markerRadius * 0.56, 0, Math.PI * 2); context.fill()
