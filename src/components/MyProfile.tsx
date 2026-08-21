@@ -72,7 +72,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
                 </span>
                 <header className="cket-ticket__header">
                   <strong>TRAIN TICKET</strong>
-                  <small>{visited ? 'VISITED' : '방문 전'}</small>
+                  <small>{visited ? 'VISITED' : null}</small>
                 </header>
                 <div className="cket-ticket__body">
                   <p><strong>{ticket.title}</strong></p>
@@ -94,7 +94,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
       </section>
 
       <section className="order-history" aria-labelledby="order-history-title">
-        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2><p>쇼핑 구매와 배송 상태를 확인하세요.</p></div></div><strong>{orders.length}건</strong></header>
+        <header><div><span><Icon name="cart" /></span><div><h2 id="order-history-title">주문내역</h2></div></div><strong>{orders.length}건</strong></header>
         {orders.length > 0 ? (
           <div className="order-history__list">
             {orders.map((order) => {
@@ -106,7 +106,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
               </article>
             })}
           </div>
-        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong><p>쇼핑에서 굿즈를 구매하면 이곳에서 배송 상태를 확인할 수 있어요.</p></div>}
+        ) : <div className="order-history__empty"><Icon name="cart" /><strong>아직 주문내역이 없어요.</strong></div>}
       </section>
 
       <section className="profile-account-card" aria-label="계정 정보">
