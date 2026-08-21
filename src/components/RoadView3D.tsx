@@ -196,10 +196,6 @@ function makeTrainBoothSignTexture(title: string, subtitle: string, accent: stri
   context.save(); context.beginPath(); context.roundRect(16, 16, 992, 328, 42); context.clip()
   context.fillStyle = '#f8fafc'; context.fillRect(0, 0, canvas.width, canvas.height)
   context.fillStyle = '#174d98'; context.fillRect(0, 0, canvas.width, 62)
-  context.fillStyle = '#edf2f7'; context.fillRect(0, 276, canvas.width, 84)
-  context.fillStyle = '#174d98'
-  context.beginPath(); context.moveTo(0, 276); context.lineTo(180, 276); context.lineTo(250, 360); context.lineTo(0, 360); context.closePath(); context.fill()
-  context.fillStyle = accent; context.fillRect(790, 286, 170, 15)
 
   context.fillStyle = accent; context.font = '700 48px Paperlogy, sans-serif'; context.textAlign = 'center'
   context.fillText(subtitle, 512, 135)
@@ -343,7 +339,7 @@ function createIntegratedTrainShell() {
   group.position.set(0, 0, TRAIN_CENTER_Z)
   const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fafb', metalness: 0.16, roughness: 0.3, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const blue = new THREE.MeshStandardMaterial({ color: '#244f99', metalness: 0.42, roughness: 0.28 })
-  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#172c36', transparent: true, opacity: 0.94, metalness: 0.32, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
+  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#29485a', transparent: true, opacity: 0.9, metalness: 0.3, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.05 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
   const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
   const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
@@ -351,7 +347,8 @@ function createIntegratedTrainShell() {
   const trainLength = 28.2
   const halfLength = trainLength / 2
   const halfDepth = 2.8
-  const openingWidth = 4.2
+  const openingWidth = 3.32
+  const stripeOpeningWidth = 4.2
   const wallHeight = 4.05
   const wallCenterY = 2.18
   const geometries: THREE.BoxGeometry[] = []
@@ -373,6 +370,12 @@ function createIntegratedTrainShell() {
     [doorCenters[1] + openingWidth / 2, doorCenters[2] - openingWidth / 2],
     [doorCenters[2] + openingWidth / 2, halfLength],
   ] as const
+  const stripeSections = [
+    [-halfLength, doorCenters[0] - stripeOpeningWidth / 2],
+    [doorCenters[0] + stripeOpeningWidth / 2, doorCenters[1] - stripeOpeningWidth / 2],
+    [doorCenters[1] + stripeOpeningWidth / 2, doorCenters[2] - stripeOpeningWidth / 2],
+    [doorCenters[2] + stripeOpeningWidth / 2, halfLength],
+  ] as const
   for (const [start, end] of frontSections) {
     addShellPart([end - start, wallHeight, 0.24], [(start + end) / 2, wallCenterY, halfDepth])
   }
@@ -387,7 +390,7 @@ function createIntegratedTrainShell() {
   group.add(shell)
 
   addRoundedBox(group, [27.9, 1.02, 0.06], [0, 2.52, -halfDepth - 0.13], blue, 0.02)
-  for (const [start, end] of frontSections) {
+  for (const [start, end] of stripeSections) {
     addRoundedBox(group, [end - start - 0.16, 1.02, 0.06], [(start + end) / 2, 2.52, halfDepth + 0.13], blue, 0.02)
   }
   const noseShape = new THREE.Shape()
@@ -410,7 +413,11 @@ function createIntegratedTrainShell() {
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.1; group.add(blueNose)
   const windshieldShape = new THREE.Shape()
-  windshieldShape.moveTo(-18.6, 2.45); windshieldShape.lineTo(-17.86, 3.2); windshieldShape.lineTo(-15.8, 3.76); windshieldShape.lineTo(-16, 2.83); windshieldShape.closePath()
+  windshieldShape.moveTo(-18.25, 2.58)
+  windshieldShape.quadraticCurveTo(-17.55, 3.2, -15.96, 3.64)
+  windshieldShape.lineTo(-16.08, 3.18)
+  windshieldShape.quadraticCurveTo(-17.3, 2.88, -18.05, 2.42)
+  windshieldShape.closePath()
   const windshield = new THREE.Mesh(new THREE.ShapeGeometry(windshieldShape), cockpitGlass)
   windshield.position.z = halfDepth + 0.16; group.add(windshield)
   for (const z of [-1.72, 1.72]) {
@@ -424,8 +431,8 @@ function createIntegratedTrainShell() {
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.18, halfDepth + 0.18]) addRoundedBox(group, [0.18, 3.86, 0.09], [x, 2.15, z], undercarriage, 0.02)
   }
-  const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.75, 0.96), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
-  ktxMark.position.set(-16.45, 1.72, halfDepth + 0.19); group.add(ktxMark)
+  const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
+  ktxMark.position.set(-16.45, 0.96, halfDepth + 0.19); group.add(ktxMark)
 
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
