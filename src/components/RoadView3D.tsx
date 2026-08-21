@@ -39,6 +39,7 @@ const SIDE_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_DEPTH /
 const SIDE_GATE_X = SIDE_ZONE_X - BOOTH_DEPTH / 2
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
+const TRAIN_BODY_BASE_Y = 0.28
 const FACILITY_DOOR_WIDTH = 2.08
 const FACILITY_DOOR_HEIGHT = 3.05
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -308,11 +309,11 @@ function createTrainDoor(zone: RoadViewBooth) {
   const frame = new THREE.MeshStandardMaterial({ color: '#355171', metalness: 0.6, roughness: 0.24 })
   const doorMaterial = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.22, roughness: 0.3, clearcoat: 0.65, clearcoatRoughness: 0.22 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#253a42', transparent: true, opacity: 0.92, metalness: 0.25, roughness: 0.1, side: THREE.DoubleSide })
-  addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75, 0], frame, 0.06)
-  addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75, 0], frame, 0.06)
-  addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42, 0], frame, 0.06)
-  const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71, -0.28], doorMaterial, 0.02)
-  const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71, -0.28], doorMaterial, 0.02)
+  addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
+  addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
+  addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
+  const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
+  const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
   for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
@@ -348,9 +349,8 @@ function createIntegratedTrainShell() {
   const halfLength = trainLength / 2
   const halfDepth = 2.8
   const openingWidth = 3.32
-  const stripeOpeningWidth = 4.2
-  const wallHeight = 4.05
-  const wallCenterY = 2.18
+  const wallHeight = 3.94
+  const wallCenterY = TRAIN_BODY_BASE_Y + wallHeight / 2
   const geometries: THREE.BoxGeometry[] = []
   const addShellPart = (size: [number, number, number], position: [number, number, number]) => {
     const geometry = new THREE.BoxGeometry(...size)
@@ -358,7 +358,7 @@ function createIntegratedTrainShell() {
     geometries.push(geometry)
   }
 
-  addShellPart([trainLength, 0.3, 5.8], [0, 0.16, 0])
+  addShellPart([trainLength, 0.3, 5.8], [0, TRAIN_BODY_BASE_Y + 0.15, 0])
   addShellPart([trainLength, 0.34, 5.8], [0, 4.28, 0])
   addShellPart([trainLength, wallHeight, 0.24], [0, wallCenterY, -halfDepth])
   addShellPart([0.26, wallHeight, 5.6], [halfLength, wallCenterY, 0])
@@ -369,12 +369,6 @@ function createIntegratedTrainShell() {
     [doorCenters[0] + openingWidth / 2, doorCenters[1] - openingWidth / 2],
     [doorCenters[1] + openingWidth / 2, doorCenters[2] - openingWidth / 2],
     [doorCenters[2] + openingWidth / 2, halfLength],
-  ] as const
-  const stripeSections = [
-    [-halfLength, doorCenters[0] - stripeOpeningWidth / 2],
-    [doorCenters[0] + stripeOpeningWidth / 2, doorCenters[1] - stripeOpeningWidth / 2],
-    [doorCenters[1] + stripeOpeningWidth / 2, doorCenters[2] - stripeOpeningWidth / 2],
-    [doorCenters[2] + stripeOpeningWidth / 2, halfLength],
   ] as const
   for (const [start, end] of frontSections) {
     addShellPart([end - start, wallHeight, 0.24], [(start + end) / 2, wallCenterY, halfDepth])
@@ -389,10 +383,8 @@ function createIntegratedTrainShell() {
   shell.receiveShadow = true
   group.add(shell)
 
-  addRoundedBox(group, [27.9, 1.02, 0.06], [0, 2.52, -halfDepth - 0.13], blue, 0.02)
-  for (const [start, end] of stripeSections) {
-    addRoundedBox(group, [end - start - 0.16, 1.02, 0.06], [(start + end) / 2, 2.52, halfDepth + 0.13], blue, 0.02)
-  }
+  addRoundedBox(group, [27.9, 0.72, 0.06], [0, 3.82, -halfDepth - 0.13], blue, 0.02)
+  addRoundedBox(group, [27.9, 0.72, 0.06], [0, 3.82, halfDepth + 0.13], blue, 0.02)
   const noseShape = new THREE.Shape()
   noseShape.moveTo(-20.6, 0.28)
   noseShape.quadraticCurveTo(-20.45, 0.72, -19.55, 1.42)
@@ -406,9 +398,9 @@ function createIntegratedTrainShell() {
 
   const blueNoseShape = new THREE.Shape()
   blueNoseShape.moveTo(-19.35, 1.7)
-  blueNoseShape.quadraticCurveTo(-17.35, 3.14, -14.08, 3.03)
-  blueNoseShape.lineTo(-14.08, 2.01)
-  blueNoseShape.quadraticCurveTo(-17.15, 2.05, -18.82, 1.48)
+  blueNoseShape.quadraticCurveTo(-17.35, 3.7, -14.08, 4.18)
+  blueNoseShape.lineTo(-14.08, 3.46)
+  blueNoseShape.quadraticCurveTo(-17.15, 3.25, -18.82, 1.48)
   blueNoseShape.closePath()
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.1; group.add(blueNose)
@@ -438,18 +430,12 @@ function createIntegratedTrainShell() {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
   }
   for (const x of [-10.8, -1.2, 8.4]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
-  const leftPantographArm = addRoundedBox(group, [2.35, 0.08, 0.08], [-6.95, 5.12, 0], undercarriage, 0.025)
-  leftPantographArm.rotation.z = 0.58
-  const rightPantographArm = addRoundedBox(group, [2.35, 0.08, 0.08], [-5.45, 5.12, 0], undercarriage, 0.025)
-  rightPantographArm.rotation.z = -0.58
-  addRoundedBox(group, [2.2, 0.08, 0.1], [-6.2, 5.8, 0], undercarriage, 0.025)
-
-  for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, 0.28, 0], undercarriage, 0.08)
+  for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, TRAIN_BODY_BASE_Y + 0.15, 0], undercarriage, 0.08)
   return group
 }
 
 function createTrainCarBooth(zone: RoadViewBooth) {
-  const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
+  const group = new THREE.Group(); group.position.set(zone.x, TRAIN_BODY_BASE_Y, zone.z)
   group.rotation.y = -Math.PI / 2
   const seatMaterial = new THREE.MeshStandardMaterial({ color: '#244f70', metalness: 0.15, roughness: 0.55 })
   const seatTrim = new THREE.MeshStandardMaterial({ color: '#c8d5dc', metalness: 0.62, roughness: 0.24 })
