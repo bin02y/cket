@@ -171,6 +171,7 @@ const carrierCards = [
 
 export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
+  const [carrierStep, setCarrierStep] = useState(0)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
@@ -279,18 +280,42 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
           </div>
 
           <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
-            <div className="carrier-story__grid">
-              {carrierCards.map((card) => (
-                <article className={`carrier-card carrier-card--visual carrier-card--${card.variant}`} tabIndex={0} key={card.title}>
-                  <figure className="carrier-card__image">
-                    <img src={card.image} alt={card.imageAlt} decoding="async" />
-                  </figure>
-                  <div className="carrier-card__overlay">
-                    <h3>{card.title}</h3>
-                    <p>{card.description}</p>
-                  </div>
-                </article>
-              ))}
+            <div className="carrier-carousel">
+              <div className="carrier-story__grid" style={{ transform: `translateX(-${carrierStep * 100}%)` }}>
+                {carrierCards.map((card, cardIndex) => (
+                  <article
+                    className={`carrier-card carrier-card--visual carrier-card--${card.variant}`}
+                    tabIndex={cardIndex === carrierStep ? 0 : -1}
+                    aria-hidden={cardIndex !== carrierStep}
+                    key={card.title}
+                  >
+                    <figure className="carrier-card__image">
+                      <img src={card.image} alt={card.imageAlt} decoding="async" />
+                    </figure>
+                    <div className="carrier-card__overlay">
+                      <h3>{card.title}</h3>
+                      <p>{card.description}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <button
+                className="carrier-carousel__button carrier-carousel__button--previous"
+                type="button"
+                aria-label="이전 윌리스 캐리어 카드"
+                onClick={() => setCarrierStep((current) => (current - 1 + carrierCards.length) % carrierCards.length)}
+              >
+                <Icon name="arrow" />
+              </button>
+              <button
+                className="carrier-carousel__button carrier-carousel__button--next"
+                type="button"
+                aria-label="다음 윌리스 캐리어 카드"
+                onClick={() => setCarrierStep((current) => (current + 1) % carrierCards.length)}
+              >
+                <Icon name="arrow" />
+              </button>
+              <span className="carrier-carousel__status" aria-live="polite">{carrierStep + 1} / {carrierCards.length}</span>
             </div>
           </section>
 
