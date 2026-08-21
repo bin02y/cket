@@ -259,7 +259,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <div className="home-feature-grid">
             <section className="home-video" aria-label="초고속 냉동공조 영상">
-              <video controls playsInline preload="metadata">
+              <video autoPlay muted loop playsInline preload="metadata">
                 <source src="/videos/high-speed-refrigeration-hvac.mp4" type="video/mp4" />
                 브라우저에서 영상을 재생할 수 없습니다.
               </video>
