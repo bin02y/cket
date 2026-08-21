@@ -126,7 +126,9 @@ const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
 
 function isWalkable(x: number, z: number) {
   const radius = 0.32
-  if (x < -21.8 || x > 21.8 || z < -21.8 || z > 21.8) return false
+  const horizontalLimit = 23 - radius - 0.05
+  const verticalLimit = 24 - radius - 0.05
+  if (x < -horizontalLimit || x > horizontalLimit || z < -verticalLimit || z > verticalLimit) return false
   return !COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)
 }
 
@@ -237,17 +239,33 @@ function createGate(zone: RoadViewBooth) {
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   const frameMaterial = new THREE.MeshStandardMaterial({ color: '#dce4e8', metalness: 0.7, roughness: 0.22 })
   const capMaterial = new THREE.MeshStandardMaterial({ color: '#f5f8f9', metalness: 0.42, roughness: 0.24 })
+  const screenMaterial = new THREE.MeshPhysicalMaterial({ color: '#8cbfd0', metalness: 0.2, roughness: 0.12, clearcoat: 0.9, clearcoatRoughness: 0.08 })
+  const arrowMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff', side: THREE.DoubleSide })
   const glassMaterial = new THREE.MeshPhysicalMaterial({ color: '#f4fdff', transparent: true, opacity: 0.2, transmission: 0.72, roughness: 0.04, metalness: 0, thickness: 0.04, side: THREE.DoubleSide, depthWrite: false })
-  for (const x of [-1.35, 1.35]) {
-    addRoundedBox(group, [0.62, 0.1, 0.76], [x, 0.05, 0], frameMaterial, 0.03)
-    addRoundedBox(group, [0.46, 1.42, 0.62], [x, 0.81, 0], frameMaterial, 0.14)
-    addRoundedBox(group, [0.33, 0.12, 0.46], [x, 1.48, 0], capMaterial, 0.06)
-    const scanner = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), new THREE.MeshBasicMaterial({ color: '#f8ffff' }))
-    scanner.rotation.x = -Math.PI / 2; scanner.position.set(x, 1.55, 0); group.add(scanner)
+  for (const x of [-1.3, 1.3]) {
+    addRoundedBox(group, [0.56, 0.12, 0.76], [x, 0.06, 0], frameMaterial, 0.035)
+    addRoundedBox(group, [0.46, 1.62, 0.64], [x, 0.87, 0], frameMaterial, 0.055)
+    const slopedTop = addRoundedBox(group, [0.46, 0.24, 0.76], [x, 1.72, -0.045], capMaterial, 0.045)
+    slopedTop.rotation.x = -0.24
+    addRoundedBox(group, [0.31, 0.4, 0.035], [x, 1.29, 0.337], screenMaterial, 0.025)
+    const arrowShape = new THREE.Shape()
+    arrowShape.moveTo(-0.1, 0.09); arrowShape.lineTo(0.01, 0.09); arrowShape.lineTo(0.01, 0.18); arrowShape.lineTo(0.15, 0); arrowShape.lineTo(0.01, -0.18); arrowShape.lineTo(0.01, -0.09); arrowShape.lineTo(-0.1, -0.09); arrowShape.closePath()
+    const arrow = new THREE.Mesh(new THREE.ShapeGeometry(arrowShape), arrowMaterial)
+    arrow.position.set(x, 1.29, 0.36); arrow.rotation.z = -0.45; group.add(arrow)
   }
-  const leftWing = new THREE.Mesh(new RoundedBoxGeometry(0.82, 0.72, 0.05, 3, 0.06), glassMaterial)
-  leftWing.position.set(-0.66, 0.87, 0)
-  const rightWing = leftWing.clone(); rightWing.position.x = 0.66
+  const makeWing = (direction: -1 | 1) => {
+    const shape = new THREE.Shape()
+    shape.moveTo(0, 0.16)
+    shape.lineTo(direction * 1.08, 0.24)
+    shape.lineTo(direction * 0.86, 1.16)
+    shape.lineTo(0, 1.36)
+    shape.closePath()
+    const wing = new THREE.Mesh(new THREE.ShapeGeometry(shape), glassMaterial)
+    wing.position.set(direction > 0 ? -1.07 : 1.07, 0.12, 0)
+    return wing
+  }
+  const leftWing = makeWing(1)
+  const rightWing = makeWing(-1)
   group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
   return group
 }
@@ -291,11 +309,6 @@ function createIntegratedTrainShell() {
   group.position.set(0, 0, -20.1)
   const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
   const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
-  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#102d3d', transparent: true, opacity: 0.9, metalness: 0.38, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
-  const roofTrim = new THREE.MeshStandardMaterial({ color: '#cbd7dc', metalness: 0.68, roughness: 0.22 })
-  const undercarriage = new THREE.MeshStandardMaterial({ color: '#394a53', metalness: 0.82, roughness: 0.3 })
-  const tireMaterial = new THREE.MeshStandardMaterial({ color: '#172329', metalness: 0.72, roughness: 0.36 })
-  const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
   const trainLength = 28.2
   const halfLength = trainLength / 2
   const halfDepth = 2.8
@@ -337,50 +350,6 @@ function createIntegratedTrainShell() {
 
   for (const [start, end] of frontSections) {
     addRoundedBox(group, [end - start - 0.16, 0.25, 0.06], [(start + end) / 2, 0.95, halfDepth + 0.13], blue, 0.02)
-  }
-
-  const noseProfile = [
-    new THREE.Vector2(0.01, 0),
-    new THREE.Vector2(0.72, 0.42),
-    new THREE.Vector2(1.55, 1.18),
-    new THREE.Vector2(2.25, 2.2),
-    new THREE.Vector2(2.62, 3.45),
-  ]
-  for (const direction of [-1, 1] as const) {
-    const nose = new THREE.Mesh(new THREE.LatheGeometry(noseProfile, 36), shellMaterial)
-    nose.position.set(direction * (halfLength + 3.45), 2.2, 0)
-    nose.rotation.z = direction > 0 ? Math.PI / 2 : -Math.PI / 2
-    nose.scale.set(0.82, 1, 1.05)
-    nose.castShadow = true; nose.receiveShadow = true; group.add(nose)
-
-    const windshield = addRoundedBox(group, [1.72, 0.08, 2.28], [direction * (halfLength + 1.72), 3.88, 0], cockpitGlass, 0.025)
-    windshield.rotation.z = direction > 0 ? -0.2 : 0.2
-    for (const z of [-0.62, 0.62]) {
-      const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.16, 18, 10), headlightMaterial)
-      headlight.scale.set(0.42, 0.78, 1)
-      headlight.position.set(direction * (halfLength + 3.16), 1.48, z)
-      group.add(headlight)
-    }
-  }
-
-  for (const x of [-4.7, 4.7]) {
-    for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
-  }
-  for (const x of doorCenters) addRoundedBox(group, [3.45, 0.22, 1.12], [x, 4.58, 0], roofTrim, 0.08)
-  const leftPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [-0.72, 4.98, 0], undercarriage, 0.025)
-  leftPantographArm.rotation.z = 0.58
-  const rightPantographArm = addRoundedBox(group, [1.9, 0.08, 0.08], [0.72, 4.98, 0], undercarriage, 0.025)
-  rightPantographArm.rotation.z = -0.58
-  addRoundedBox(group, [1.22, 0.08, 0.1], [0, 5.5, 0], undercarriage, 0.025)
-
-  for (const x of doorCenters) addRoundedBox(group, [6.6, 0.3, 2.35], [x, 0.28, 0], undercarriage, 0.08)
-  for (const x of [-11, -7.8, -1.6, 1.6, 7.8, 11]) {
-    for (const z of [-halfDepth - 0.04, halfDepth + 0.04]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.2, 22), tireMaterial)
-      wheel.rotation.x = Math.PI / 2
-      wheel.position.set(x, 0.34, z)
-      wheel.castShadow = true; group.add(wheel)
-    }
   }
   return group
 }
