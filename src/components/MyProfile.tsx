@@ -54,16 +54,26 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
   return (
     <main id="main-content" className="page my-page">
       <section className="profile-point-summary" aria-label="포인트 현황">
-        <article><span><Icon name="wallet" /></span><div><small>사용 가능 잔액</small><strong>0원</strong></div></article>
-        <article><span><Icon name="point" /></span><div><small>사용 가능 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
+        <article aria-label="사용 가능 잔액 0원"><span aria-hidden="true"><Icon name="wallet" /></span><strong>0</strong><em>원</em></article>
+        <article aria-label={`사용 가능 포인트 ${balance.toLocaleString('ko-KR')} 포인트`}><span aria-hidden="true"><Icon name="point" /></span><strong>{balance.toLocaleString('ko-KR')}</strong><em>P</em></article>
       </section>
 
       <section className="cket-ticket-board" aria-label="3D 전시관 방문 티켓">
         <div className="cket-ticket-grid">
           {roadViewTickets.map((ticket) => {
             const visited = visitedRoadViewGates.has(ticket.code)
-            const ticketStyle = { '--ticket-color': ticket.color } as CSSProperties
-            return <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={ticketStyle}><span className="cket-ticket__code">{ticket.code}</span><p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p></article>
+            return (
+              <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={{ '--ticket-color': ticket.color } as CSSProperties}>
+                <header className="cket-ticket__header">
+                  <span><Icon name="train" /><strong>TRAIN TICKET</strong></span>
+                  <small>{ticket.code}</small>
+                </header>
+                <div className="cket-ticket__body">
+                  <p><small>{ticket.location}</small><strong>{ticket.title}</strong><em>{visited ? 'VISITED · 500 P' : '방문 전'}</em></p>
+                  <span className="cket-ticket__stub" aria-hidden="true"><i /></span>
+                </div>
+              </article>
+            )
           })}
         </div>
       </section>
