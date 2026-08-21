@@ -21,9 +21,7 @@ function App() {
   const [orders, setOrders] = useState<RewardOrder[]>([])
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured)
   const [dataError, setDataError] = useState('')
-  const [isHeaderHidden, setIsHeaderHidden] = useState(false)
   const dataRequestId = useRef(0)
-  const lastScrollY = useRef(0)
   const visitedRoadViewGates = new Set(transactions.flatMap((transaction) => transaction.roadViewGateCode ? [transaction.roadViewGateCode] : []))
   const balance = transactions.reduce((total, transaction) => total + transaction.amount, 0)
 
@@ -82,24 +80,6 @@ function App() {
       listener.subscription.unsubscribe()
     }
   }, [loadRemoteState])
-
-  useEffect(() => {
-    lastScrollY.current = Math.max(window.scrollY, 0)
-
-    function updateHeaderVisibility() {
-      const currentScrollY = Math.max(window.scrollY, 0)
-      const scrollDelta = currentScrollY - lastScrollY.current
-
-      if (currentScrollY <= 8) setIsHeaderHidden(false)
-      else if (scrollDelta > 4) setIsHeaderHidden(true)
-      else if (scrollDelta < -4) setIsHeaderHidden(false)
-
-      lastScrollY.current = currentScrollY
-    }
-
-    window.addEventListener('scroll', updateHeaderVisibility, { passive: true })
-    return () => window.removeEventListener('scroll', updateHeaderVisibility)
-  }, [])
 
   async function signUp(details: SignUpDetails): Promise<AuthActionResult> {
     if (!supabase) return { error: '현재 회원가입 연결을 사용할 수 없습니다. 관리자에게 문의해 주세요.' }
@@ -184,7 +164,6 @@ function App() {
 
   function navigateTo(tab: TabId) {
     setActiveTab(tab)
-    setIsHeaderHidden(false)
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }
 
@@ -203,7 +182,7 @@ function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
-      <header className={`app-header${isHeaderHidden ? ' is-hidden' : ''}`}>
+      <header className="app-header">
         <div className="app-header__inner">
           <div className="app-header__brand-row">
             <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
