@@ -4,7 +4,7 @@ import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.
 import aerodynamicRoofMaterialsImage from '../assets/academy/aerodynamic-roof-materials.png'
 import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-principle.png'
 import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.png'
-import carrierFourElementsImage from '../assets/carrier-four-elements.jpg'
+import carrierFourElementsImage from '../assets/carrier-four-elements.png'
 import carrierPatentImage from '../assets/carrier-patent.jpg'
 import carrierPrintingShopImage from '../assets/carrier-printing-shop-hd.png'
 import kitFinalImage from '../assets/academy/kit-final-4way.png'
