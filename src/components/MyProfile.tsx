@@ -34,10 +34,10 @@ const roadViewTickets: readonly { code: RoadViewGateCode; title: string; color: 
   { code: 'E01', title: '초고속 냉동사이클', color: '#e69a35' },
   { code: 'L01', title: '교육용 키트', color: '#73b62f' },
   { code: 'R01', title: '굿즈샵', color: '#e45575' },
-  { code: 'B01', title: '빙하 위 펭귄 구조', color: '#45aee8' },
-  { code: 'B02', title: '무더운 여름', color: '#35b981' },
-  { code: 'B03', title: '동물들을 구하라', color: '#ae7cff' },
-  { code: 'B04', title: '나비효과', color: '#82e76d' },
+  { code: 'B01', title: '녹는 빙하 위에서 펭귄을 구해내라', color: '#45aee8' },
+  { code: 'B02', title: '무더운 여름에서 살아남기', color: '#35b981' },
+  { code: 'B03', title: '기후위기에서 동물들을 구하라', color: '#ae7cff' },
+  { code: 'B04', title: '나비효과로부터 지구를 지켜라', color: '#82e76d' },
 ]
 
 export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLogout, onDeleteAccount }: MyProfileProps) {
