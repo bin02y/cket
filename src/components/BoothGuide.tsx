@@ -149,7 +149,7 @@ const carrierCards = [
   },
   {
     title: '인쇄소의 습기 문제 해결',
-    description: <>버펄로 포지 컴퍼니 입사 후, 여름철 고온다습한 날씨로<br />종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의 문제를 해결했습니다.</>,
+    description: <>버펄로 포지 컴퍼니 입사 후, 여름철 고온다습한 날씨로<br />종이가 변형되어 인쇄가 번지는 뉴욕 브루클린 출판사의<br />문제를 해결했습니다.</>,
     image: carrierPrintingShopImage,
     imageAlt: '초기 캐리어 공기조화 설비가 설치된 인쇄 공장',
     variant: 'factory',

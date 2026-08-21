@@ -132,7 +132,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .profile-account-delete:hover { color: var(--danger-700); background: var(--danger-50); border-color: var(--danger-100); }
 .profile-account-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; margin-left: auto; }
 .profile-account-logout { min-height: 38px; padding: 0 14px; color: #526a76; background: white; border: 1px solid var(--line); border-radius: 11px; font: inherit; font-size: 9px; font-weight: 800; cursor: pointer; }
-.profile-account-logout:hover { color: var(--blue-700); border-color: var(--blue-200); background: var(--blue-50); }
+.profile-account-logout:hover { color: var(--blue-700); border-color: var(--blue-700); background: var(--blue-50); }
 .account-dialog .account-dialog__error { margin-top: 12px; padding: 9px; color: var(--danger-700); background: var(--danger-50); border-radius: 10px; }
 
 /* PHASE 11 · Exhibition booth guide */
@@ -245,13 +245,13 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 /* Current tab layout */
 .reward-catalog { margin-top: 0; }
 .profile-point-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; width: calc((100% - 30px)/3); }
-.profile-point-summary article { position: relative; display: grid; grid-template-columns: 68px minmax(0,1fr) auto; align-items: center; min-width: 0; min-height: 56px; padding-right: 14px; background: transparent; border: 0; box-shadow: none; isolation: isolate; }
-.profile-point-summary article::before { position: absolute; z-index: -1; top: 0; right: 0; bottom: 0; left: 68px; background: #f5f7f8; border-radius: 999px; content: ''; }
-.profile-point-summary article > span { display: grid; place-items: center; width: 56px; height: 56px; color: white; background: var(--blue-950); border-radius: 50%; }
+.profile-point-summary article { position: relative; display: grid; grid-template-columns: 58px minmax(0,1fr) auto; align-items: center; min-width: 0; min-height: 48px; padding-right: 12px; background: transparent; border: 0; box-shadow: none; isolation: isolate; }
+.profile-point-summary article::before { position: absolute; z-index: -1; top: 0; right: 0; bottom: 0; left: 58px; background: #f5f7f8; border-radius: 999px; content: ''; }
+.profile-point-summary article > span { display: grid; place-items: center; width: 48px; height: 48px; color: white; background: var(--blue-950); border-radius: 50%; }
 .profile-point-summary article:nth-child(2) > span { background: var(--green-700); }
-.profile-point-summary svg { width: 23px; height: 23px; }
-.profile-point-summary strong { min-width: 0; overflow: hidden; color: var(--blue-950); font-size: clamp(21px,2.2vw,27px); line-height: 1; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.profile-point-summary em { color: var(--blue-950); font-size: clamp(18px,1.9vw,23px); font-style: normal; font-weight: 900; line-height: 1; }
+.profile-point-summary svg { width: 20px; height: 20px; }
+.profile-point-summary strong { min-width: 0; overflow: hidden; color: var(--blue-950); font-size: clamp(18px,1.9vw,23px); line-height: 1; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.profile-point-summary em { color: var(--blue-950); font-size: clamp(16px,1.65vw,20px); font-style: normal; font-weight: 900; line-height: 1; }
 
 @media (max-width: 1050px) {
   .profile-point-summary { width: calc((100% - 15px)/2); }
@@ -260,12 +260,12 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 @media (max-width: 700px) {
   .reward-catalog { margin-top: 0; }
   .profile-point-summary { grid-template-columns: repeat(2,minmax(0,1fr)); width: 100%; gap: 8px; }
-  .profile-point-summary article { grid-template-columns: 50px minmax(0,1fr) auto; min-height: 42px; padding-right: 9px; }
-  .profile-point-summary article::before { left: 50px; }
-  .profile-point-summary article > span { width: 42px; height: 42px; }
-  .profile-point-summary svg { width: 18px; height: 18px; }
-  .profile-point-summary strong { font-size: clamp(15px,4.5vw,18px); }
-  .profile-point-summary em { font-size: clamp(14px,4vw,16px); }
+  .profile-point-summary article { grid-template-columns: 43px minmax(0,1fr) auto; min-height: 36px; padding-right: 8px; }
+  .profile-point-summary article::before { left: 43px; }
+  .profile-point-summary article > span { width: 36px; height: 36px; }
+  .profile-point-summary svg { width: 15px; height: 15px; }
+  .profile-point-summary strong { font-size: clamp(13px,4vw,16px); }
+  .profile-point-summary em { font-size: clamp(12px,3.6vw,14px); }
 }
 
 /* Experience tab · immersive 3D roadview */
@@ -292,16 +292,17 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .roadview__map-panel { width: min(100%,540px); padding: 12px; }
 .roadview__map { display: block; width: min(100%,516px); aspect-ratio: 1; margin: 0 auto; border: 1px solid rgba(109,211,231,.17); border-radius: 0; }
 .roadview__booth-info { max-height: min(90vh,760px); overflow: auto; border-top: 3px solid var(--roadview-accent); }
-.roadview__gate-reward { display: flex; align-items: center; gap: 11px; margin-top: 17px; padding: 12px 14px; color: #176c55; background: #edf9f4; border: 1px solid #b9e5d4; }
+.roadview__gate-reward { display: flex; align-items: center; gap: 11px; width: 100%; margin-top: 17px; padding: 12px 14px; color: #176c55; background: #edf9f4; border: 1px solid #b9e5d4; }
 .roadview__gate-reward > svg { flex: 0 0 auto; width: 22px; height: 22px; }
 .roadview__gate-reward span,.roadview__gate-reward small,.roadview__gate-reward strong { display: block; }
 .roadview__gate-reward small { color: #5d8d7d; font-size: 7px; font-weight: 900; letter-spacing: .1em; }
 .roadview__gate-reward strong { margin-top: 2px; font-size: 11px; }
 .roadview__gate-reward--pending { color: #176a92; background: #edf7fb; border-color: #beddeb; }
 .roadview__gate-reward--error { color: #9a4e37; background: #fff4ef; border-color: #f0c9ba; }
-.roadview__booth-image { overflow: hidden; margin: 20px 0 16px; background: #edf4f7; border: 1px solid color-mix(in srgb,var(--roadview-accent) 34%,transparent); border-radius: 18px; box-shadow: 0 14px 34px rgba(4,25,38,.14); }
-.roadview__booth-image img { display: block; width: 100%; max-height: 320px; object-fit: contain; }
-.roadview__booth-video video { display: block; width: 100%; max-height: 320px; background: #071d2b; object-fit: contain; }
+.roadview__booth-image { display: grid; width: 100%; aspect-ratio: 3 / 2; overflow: hidden; margin: 20px 0 16px; place-items: center; background: #fff; border: 0; border-radius: 18px; box-shadow: 0 14px 34px rgba(4,25,38,.14); }
+.roadview__booth-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.roadview__booth-image--contain img { background: #fff; object-fit: contain; }
+.roadview__booth-video video { display: block; width: 100%; height: 100%; background: #fff; object-fit: contain; }
 .roadview__booth-info > p { margin: 0 auto; max-width: 420px; color: rgba(255,255,255,.68); text-align: center; font-size: 11px; line-height: 1.75; word-break: keep-all; }
 
 @media (max-width: 700px), (hover: none) and (pointer: coarse) {
@@ -480,8 +481,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .roadview__booth-info > p { color: rgba(29,68,88,.72); }
 .roadview__panel.roadview__booth-info { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
 .roadview__panel.roadview__map-panel { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
-.roadview__booth-info .roadview__booth-image { margin: 0; border-radius: 0; box-shadow: none; }
-.roadview__booth-info .roadview__gate-reward { margin: 12px 0 0; border-radius: 0; }
+.roadview__booth-info .roadview__booth-image { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.roadview__booth-info .roadview__gate-reward { width: 100%; margin: 12px 0 0; border-radius: 0; }
 .roadview__mobile-controls button { color: #214b63; background: rgba(255,255,255,.9); border-color: rgba(69,116,138,.25); }
 .roadview__mobile-gate-guide { color: #244e64; background: rgba(255,255,255,.92); border-color: rgba(43,139,137,.25); }
 .roadview__mobile-gate-guide > svg,.roadview__mobile-gate-guide strong { color: #177f83; }
