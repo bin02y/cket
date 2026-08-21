@@ -15,6 +15,7 @@ import vibrationFinalImage from '../assets/academy/vibration-final.png'
 import vibrationMaterialsImage from '../assets/academy/vibration-materials.png'
 import vibrationPrincipleImage from '../assets/academy/vibration-principle.png'
 import vibrationProcessImage from '../assets/academy/vibration-process.png'
+import roadViewEntryImage from '../assets/roadview/roadview-entry-train.png'
 import willisCarrierImage from '../assets/willis-carrier-hd.png'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
@@ -265,16 +266,9 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
             </section>
 
             <section className="roadview-entry" aria-labelledby="roadview-entry-title">
+              <img className="roadview-entry__image" src={roadViewEntryImage} alt="" decoding="async" />
               <div className="roadview-entry__copy">
-                <small>CKET EXHIBITION</small>
                 <h1 id="roadview-entry-title">3D 전시관<br />로드뷰</h1>
-              </div>
-              <div className="roadview-entry__map" aria-hidden="true">
-                <span className="roadview-entry__route" />
-                <span className="roadview-entry__station roadview-entry__station--1" />
-                <span className="roadview-entry__station roadview-entry__station--2" />
-                <span className="roadview-entry__station roadview-entry__station--3" />
-                <span className="roadview-entry__train"><i /><i /><i /></span>
               </div>
               <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 열기" onClick={openRoadView}>
                 <span><em>입장하러 가기</em><Icon name="arrow" /></span>
