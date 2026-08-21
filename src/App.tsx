@@ -7,6 +7,7 @@ import { Icon } from './components/Icon'
 import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
 import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SignUpDetails, TabId } from './types'
+import cketLogo from './assets/cket-logo.jpg'
 
 const MyProfile = lazy(() => import('./components/MyProfile').then(({ MyProfile: component }) => ({ default: component })))
 const RewardShop = lazy(() => import('./components/RewardShop').then(({ RewardShop: component }) => ({ default: component })))
@@ -182,6 +183,13 @@ function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
+      <header className="app-header">
+        <div className="app-header__inner">
+          <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
+            <img src={cketLogo} alt="" />
+          </button>
+        </div>
+      </header>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'education' ? (
         <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
