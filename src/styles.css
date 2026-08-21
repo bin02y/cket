@@ -90,12 +90,12 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .app-shell { min-height: 100vh; background: #fff; }
 
 .app-header { width: 100%; background: #fff; border-bottom: 1px solid #e6e8e5; box-shadow: 0 5px 18px rgba(20,65,92,.05); }
-.app-header__inner { display: grid; grid-template-rows: 27px 24px; row-gap: 17px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: 111px; margin: 0 auto; padding-block: 28px 15px; }
+.app-header__inner { --header-left-space: max(clamp(20px,4.1665vw,60px),calc((100vw - 1440px)/2)); display: grid; grid-template-rows: 27px 24px; row-gap: 17px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: 111px; margin: 0 auto; padding-block: 28px 15px; }
 .app-header__brand-row { display: flex; align-items: center; }
 .app-header__logo { display: flex; align-items: center; justify-content: center; width: 95px; height: 27px; overflow: hidden; padding: 0; background: #fff; border: 0; cursor: pointer; }
 .app-header__logo img { display: block; flex: 0 0 auto; width: 123px; max-width: none; height: auto; filter: contrast(1.04) brightness(1.01); }
 .app-header__logo:focus-visible { outline-color: var(--blue-500); outline-offset: 2px; }
-.top-navigation { display: flex; align-items: stretch; gap: clamp(22px,2.2vw,32px); min-width: 0; }
+.top-navigation { display: flex; align-items: stretch; gap: var(--header-left-space); min-width: 0; }
 .top-navigation__item { position: relative; display: grid; min-width: 0; padding: 0; place-items: center; color: #8d98a3; background: transparent; border: 0; font-size: clamp(15px,1.45vw,20px); font-weight: 800; line-height: 24px; letter-spacing: -.025em; cursor: pointer; }
 .top-navigation__item span { display: block; transform: translateY(4px); }
 .top-navigation__item[aria-current='page'] { color: var(--blue-800); }
@@ -195,10 +195,10 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 }
 
 @media (max-width: 680px) {
-  .app-header__inner { grid-template-rows: 23px 16px; row-gap: 15px; width: min(100% - 28px,1440px); height: 87px; padding-block: 22px 11px; }
+  .app-header__inner { --header-left-space: 14px; grid-template-rows: 23px 16px; row-gap: 15px; width: min(100% - 28px,1440px); height: 87px; padding-block: 22px 11px; }
   .app-header__logo { width: 78px; height: 23px; }
   .app-header__logo img { width: 101px; }
-  .top-navigation { gap: 22px; width: auto; }
+  .top-navigation { width: auto; }
   .top-navigation__item { font-size: 13px; line-height: 16px; }
   .top-navigation__item span { transform: translateY(3px); }
   .page { width: min(100% - 28px,1440px); padding-top: 20px; }
@@ -378,8 +378,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 /* Education tab · kit library */
 .kit-education { min-height: 520px; }
 .kit-education__libraries { display: grid; gap: clamp(16px,2vw,24px); }
-.kit-education__board { position: relative; width: 100%; min-height: clamp(230px,25vw,360px); overflow: hidden; background: #0b3150; border: 0; border-radius: 22px; box-shadow: 0 15px 36px rgba(8,57,82,.12); isolation: isolate; }
-.kit-education__cover { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transform: scale(1.025); }
+.kit-education__board { position: relative; width: 100%; min-height: clamp(230px,25vw,360px); overflow: hidden; background: #fff; border: 0; border-radius: 22px; box-shadow: none; isolation: isolate; }
+.kit-education__cover { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .kit-education__card-copy { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: clamp(22px,3vw,38px); }
 .kit-education__card-copy h1 { max-width: min(760px,70%); margin: 0; padding: 0; color: #fff; background: transparent; border-radius: 0; box-shadow: none; font-size: clamp(25px,3.1vw,42px); line-height: 1.16; letter-spacing: -.045em; text-shadow: 0 3px 14px rgba(0,25,44,.72); word-break: keep-all; }
 .kit-education__card-copy button { display: grid; flex: 0 0 auto; width: 52px; height: 52px; padding: 0; place-items: center; color: var(--blue-950); background: #fff; border: 0; border-radius: 50%; box-shadow: 0 9px 24px rgba(0,24,43,.2); font: inherit; font-size: 31px; font-weight: 400; line-height: 1; cursor: pointer; }
