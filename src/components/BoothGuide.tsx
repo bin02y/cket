@@ -125,21 +125,15 @@ const academyContents: readonly AcademyContent[] = [
 
 const academyKits = [
   {
-    eyebrow: 'HVAC FLOW LAB',
     title: '냉·난방 4-way 밸브 교육용 키트',
-    description: '냉매의 흐름이 바뀌는 과정을 4개의 자료로 살펴보세요.',
     contents: academyContents.slice(0, 4),
   },
   {
-    eyebrow: 'VIBRATION LAB',
     title: '방진 마운트 교육용 키트',
-    description: '스프링과 고무가 진동을 줄이는 원리를 직접 비교해 보세요.',
     contents: academyContents.slice(4, 8),
   },
   {
-    eyebrow: 'AERODYNAMICS LAB',
     title: '공기역학적 지붕 커버 교육용 키트',
-    description: '유선형 커버가 공기저항을 줄이는 과정을 압력값으로 비교해 보세요.',
     contents: academyContents.slice(8, 12),
   },
 ] as const
@@ -237,19 +231,16 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
               <section className={`kit-education__board kit-education__board--${kitIndex + 1}`} aria-labelledby={`kit-education-title-${kitIndex}`} key={kit.title}>
                 <header className="kit-education__header">
                   <div>
-                    <span>{kit.eyebrow}</span>
                     <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
                   </div>
-                  <p>{kit.description}</p>
                 </header>
                 <div className="kit-education__grid">
                   {kit.contents.map((content, contentIndex) => {
                     const globalIndex = kitIndex * 4 + contentIndex
                     return (
                       <button className="kit-education-card" type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(globalIndex)} key={`${kit.title}-${content.label}`}>
-                        <span className="kit-education-card__index">0{contentIndex + 1}</span>
                         <span className="kit-education-card__image"><img src={content.image} alt="" decoding="async" /></span>
-                        <span className="kit-education-card__copy"><small>{kit.eyebrow}</small><strong>{content.label}</strong></span>
+                        <span className="kit-education-card__copy"><strong>{content.label}</strong></span>
                         <span className="kit-education-card__arrow"><Icon name="arrow" /></span>
                       </button>
                     )
