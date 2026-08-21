@@ -1,22 +1,22 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.png'
-import aerodynamicRoofMaterialsImage from '../assets/academy/aerodynamic-roof-materials.png'
-import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-principle.png'
-import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.png'
+import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.webp'
+import aerodynamicRoofMaterialsImage from '../assets/academy/aerodynamic-roof-materials.webp'
+import aerodynamicRoofPrincipleImage from '../assets/academy/aerodynamic-roof-principle.webp'
+import aerodynamicRoofProcessImage from '../assets/academy/aerodynamic-roof-process.webp'
 import carrierFourElementsImage from '../assets/carrier-four-elements.png'
 import carrierPatentImage from '../assets/carrier-patent.jpg'
-import carrierPrintingShopImage from '../assets/carrier-printing-shop-hd.png'
-import kitFinalImage from '../assets/academy/kit-final-4way.png'
-import kitMaterialsImage from '../assets/academy/kit-materials-4way.png'
-import kitPrincipleImage from '../assets/academy/kit-principle-4way.png'
-import kitProcessImage from '../assets/academy/kit-process-4way.png'
-import vibrationFinalImage from '../assets/academy/vibration-final.png'
-import vibrationMaterialsImage from '../assets/academy/vibration-materials.png'
-import vibrationPrincipleImage from '../assets/academy/vibration-principle.png'
-import vibrationProcessImage from '../assets/academy/vibration-process.png'
-import roadViewEntryImage from '../assets/roadview/roadview-entry-train.png'
-import willisCarrierImage from '../assets/willis-carrier-hd.png'
+import carrierPrintingShopImage from '../assets/carrier-printing-shop-hd.webp'
+import kitFinalImage from '../assets/academy/kit-final-4way.webp'
+import kitMaterialsImage from '../assets/academy/kit-materials-4way.webp'
+import kitPrincipleImage from '../assets/academy/kit-principle-4way.webp'
+import kitProcessImage from '../assets/academy/kit-process-4way.webp'
+import vibrationFinalImage from '../assets/academy/vibration-final.webp'
+import vibrationMaterialsImage from '../assets/academy/vibration-materials.webp'
+import vibrationPrincipleImage from '../assets/academy/vibration-principle.webp'
+import vibrationProcessImage from '../assets/academy/vibration-process.webp'
+import roadViewEntryImage from '../assets/roadview/roadview-entry-train.webp'
+import willisCarrierImage from '../assets/willis-carrier-hd.webp'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
 
@@ -246,7 +246,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
           <div className="kit-education__libraries">
             {academyKits.map((kit, kitIndex) => (
               <section className={`kit-education__board kit-education__board--${kitIndex + 1}`} aria-labelledby={`kit-education-title-${kitIndex}`} key={kit.title}>
-                <img className="kit-education__cover" src={kit.contents[0].image} alt="" decoding="async" />
+                <img className="kit-education__cover" src={kit.contents[0].image} alt="" loading={kitIndex === 0 ? 'eager' : 'lazy'} decoding="async" fetchPriority={kitIndex === 0 ? 'high' : 'auto'} />
                 <div className="kit-education__card-copy">
                   <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
                   <button type="button" aria-label={`${kit.title} 자세히 보기`} aria-haspopup="dialog" onClick={() => setAcademyStep(kitIndex * 4)}>+</button>
@@ -260,13 +260,13 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
           <div className="home-feature-grid">
             <section className="home-video" aria-label="초고속 냉동공조 영상">
               <video autoPlay muted loop playsInline preload="metadata">
-                <source src="/videos/high-speed-refrigeration-hvac.mp4" type="video/mp4" />
+                <source src="/videos/high-speed-refrigeration-hvac-720p.mp4" type="video/mp4" />
                 브라우저에서 영상을 재생할 수 없습니다.
               </video>
             </section>
 
             <section className="roadview-entry" aria-labelledby="roadview-entry-title">
-              <img className="roadview-entry__image" src={roadViewEntryImage} alt="" decoding="async" />
+              <img className="roadview-entry__image" src={roadViewEntryImage} alt="" decoding="async" fetchPriority="high" />
               <div className="roadview-entry__copy">
                 <h1 id="roadview-entry-title">3D 전시관<br />로드뷰</h1>
               </div>
@@ -287,8 +287,8 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                     key={card.title}
                   >
                     <figure className="carrier-card__image">
-                      <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" decoding="async" />
-                      <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} decoding="async" />
+                      <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                      <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} loading="lazy" decoding="async" />
                     </figure>
                     <div className="carrier-card__overlay">
                       <h3>{card.title}</h3>

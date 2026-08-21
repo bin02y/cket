@@ -3,14 +3,14 @@ import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.png'
-import kitFinalImage from '../assets/academy/kit-final-4way.png'
-import vibrationFinalImage from '../assets/academy/vibration-final.png'
-import boothOneImage from '../assets/roadview/booth-1.png'
-import boothTwoImage from '../assets/roadview/booth-2.png'
-import boothThreeImage from '../assets/roadview/booth-3.png'
-import boothFourImage from '../assets/roadview/booth-4.png'
-import ultraFastRefrigerationVideo from '../assets/roadview/ultra-fast-refrigeration-cycle.mp4'
+import aerodynamicRoofFinalImage from '../assets/academy/aerodynamic-roof-final.webp'
+import kitFinalImage from '../assets/academy/kit-final-4way.webp'
+import vibrationFinalImage from '../assets/academy/vibration-final.webp'
+import boothOneImage from '../assets/roadview/booth-1.webp'
+import boothTwoImage from '../assets/roadview/booth-2.webp'
+import boothThreeImage from '../assets/roadview/booth-3.webp'
+import boothFourImage from '../assets/roadview/booth-4.webp'
+import ultraFastRefrigerationVideo from '../assets/roadview/ultra-fast-refrigeration-cycle-720p.mp4'
 import { rewardProducts } from '../data/rewards'
 import type { RoadViewGateCode, RoadViewGateRewardResult } from '../types'
 import { Icon } from './Icon'
@@ -677,7 +677,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-label={`${selectedBooth.title} 방문 미디어와 포인트 획득 결과`} style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
-        {selectedBooth.gateCode === 'E01' ? <figure className="roadview__booth-image roadview__booth-video"><video src={ultraFastRefrigerationVideo} aria-label="초고속 냉동공조 소개 영상" autoPlay muted playsInline controls preload="metadata" /></figure> : selectedBoothImage ? <figure className="roadview__booth-image"><img src={selectedBoothImage.src} alt={selectedBoothImage.alt} /></figure> : null}
+        {selectedBooth.gateCode === 'E01' ? <figure className="roadview__booth-image roadview__booth-video"><video src={ultraFastRefrigerationVideo} aria-label="초고속 냉동공조 소개 영상" autoPlay muted playsInline controls preload="metadata" /></figure> : selectedBoothImage ? <figure className="roadview__booth-image"><img src={selectedBoothImage.src} alt={selectedBoothImage.alt} decoding="async" /></figure> : null}
         {gateRewardNotice?.gateCode === selectedBooth.gateCode ? <div className={`roadview__gate-reward roadview__gate-reward--${gateRewardNotice.status}`} role="status"><Icon name={gateRewardNotice.status === 'error' ? 'warning' : 'wallet'} /><span><small>{selectedBooth.gateCode} VISIT REWARD</small><strong>{gateRewardNotice.status === 'pending' ? '500 P 적립 중…' : gateRewardNotice.status === 'completed' ? `+${gateRewardNotice.points.toLocaleString('ko-KR')} P 적립 완료` : gateRewardNotice.status === 'already_completed' ? '이미 500 P를 받은 구역이에요' : '포인트 적립을 확인하지 못했어요'}</strong></span></div> : null}
       </section></div> : null}
     </section>
