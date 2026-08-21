@@ -40,6 +40,8 @@ const SIDE_GATE_X = SIDE_ZONE_X - BOOTH_DEPTH / 2
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const TRAIN_BODY_BASE_Y = 0.28
+const TRAIN_ROOF_TOP_Y = 4.45
+const TRAIN_WINDOW_CENTER_Y = 2.55
 const FACILITY_DOOR_WIDTH = 2.08
 const FACILITY_DOOR_HEIGHT = 3.05
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -315,7 +317,7 @@ function createTrainDoor(zone: RoadViewBooth) {
   const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
   const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
   for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
-    addRoundedBox(door, [0.78, 1.12, 0.05], [0, 0.35, 0.1], windowMaterial, 0.05)
+    addRoundedBox(door, [0.78, 1.12, 0.05], [0, TRAIN_WINDOW_CENTER_Y - door.position.y, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
     door.userData.openX = Math.sign(x) * 2.3
   }
@@ -383,12 +385,14 @@ function createIntegratedTrainShell() {
   shell.receiveShadow = true
   group.add(shell)
 
-  addRoundedBox(group, [27.9, 0.72, 0.06], [0, 3.82, -halfDepth - 0.13], blue, 0.02)
-  addRoundedBox(group, [27.9, 0.72, 0.06], [0, 3.82, halfDepth + 0.13], blue, 0.02)
+  const stripeHeight = 0.72
+  const stripeCenterY = TRAIN_ROOF_TOP_Y - stripeHeight / 2
+  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [0, stripeCenterY, -halfDepth - 0.13], blue, 0.02)
+  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [0, stripeCenterY, halfDepth + 0.13], blue, 0.02)
   const noseShape = new THREE.Shape()
   noseShape.moveTo(-20.6, 0.28)
   noseShape.quadraticCurveTo(-20.45, 0.72, -19.55, 1.42)
-  noseShape.quadraticCurveTo(-17.4, 3.62, -14.1, 4.22)
+  noseShape.quadraticCurveTo(-17.4, 3.78, -14.1, TRAIN_ROOF_TOP_Y - 0.08)
   noseShape.lineTo(-14.1, 0.28)
   noseShape.closePath()
   const noseGeometry = new THREE.ExtrudeGeometry(noseShape, { depth: 5.56, bevelEnabled: true, bevelSegments: 3, bevelSize: 0.08, bevelThickness: 0.08, curveSegments: 12 })
@@ -398,12 +402,12 @@ function createIntegratedTrainShell() {
 
   const blueNoseShape = new THREE.Shape()
   blueNoseShape.moveTo(-19.35, 1.7)
-  blueNoseShape.quadraticCurveTo(-17.35, 3.7, -14.08, 4.18)
-  blueNoseShape.lineTo(-14.08, 3.46)
-  blueNoseShape.quadraticCurveTo(-17.15, 3.25, -18.82, 1.48)
+  blueNoseShape.quadraticCurveTo(-17.35, 3.95, -14.08, TRAIN_ROOF_TOP_Y)
+  blueNoseShape.lineTo(-14.08, TRAIN_ROOF_TOP_Y - stripeHeight)
+  blueNoseShape.quadraticCurveTo(-17.15, 3.5, -18.82, 1.48)
   blueNoseShape.closePath()
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
-  blueNose.position.z = halfDepth + 0.1; group.add(blueNose)
+  blueNose.position.z = halfDepth + 0.14; group.add(blueNose)
   const windshieldShape = new THREE.Shape()
   windshieldShape.moveTo(-18.25, 2.58)
   windshieldShape.quadraticCurveTo(-17.55, 3.2, -15.96, 3.64)
@@ -418,13 +422,13 @@ function createIntegratedTrainShell() {
   }
 
   for (const x of [-6.65, -3.15, 3.15, 6.65, 12.05]) {
-    for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, 2.55, z], windowMaterial, 0.12)
+    for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, TRAIN_WINDOW_CENTER_Y, z], windowMaterial, 0.12)
   }
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.18, halfDepth + 0.18]) addRoundedBox(group, [0.18, 3.86, 0.09], [x, 2.15, z], undercarriage, 0.02)
   }
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
-  ktxMark.position.set(-16.45, 0.96, halfDepth + 0.19); group.add(ktxMark)
+  ktxMark.position.set(-16.45, 2.5, halfDepth + 0.2); group.add(ktxMark)
 
   for (const x of [-4.7, 4.7]) {
     for (const z of [-halfDepth - 0.13, halfDepth + 0.13]) addRoundedBox(group, [0.08, 3.72, 0.06], [x, 2.18, z], roofTrim, 0.025)
