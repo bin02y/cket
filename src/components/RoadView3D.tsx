@@ -31,6 +31,14 @@ type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 8.4
 const BOOTH_DEPTH = 5.4
+const STATION_WIDTH = 64
+const STATION_DEPTH = 64
+const STATION_HEIGHT = 8.5
+const PERIMETER_WALL_THICKNESS = 0.24
+const SIDE_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_DEPTH / 2
+const SIDE_GATE_X = SIDE_ZONE_X - BOOTH_DEPTH / 2
+const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
+const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const FACILITY_DOOR_WIDTH = 2.08
 const FACILITY_DOOR_HEIGHT = 3.05
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -47,18 +55,18 @@ const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
 }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -19.1, z: -5, gate: { x: -16.4, z: -5, side: 'east' } },
-  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: -15, gate: { x: -9.4, z: -12, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: 19.1, z: -5, gate: { x: 16.4, z: -5, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -19.1, z: 5, gate: { x: -16.4, z: 5, side: 'east' } },
-  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: -15, gate: { x: 0, z: -12, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: 19.1, z: 5, gate: { x: 16.4, z: 5, side: 'west' } },
-  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: -15, gate: { x: 9.4, z: -12, side: 'south' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -SIDE_ZONE_X, z: -5, gate: { x: -SIDE_GATE_X, z: -5, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: TRAIN_CENTER_Z, gate: { x: -9.4, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: SIDE_ZONE_X, z: -5, gate: { x: SIDE_GATE_X, z: -5, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -SIDE_ZONE_X, z: 5, gate: { x: -SIDE_GATE_X, z: 5, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: TRAIN_CENTER_Z, gate: { x: 0, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: SIDE_ZONE_X, z: 5, gate: { x: SIDE_GATE_X, z: 5, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: TRAIN_CENTER_Z, gate: { x: 9.4, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
-  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -19.1, z: 15, gate: { x: -16.4, z: 15, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: 19.1, z: 15, gate: { x: 16.4, z: 15, side: 'west' } },
+  { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: -SIDE_ZONE_X, z: 15, gate: { x: -SIDE_GATE_X, z: 15, side: 'east' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: SIDE_ZONE_X, z: 15, gate: { x: SIDE_GATE_X, z: 15, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
@@ -126,7 +134,9 @@ const COLLIDERS: readonly Collider[] = ZONES.flatMap((zone) => {
 
 function isWalkable(x: number, z: number) {
   const radius = 0.32
-  if (x < -21.8 || x > 21.8 || z < -21.8 || z > 21.8) return false
+  const horizontalLimit = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - radius - 0.05
+  const verticalLimit = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - radius - 0.05
+  if (x < -horizontalLimit || x > horizontalLimit || z < -verticalLimit || z > verticalLimit) return false
   return !COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)
 }
 
@@ -286,7 +296,7 @@ function addTrainSeat(parent: THREE.Object3D, x: number, z: number, backDirectio
 
 function createIntegratedTrainShell() {
   const group = new THREE.Group()
-  group.position.set(0, 0, -15)
+  group.position.set(0, 0, TRAIN_CENTER_Z)
   const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.22, roughness: 0.24, clearcoat: 0.8, clearcoatRoughness: 0.18 })
   const blue = new THREE.MeshStandardMaterial({ color: '#146da6', emissive: '#0d5d91', emissiveIntensity: 0.18, metalness: 0.55, roughness: 0.24 })
   const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#102d3d', transparent: true, opacity: 0.9, metalness: 0.38, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04 })
@@ -482,11 +492,15 @@ function createFacility(facility: StationFacility) {
 
 function buildMetaverseStation(scene: THREE.Scene) {
   const animated: THREE.Object3D[] = []
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 48), new THREE.MeshStandardMaterial({ color: '#edf2f3', metalness: 0.02, roughness: 0.9 }))
+  const envelopeMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92, side: THREE.DoubleSide })
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
-  const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
-  const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 47), glass)
-  roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, 0); scene.add(roofPanel)
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
+  ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, STATION_HEIGHT, 0); scene.add(ceiling)
+  addRoundedBox(scene, [STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, -STATION_DEPTH / 2 + PERIMETER_WALL_THICKNESS / 2], envelopeMaterial, 0.04)
+  addRoundedBox(scene, [STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS / 2], envelopeMaterial, 0.04)
+  addRoundedBox(scene, [PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [-STATION_WIDTH / 2 + PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0], envelopeMaterial, 0.04)
+  addRoundedBox(scene, [PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0], envelopeMaterial, 0.04)
   scene.add(createIntegratedTrainShell())
   for (const booth of BOOTHS) {
     scene.add(createBooth(booth))
@@ -499,8 +513,8 @@ function buildMetaverseStation(scene: THREE.Scene) {
     if (builtFacility.userData.hingedDoor) animated.push(builtFacility)
   }
   const rail = new THREE.MeshStandardMaterial({ color: '#8da1ad', metalness: 0.9, roughness: 0.18 })
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -17.3], rail, 0.03)
-  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, -12.7], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, TRAIN_CENTER_Z - 2.3], rail, 0.03)
+  addRoundedBox(scene, [40, 0.1, 0.14], [0, 0.11, TRAIN_CENTER_Z + 2.3], rail, 0.03)
   return animated
 }
 
@@ -509,17 +523,18 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const ratio = Math.min(window.devicePixelRatio || 1, 2); const size = Math.min(canvas.clientWidth, canvas.clientHeight)
   canvas.width = Math.round(size * ratio); canvas.height = Math.round(size * ratio); context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
-  const mapExtent = 22; const worldToMap = (value: number) => ((value + mapExtent) / (mapExtent * 2)) * size
-  const trainX = worldToMap(-14.1); const trainY = worldToMap(-18.15)
-  const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-11.85) - trainY
+  const worldXToMap = (value: number) => ((value + STATION_WIDTH / 2) / STATION_WIDTH) * size
+  const worldZToMap = (value: number) => ((value + STATION_DEPTH / 2) / STATION_DEPTH) * size
+  const trainX = worldXToMap(-14.1); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
+  const trainWidth = worldXToMap(14.1) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.fillRect(trainX, trainY, trainWidth, trainHeight); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
   context.fillStyle = '#335469'; context.font = `300 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
-    const x = worldToMap(zone.x - zoneDimensions.width / 2); const y = worldToMap(zone.z - zoneDimensions.depth / 2)
-    const width = worldToMap(zone.x + zoneDimensions.width / 2) - x; const height = worldToMap(zone.z + zoneDimensions.depth / 2) - y
+    const x = worldXToMap(zone.x - zoneDimensions.width / 2); const y = worldZToMap(zone.z - zoneDimensions.depth / 2)
+    const width = worldXToMap(zone.x + zoneDimensions.width / 2) - x; const height = worldZToMap(zone.z + zoneDimensions.depth / 2) - y
     context.fillStyle = zone.trainCar ? '#ffffff' : zone.color; context.globalAlpha = zone.trainCar ? 0.95 : 0.72
     context.fillRect(x, y, width, height); context.globalAlpha = 1
     context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.strokeRect(x, y, width, height)
@@ -527,11 +542,11 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.font = `500 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
     if ('id' in zone) {
       context.fillStyle = '#143e57'
-      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldToMap(zone.gate.x) - 2, worldToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
-      else context.fillRect(worldToMap(zone.gate.x) - width * 0.14, worldToMap(zone.gate.z) - 2, width * 0.28, 4)
+      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldXToMap(zone.gate.x) - 2, worldZToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
+      else context.fillRect(worldXToMap(zone.gate.x) - width * 0.14, worldZToMap(zone.gate.z) - 2, width * 0.28, 4)
     }
   }
-  const x = worldToMap(player.x); const y = worldToMap(player.z)
+  const x = worldXToMap(player.x); const y = worldZToMap(player.z)
   const arrowSize = Math.max(5, size * 0.016)
   context.save(); context.translate(x, y); context.rotate(-player.yaw)
   context.fillStyle = '#ffffff'; context.strokeStyle = '#0879db'; context.lineWidth = Math.max(1.5, size * 0.005); context.shadowColor = '#17c9ff'; context.shadowBlur = 10
@@ -591,11 +606,11 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }) } catch { setRenderError(true); return }
     renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.22
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    const scene = new THREE.Scene(); scene.background = new THREE.Color('#e8f1f4'); scene.fog = new THREE.Fog('#e8f1f4', 30, 72)
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#ffffff'); scene.fog = new THREE.Fog('#ffffff', 40, 100)
     const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 120); camera.rotation.order = 'YXZ'
-    scene.add(new THREE.HemisphereLight('#ffffff', '#b8cad2', 2.25))
+    scene.add(new THREE.HemisphereLight('#ffffff', '#ffffff', 2.25))
     const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024)
-    sun.shadow.camera.left = -26; sun.shadow.camera.right = 26; sun.shadow.camera.top = 26; sun.shadow.camera.bottom = -26; scene.add(sun)
+    sun.shadow.camera.left = -36; sun.shadow.camera.right = 36; sun.shadow.camera.top = 36; sun.shadow.camera.bottom = -36; scene.add(sun)
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const resize = () => {
