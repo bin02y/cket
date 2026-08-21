@@ -325,9 +325,11 @@ function createTrainDoor(zone: RoadViewBooth) {
   addRoundedBox(group, [0.2, 3.5, 0.3], [-1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
   addRoundedBox(group, [0.2, 3.5, 0.3], [1.52, 1.75 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
   addRoundedBox(group, [3.2, 0.2, 0.3], [0, 3.42 + TRAIN_BODY_BASE_Y, 0], frame, 0.06)
-  const leftDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [-0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
-  const rightDoor = addRoundedBox(group, [1.42, 3.24, 0.16], [0.71, 1.71 + TRAIN_BODY_BASE_Y, -0.28], doorMaterial, 0.02)
-  for (const [x, door] of [[-0.71, leftDoor], [0.71, rightDoor]] as const) {
+  const doorOffset = 0.73
+  const doorCenterY = 1.72 + TRAIN_BODY_BASE_Y
+  const leftDoor = addRoundedBox(group, [1.5, 3.36, 0.16], [-doorOffset, doorCenterY, -0.28], doorMaterial, 0.02)
+  const rightDoor = addRoundedBox(group, [1.5, 3.36, 0.16], [doorOffset, doorCenterY, -0.28], doorMaterial, 0.02)
+  for (const [x, door] of [[-doorOffset, leftDoor], [doorOffset, rightDoor]] as const) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, TRAIN_WINDOW_CENTER_Y - door.position.y, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
     door.userData.openX = Math.sign(x) * 2.3
@@ -353,7 +355,6 @@ function createIntegratedTrainShell() {
   group.position.set(0, 0, TRAIN_CENTER_Z)
   const shellMaterial = new THREE.MeshPhysicalMaterial({ color: '#f9fafb', metalness: 0.16, roughness: 0.3, clearcoat: 0.72, clearcoatRoughness: 0.2 })
   const blue = new THREE.MeshStandardMaterial({ color: '#244f99', metalness: 0.42, roughness: 0.28 })
-  const cockpitGlass = new THREE.MeshPhysicalMaterial({ color: '#29485a', transparent: true, opacity: 0.9, metalness: 0.3, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.05 })
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
   const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
   const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
@@ -417,14 +418,6 @@ function createIntegratedTrainShell() {
   blueNoseShape.closePath()
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.14; group.add(blueNose)
-  const windshieldShape = new THREE.Shape()
-  windshieldShape.moveTo(-18.32, 2.35)
-  windshieldShape.quadraticCurveTo(-17.3, 3.42, -15.94, 3.88)
-  windshieldShape.lineTo(-16.08, 3.56)
-  windshieldShape.quadraticCurveTo(-17.28, 3.14, -18.24, 2.16)
-  windshieldShape.closePath()
-  const windshield = new THREE.Mesh(new THREE.ShapeGeometry(windshieldShape), cockpitGlass)
-  windshield.position.z = halfDepth + 0.16; group.add(windshield)
   for (const z of [-1.72, 1.72]) {
     const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 10), headlightMaterial)
     headlight.scale.set(0.48, 0.72, 1); headlight.position.set(-20.12, 1.03, z); group.add(headlight)
