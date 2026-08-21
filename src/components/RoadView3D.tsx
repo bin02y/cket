@@ -482,10 +482,8 @@ function createFacility(facility: StationFacility) {
 
 function buildMetaverseStation(scene: THREE.Scene) {
   const animated: THREE.Object3D[] = []
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 48), new THREE.MeshPhysicalMaterial({ color: '#e5ecef', metalness: 0.12, roughness: 0.3, clearcoat: 0.78, clearcoatRoughness: 0.22 }))
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 48), new THREE.MeshStandardMaterial({ color: '#edf2f3', metalness: 0.02, roughness: 0.9 }))
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
-  const grid = new THREE.GridHelper(46, 46, '#7ea6b9', '#c1d0d8')
-  grid.material.transparent = true; grid.material.opacity = 0.32; grid.position.y = 0.015; scene.add(grid)
   const glass = new THREE.MeshPhysicalMaterial({ color: '#bde1ec', transparent: true, opacity: 0.28, roughness: 0.06, metalness: 0.08, side: THREE.DoubleSide })
   const roofPanel = new THREE.Mesh(new THREE.PlaneGeometry(43.5, 47), glass)
   roofPanel.rotation.x = Math.PI / 2; roofPanel.position.set(0, 8.52, 0); scene.add(roofPanel)
@@ -511,13 +509,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const ratio = Math.min(window.devicePixelRatio || 1, 2); const size = Math.min(canvas.clientWidth, canvas.clientHeight)
   canvas.width = Math.round(size * ratio); canvas.height = Math.round(size * ratio); context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
-  const padding = size * 0.075; const mapSize = size - padding * 2; const worldToMap = (value: number) => padding + ((value + 23) / 46) * mapSize
-  context.strokeStyle = 'rgba(42,76,92,.12)'; context.lineWidth = 1
-  for (let index = 0; index <= 12; index += 1) {
-    const point = padding + mapSize * index / 12
-    context.beginPath(); context.moveTo(point, padding); context.lineTo(point, size - padding); context.stroke()
-    context.beginPath(); context.moveTo(padding, point); context.lineTo(size - padding, point); context.stroke()
-  }
+  const mapExtent = 22; const worldToMap = (value: number) => ((value + mapExtent) / (mapExtent * 2)) * size
   const trainX = worldToMap(-14.1); const trainY = worldToMap(-18.15)
   const trainWidth = worldToMap(14.1) - trainX; const trainHeight = worldToMap(-11.85) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
