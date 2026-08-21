@@ -61,9 +61,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 .app-shell { min-height: 100vh; padding-bottom: calc(96px + env(safe-area-inset-bottom)); background: #fff; }
 
-.app-header { position: sticky; z-index: 19; top: 0; width: 100%; background: #fff; border-bottom: 1px solid #e3ebf0; box-shadow: 0 5px 18px rgba(20,65,92,.05); }
-.app-header__inner { display: flex; align-items: center; justify-content: center; width: min(1180px,calc(100% - 40px)); height: 76px; margin: 0 auto; }
-.app-header__logo { display: flex; align-items: center; justify-content: center; width: 190px; height: 56px; overflow: hidden; padding: 0; background: #fff; border: 0; cursor: pointer; }
+.app-header { position: sticky; z-index: 19; top: 0; width: 100%; background: #fafaf8; border-bottom: 1px solid #e6e8e5; box-shadow: 0 5px 18px rgba(20,65,92,.05); }
+.app-header__inner { display: flex; align-items: center; justify-content: flex-start; width: min(1180px,calc(100% - 40px)); height: 76px; margin: 0 auto; }
+.app-header__logo { display: flex; align-items: center; justify-content: center; width: 190px; height: 56px; overflow: hidden; padding: 0; background: #fafaf8; border: 0; cursor: pointer; }
 .app-header__logo img { display: block; flex: 0 0 auto; width: 245px; max-width: none; height: auto; }
 .app-header__logo:focus-visible { outline-color: var(--blue-500); outline-offset: 2px; }
 
