@@ -175,9 +175,6 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
-  const currentAcademyKitIndex = academyStep !== null ? Math.floor(academyStep / 4) : null
-  const currentAcademyKit = currentAcademyKitIndex !== null ? academyKits[currentAcademyKitIndex] : null
-  const currentAcademySlide = academyStep !== null ? academyStep % 4 : 0
 
   const moveAcademySlide = useCallback((direction: -1 | 1) => {
     setAcademyStep((current) => {
@@ -251,10 +248,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                 <img className="kit-education__cover" src={kit.contents[0].image} alt="" decoding="async" />
                 <div className="kit-education__card-copy">
                   <h1 id={`kit-education-title-${kitIndex}`}>{kit.title}</h1>
-                  <button type="button" aria-haspopup="dialog" onClick={() => setAcademyStep(kitIndex * 4)}>
-                    <span>자세히 보기</span>
-                    <Icon name="arrow" />
-                  </button>
+                  <button type="button" aria-label={`${kit.title} 자세히 보기`} aria-haspopup="dialog" onClick={() => setAcademyStep(kitIndex * 4)}>+</button>
                 </div>
               </section>
             ))}
@@ -331,41 +325,20 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         </div>
       )}
 
-      {academyStep !== null && currentAcademyContent && currentAcademyKit && currentAcademyKitIndex !== null ? createPortal(
+      {academyStep !== null && currentAcademyContent ? createPortal(
         <div className="academy-dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setAcademyStep(null)}>
-          <section className="academy-image-viewer" role="dialog" aria-modal="true" aria-labelledby="academy-viewer-title">
-            <header>
-              <div>
-                <small>{currentAcademyKit.title}</small>
-                <h2 id="academy-viewer-title">{currentAcademyContent.label} · {currentAcademyContent.title}</h2>
-              </div>
-              <button type="button" aria-label="상세 이미지 닫기" onClick={() => setAcademyStep(null)} autoFocus>×</button>
-            </header>
+          <section className="academy-image-viewer" role="dialog" aria-modal="true" aria-label={`${currentAcademyContent.label} 상세 이미지`}>
             <div className="academy-image-viewer__stage">
               <button className="academy-image-viewer__nav academy-image-viewer__nav--previous" type="button" aria-label="이전 이미지" onClick={() => moveAcademySlide(-1)}>
                 <Icon name="arrow" />
               </button>
-              <figure>
+              <button className="academy-image-viewer__image" type="button" aria-label="상세 이미지 닫기" onClick={() => setAcademyStep(null)} autoFocus>
                 <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
-              </figure>
+              </button>
               <button className="academy-image-viewer__nav academy-image-viewer__nav--next" type="button" aria-label="다음 이미지" onClick={() => moveAcademySlide(1)}>
                 <Icon name="arrow" />
               </button>
             </div>
-            <footer>
-              <div className="academy-image-viewer__dots" aria-label="상세 이미지 선택">
-                {currentAcademyKit.contents.map((content, contentIndex) => (
-                  <button
-                    type="button"
-                    aria-label={`${content.label} 이미지 보기`}
-                    aria-current={contentIndex === currentAcademySlide ? 'true' : undefined}
-                    onClick={() => setAcademyStep(currentAcademyKitIndex * 4 + contentIndex)}
-                    key={content.label}
-                  />
-                ))}
-              </div>
-              <strong>{currentAcademySlide + 1} / 4</strong>
-            </footer>
           </section>
         </div>,
         document.body,
