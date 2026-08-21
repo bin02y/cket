@@ -174,6 +174,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [carrierStep, setCarrierStep] = useState(0)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
+  const homeVideoRef = useRef<HTMLVideoElement>(null)
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
 
@@ -239,6 +240,18 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [roadViewOpen])
 
+  useEffect(() => {
+    const homeVideo = homeVideoRef.current
+    if (!homeVideo) return
+
+    if (roadViewOpen) {
+      homeVideo.pause()
+      return
+    }
+
+    void homeVideo.play().catch(() => undefined)
+  }, [roadViewOpen])
+
   return (
     <main id="main-content" className="page booth-page">
       {section === 'education' ? (
@@ -259,7 +272,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
         <div id="experience-panel-booths" className="experience-section-panel" role="region" aria-label="부스 콘텐츠">
           <div className="home-feature-grid">
             <section className="home-video" aria-label="초고속 냉동공조 영상">
-              <video autoPlay loop playsInline preload="metadata" onClick={(event) => void event.currentTarget.play()}>
+              <video ref={homeVideoRef} autoPlay loop playsInline preload="metadata" onClick={(event) => void event.currentTarget.play()}>
                 <source src="/videos/high-speed-refrigeration-hvac-720p.mp4" type="video/mp4" />
                 브라우저에서 영상을 재생할 수 없습니다.
               </video>
