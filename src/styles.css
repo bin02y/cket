@@ -59,10 +59,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 .skip-link:focus { transform: translateY(0); }
 
-.app-shell { min-height: 100vh; padding-top: calc(132px + clamp(16px,3vw,42px)); background: #fff; }
+.app-shell { min-height: 100vh; padding-top: 157px; background: #fff; }
 
 .app-header { position: fixed; z-index: 19; top: 0; left: 0; width: 100%; background: #fff; border-bottom: 1px solid #e6e8e5; box-shadow: 0 5px 18px rgba(20,65,92,.05); }
-.app-header__inner { display: grid; grid-template-rows: 72px 59px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: calc(131px + clamp(16px,3vw,42px)); margin: 0 auto; padding-top: clamp(16px,3vw,42px); }
+.app-header__inner { display: grid; grid-template-rows: 72px 59px; width: min(1440px,calc(100% - clamp(40px,8.333vw,120px))); height: 156px; margin: 0 auto; padding-top: 25px; }
 .app-header__brand-row { display: flex; align-items: center; }
 .app-header__logo { display: flex; align-items: center; justify-content: center; width: 143px; height: 41px; overflow: hidden; padding: 0; background: #fff; border: 0; cursor: pointer; }
 .app-header__logo img { display: block; flex: 0 0 auto; width: 184px; max-width: none; height: auto; filter: contrast(1.04) brightness(1.01); }
@@ -168,8 +168,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 }
 
 @media (max-width: 680px) {
-  .app-shell { padding-top: 121px; }
-  .app-header__inner { grid-template-rows: 60px 50px; width: min(100% - 28px,1440px); height: 120px; padding-top: 10px; }
+  .app-shell { padding-top: 134px; }
+  .app-header__inner { grid-template-rows: 60px 50px; width: min(100% - 28px,1440px); height: 133px; padding-top: 23px; }
   .app-header__logo { width: 117px; height: 35px; }
   .app-header__logo img { width: 152px; }
   .top-navigation { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; }
@@ -218,16 +218,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 .cket-ticket-board { margin-top: 28px; }
 .cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 17px; }
-.cket-ticket { position: relative; min-width: 0; overflow: hidden; background: #ffad18; border: 2px solid #ee9c00; border-radius: 18px; box-shadow: 0 9px 22px rgba(132,86,0,.12); }
+.cket-ticket { position: relative; min-width: 0; overflow: hidden; background: #e4e7e9; border: 2px solid #c9cfd3; border-radius: 18px; box-shadow: 0 9px 22px rgba(54,72,83,.1); transition: background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }
+.cket-ticket.is-visited { background: var(--ticket-color); border-color: color-mix(in srgb,var(--ticket-color),#263d45 24%); box-shadow: 0 9px 22px color-mix(in srgb,var(--ticket-color),transparent 70%); }
 .cket-ticket__header { display: flex; align-items: center; justify-content: space-between; height: 35px; padding: 0 16px; color: #152a3a; }
 .cket-ticket__header > span { display: flex; align-items: center; gap: 8px; }
-.cket-ticket__header svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.cket-ticket__header svg { width: 18px; height: 18px; stroke-width: 2.2; transform: rotate(180deg); }
 .cket-ticket__header strong { font-family: 'Segoe UI',sans-serif; font-size: 14px; font-weight: 900; letter-spacing: -.03em; }
 .cket-ticket__header small { font-size: 8px; font-weight: 900; letter-spacing: .14em; }
 .cket-ticket__body { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 96px; min-height: 126px; margin: 0 6px 6px; background: #f2eee8; }
-.cket-ticket__body::before,.cket-ticket__body::after { position: absolute; z-index: 2; left: calc(100% - 96px); width: 22px; height: 22px; background: #fff; border: 2px solid #ee9c00; border-radius: 50%; content: ''; transform: translate(-50%,-50%); }
-.cket-ticket__body::before { top: -1px; }
-.cket-ticket__body::after { top: calc(100% + 7px); }
 .cket-ticket p,.cket-ticket p small,.cket-ticket p strong,.cket-ticket p em { display: block; min-width: 0; }
 .cket-ticket p { align-self: center; margin: 0; padding: 19px 22px; }
 .cket-ticket p small { color: #4f616c; font-size: 9px; font-weight: 700; }
@@ -235,11 +233,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .cket-ticket p em { width: max-content; margin-top: 12px; padding: 4px 7px; color: #667780; background: rgba(255,255,255,.72); border: 1px solid #d8d1c8; font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
 .cket-ticket.is-visited p em { color: #fff; background: var(--ticket-color); border-color: color-mix(in srgb,var(--ticket-color),#163446 20%); }
 .cket-ticket__stub { display: grid; min-width: 0; place-items: center; border-left: 1px dashed #a8aaa8; }
-.cket-ticket__stub i { display: block; width: 47px; height: 77px; background: repeating-linear-gradient(90deg,#263d45 0 2px,transparent 2px 4px,#263d45 4px 5px,transparent 5px 8px,#263d45 8px 11px,transparent 11px 13px); }
+.cket-ticket__stub i { display: block; width: 47px; height: 77px; background: repeating-linear-gradient(90deg,#263d45 0 2px,transparent 2px 4px,#263d45 4px 5px,transparent 5px 8px,#263d45 8px 11px,transparent 11px 13px); transform: rotate(90deg); }
 @media (max-width: 700px) {
   .cket-ticket-grid { grid-template-columns: minmax(0,1fr); }
   .cket-ticket__body { grid-template-columns: minmax(0,1fr) 82px; min-height: 116px; }
-  .cket-ticket__body::before,.cket-ticket__body::after { left: calc(100% - 82px); }
   .cket-ticket__stub i { width: 41px; height: 69px; }
 }
 
