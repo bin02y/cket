@@ -44,8 +44,6 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const ticketComplete = visitedRoadViewGates.size === roadViewTickets.length
-
   async function deleteAccount() {
     setIsDeleting(true)
     const error = await onDeleteAccount()
@@ -60,11 +58,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
         <article><span><Icon name="point" /></span><div><small>사용 가능 포인트</small><strong>{balance.toLocaleString('ko-KR')} P</strong></div></article>
       </section>
 
-      <section className={`cket-ticket-board${ticketComplete ? ' cket-ticket-board--complete' : ''}`} aria-labelledby="cket-ticket-title">
-        <header className="cket-ticket-board__heading">
-          <div><h2 id="cket-ticket-title">CKET TICKET</h2><p>3D 전시관 로드뷰에서 구역을 방문해 티켓을 완성하세요.</p></div>
-          <strong>{visitedRoadViewGates.size} / 7</strong>
-        </header>
+      <section className="cket-ticket-board" aria-label="3D 전시관 방문 티켓">
         <div className="cket-ticket-grid">
           {roadViewTickets.map((ticket) => {
             const visited = visitedRoadViewGates.has(ticket.code)
