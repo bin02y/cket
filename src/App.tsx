@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { AuthScreen } from './components/AuthScreen'
-import { BottomNavigation } from './components/BottomNavigation'
+import { TopNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
 import { Icon } from './components/Icon'
 import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, translateDataError } from './lib/participantData'
@@ -185,9 +185,12 @@ function App() {
       <a className="skip-link" href="#main-content">본문 바로가기</a>
       <header className="app-header">
         <div className="app-header__inner">
-          <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
-            <img src={cketLogo} alt="" />
-          </button>
+          <div className="app-header__brand-row">
+            <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
+              <img src={cketLogo} alt="" />
+            </button>
+          </div>
+          <TopNavigation activeTab={activeTab} onChange={navigateTo} />
         </div>
       </header>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
@@ -204,7 +207,6 @@ function App() {
           <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
         </Suspense>
       )}
-      <BottomNavigation activeTab={activeTab} onChange={navigateTo} />
     </div>
   )
 }
