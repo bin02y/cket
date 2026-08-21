@@ -217,15 +217,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .quick-booth-actions .primary-button:disabled { color: #8da0ab; background: #e7eef2; box-shadow: none; cursor: not-allowed; }
 
 .cket-ticket-board { margin-top: 28px; }
-.cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 17px; }
+.cket-ticket-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; }
 .cket-ticket { position: relative; min-width: 0; overflow: hidden; background: #e4e7e9; border: 2px solid #c9cfd3; border-radius: 18px; box-shadow: 0 9px 22px rgba(54,72,83,.1); transition: background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }
 .cket-ticket.is-visited { background: var(--ticket-color); border-color: color-mix(in srgb,var(--ticket-color),#263d45 24%); box-shadow: 0 9px 22px color-mix(in srgb,var(--ticket-color),transparent 70%); }
 .cket-ticket__header { display: flex; align-items: center; justify-content: space-between; height: 35px; padding: 0 16px; color: #152a3a; }
-.cket-ticket__header > span { display: flex; align-items: center; gap: 8px; }
-.cket-ticket__header svg { width: 18px; height: 18px; stroke-width: 2.2; transform: rotate(180deg); }
 .cket-ticket__header strong { font-family: 'Segoe UI',sans-serif; font-size: 14px; font-weight: 900; letter-spacing: -.03em; }
 .cket-ticket__header small { font-size: 8px; font-weight: 900; letter-spacing: .14em; }
-.cket-ticket__body { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 96px; min-height: 126px; margin: 0 6px 6px; background: #f2eee8; }
+.cket-ticket__body { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 108px; min-height: 126px; margin: 0 6px 6px; background: #f2eee8; }
 .cket-ticket p,.cket-ticket p small,.cket-ticket p strong,.cket-ticket p em { display: block; min-width: 0; }
 .cket-ticket p { align-self: center; margin: 0; padding: 19px 22px; }
 .cket-ticket p small { color: #4f616c; font-size: 9px; font-weight: 700; }
@@ -233,11 +231,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 .cket-ticket p em { width: max-content; margin-top: 12px; padding: 4px 7px; color: #667780; background: rgba(255,255,255,.72); border: 1px solid #d8d1c8; font-size: 7px; font-style: normal; font-weight: 900; letter-spacing: .08em; }
 .cket-ticket.is-visited p em { color: #fff; background: var(--ticket-color); border-color: color-mix(in srgb,var(--ticket-color),#163446 20%); }
 .cket-ticket__stub { display: grid; min-width: 0; place-items: center; border-left: 1px dashed #a8aaa8; }
-.cket-ticket__stub i { display: block; width: 47px; height: 77px; background: repeating-linear-gradient(90deg,#263d45 0 2px,transparent 2px 4px,#263d45 4px 5px,transparent 5px 8px,#263d45 8px 11px,transparent 11px 13px); transform: rotate(90deg); }
+.cket-ticket__stub i { display: block; width: 47px; height: 94px; background: repeating-linear-gradient(90deg,#263d45 0 2px,transparent 2px 4px,#263d45 4px 5px,transparent 5px 8px,#263d45 8px 11px,transparent 11px 13px); transform: rotate(90deg); }
+@media (max-width: 1050px) {
+  .cket-ticket-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
 @media (max-width: 700px) {
   .cket-ticket-grid { grid-template-columns: minmax(0,1fr); }
-  .cket-ticket__body { grid-template-columns: minmax(0,1fr) 82px; min-height: 116px; }
-  .cket-ticket__stub i { width: 41px; height: 69px; }
+  .cket-ticket__body { grid-template-columns: minmax(0,1fr) 92px; min-height: 116px; }
+  .cket-ticket__stub i { width: 41px; height: 78px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -248,22 +249,22 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(8, 121, 219, 0.3
 
 /* Current tab layout */
 .reward-catalog { margin-top: 0; }
-.profile-point-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px; }
-.profile-point-summary article { display: grid; grid-template-columns: 86px minmax(0,1fr) auto; align-items: center; min-width: 0; min-height: 88px; overflow: hidden; padding-right: 20px; background: #fff; border: 2px solid #101010; box-shadow: none; }
-.profile-point-summary article > span { display: grid; align-self: stretch; place-items: center; width: 86px; color: white; background: var(--blue-950); }
+.profile-point-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; width: min(100%,920px); }
+.profile-point-summary article { display: grid; grid-template-columns: 64px minmax(0,1fr) auto; align-items: center; min-width: 0; min-height: 64px; overflow: hidden; padding-right: 16px; background: #f5f7f8; border: 0; box-shadow: none; }
+.profile-point-summary article > span { display: grid; align-self: stretch; place-items: center; width: 64px; color: white; background: var(--blue-950); }
 .profile-point-summary article:nth-child(2) > span { background: var(--green-700); }
-.profile-point-summary svg { width: 32px; height: 32px; }
-.profile-point-summary strong { min-width: 0; overflow: hidden; color: var(--blue-950); font-size: clamp(30px,3.3vw,43px); line-height: 1; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.profile-point-summary em { color: var(--blue-950); font-size: clamp(25px,2.8vw,37px); font-style: normal; font-weight: 900; line-height: 1; }
+.profile-point-summary svg { width: 26px; height: 26px; }
+.profile-point-summary strong { min-width: 0; overflow: hidden; color: var(--blue-950); font-size: clamp(24px,2.5vw,31px); line-height: 1; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.profile-point-summary em { color: var(--blue-950); font-size: clamp(21px,2.2vw,27px); font-style: normal; font-weight: 900; line-height: 1; }
 
 @media (max-width: 680px) {
   .reward-catalog { margin-top: 0; }
   .profile-point-summary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
-  .profile-point-summary article { grid-template-columns: 48px minmax(0,1fr) auto; min-height: 60px; padding-right: 9px; border-width: 1.5px; }
-  .profile-point-summary article > span { width: 48px; }
-  .profile-point-summary svg { width: 24px; height: 24px; }
-  .profile-point-summary strong { font-size: clamp(18px,6.2vw,25px); }
-  .profile-point-summary em { font-size: clamp(16px,5vw,21px); }
+  .profile-point-summary article { grid-template-columns: 42px minmax(0,1fr) auto; min-height: 48px; padding-right: 7px; }
+  .profile-point-summary article > span { width: 42px; }
+  .profile-point-summary svg { width: 20px; height: 20px; }
+  .profile-point-summary strong { font-size: clamp(16px,5vw,20px); }
+  .profile-point-summary em { font-size: clamp(15px,4.5vw,18px); }
 }
 
 /* Experience tab · immersive 3D roadview */

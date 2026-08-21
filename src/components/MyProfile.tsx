@@ -65,7 +65,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
             return (
               <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={{ '--ticket-color': ticket.color } as CSSProperties}>
                 <header className="cket-ticket__header">
-                  <span><Icon name="train" /><strong>TRAIN TICKET</strong></span>
+                  <strong>TRAIN TICKET</strong>
                   <small>{ticket.code}</small>
                 </header>
                 <div className="cket-ticket__body">
