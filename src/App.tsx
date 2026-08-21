@@ -198,8 +198,7 @@ function App() {
     }
   }
 
-  if (isAuthLoading) return null
-  if (!currentParticipant) return <AuthScreen onLogin={login} onSignUp={signUp} />
+  if (!isAuthLoading && !currentParticipant) return <AuthScreen onLogin={login} onSignUp={signUp} />
 
   return (
     <div className="app-shell">
@@ -215,7 +214,9 @@ function App() {
         </div>
       </header>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
-      {activeTab === 'education' ? (
+      {!currentParticipant ? (
+        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
+      ) : activeTab === 'education' ? (
         <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'booths' ? (
         <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
