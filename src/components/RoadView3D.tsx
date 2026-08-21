@@ -528,11 +528,16 @@ function buildMetaverseStation(scene: THREE.Scene) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
-  ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, STATION_HEIGHT, 0); scene.add(ceiling)
-  addRoundedBox(scene, [STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, -STATION_DEPTH / 2 + PERIMETER_WALL_THICKNESS / 2], envelopeMaterial, 0.04)
-  addRoundedBox(scene, [STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS / 2], envelopeMaterial, 0.04)
-  addRoundedBox(scene, [PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [-STATION_WIDTH / 2 + PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0], envelopeMaterial, 0.04)
-  addRoundedBox(scene, [PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0], envelopeMaterial, 0.04)
+  ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, STATION_HEIGHT, 0); ceiling.castShadow = false; ceiling.receiveShadow = false; scene.add(ceiling)
+  const addEnvelopeWall = (size: [number, number, number], position: [number, number, number]) => {
+    const wall = addRoundedBox(scene, size, position, envelopeMaterial, 0.04)
+    wall.castShadow = false
+    wall.receiveShadow = false
+  }
+  addEnvelopeWall([STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, -STATION_DEPTH / 2 + PERIMETER_WALL_THICKNESS / 2])
+  addEnvelopeWall([STATION_WIDTH, STATION_HEIGHT, PERIMETER_WALL_THICKNESS], [0, STATION_HEIGHT / 2, STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS / 2])
+  addEnvelopeWall([PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [-STATION_WIDTH / 2 + PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0])
+  addEnvelopeWall([PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0])
   scene.add(createIntegratedTrainShell())
   for (const booth of BOOTHS) {
     scene.add(createBooth(booth))
