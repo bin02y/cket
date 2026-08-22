@@ -31,7 +31,7 @@ type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadVi
 type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 5.8
-const BOOTH_DEPTH = 5.4
+const BOOTH_DEPTH = 7.2
 const RESTROOM_WIDTH = 7.8
 const RESTROOM_DEPTH = 7.2
 const STATION_WIDTH = 32
@@ -75,6 +75,10 @@ const TRAIN_BODY_LENGTH = TRAIN_TAIL_X - TRAIN_BODY_START_X
 const TRAIN_BODY_CENTER_X = (TRAIN_BODY_START_X + TRAIN_TAIL_X) / 2
 const TRAIN_CAR_WIDTH = 7.7
 const TRAIN_DOOR_CENTERS = [-4.8, 3.1, 11] as const
+const TRAIN_WINDOW_CENTERS = [
+  (TRAIN_DOOR_CENTERS[0] + TRAIN_DOOR_CENTERS[1]) / 2,
+  (TRAIN_DOOR_CENTERS[1] + TRAIN_DOOR_CENTERS[2]) / 2,
+] as const
 const TRAIN_SEAT_LOCAL_XS = [-1.38, 1.05] as const
 const TRAIN_SEAT_LOCAL_ZS = [-2.9, -1.45, 1.45, 2.9] as const
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -311,6 +315,28 @@ function makeTrainBoothSignTexture(title: string, subtitle: string, accent: stri
   return texture
 }
 
+function makeBoothMarqueeTexture(title: string, label: string, accent: string) {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1536; canvas.height = 128
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+
+  const gradient = context.createLinearGradient(0, 0, canvas.width, 0)
+  gradient.addColorStop(0, '#06111a'); gradient.addColorStop(0.5, '#0b1e2a'); gradient.addColorStop(1, '#06111a')
+  context.fillStyle = gradient; context.beginPath(); context.roundRect(4, 4, canvas.width - 8, canvas.height - 8, 18); context.fill()
+  context.strokeStyle = accent; context.lineWidth = 7; context.stroke()
+  context.fillStyle = 'rgba(92,206,235,.15)'
+  for (let x = 24; x < canvas.width - 20; x += 18) for (let y = 20; y < canvas.height - 16; y += 18) {
+    context.beginPath(); context.arc(x, y, 1.5, 0, Math.PI * 2); context.fill()
+  }
+  context.shadowColor = accent; context.shadowBlur = 15
+  context.fillStyle = '#eafaff'; context.font = '800 62px Paperlogy, sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'
+  context.fillText(`${label}  ·  ${title}`, canvas.width / 2, canvas.height / 2 + 2, canvas.width - 84)
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
 function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], position: [number, number, number], material: THREE.Material, radius = 0.12) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, radius), material)
   mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
@@ -538,11 +564,7 @@ function createIntegratedTrainShell() {
     headlight.scale.set(0.48, 0.72, 1); headlight.position.set(TRAIN_NOSE_X + 0.48, 1.03, z); group.add(headlight)
   }
 
-  const windowXs: number[] = []
-  for (let x = TRAIN_BODY_START_X + 1.45; x < TRAIN_TAIL_X - 1.2; x += 2.85) {
-    if (doorCenters.every((doorX) => Math.abs(x - doorX) > 2.1)) windowXs.push(x)
-  }
-  for (const x of windowXs) {
+  for (const x of TRAIN_WINDOW_CENTERS) {
     for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, TRAIN_WINDOW_CENTER_Y, z], windowMaterial, 0.12)
   }
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
@@ -574,7 +596,7 @@ function createBooth(zone: RoadViewBooth) {
   const softWhite = new THREE.MeshStandardMaterial({ color: '#f0f3f4', metalness: 0.02, roughness: 0.7 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
-  const wallHeight = 4.5
+  const wallHeight = 5.16
 
   addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], white, 0.035)
   addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], white, 0.035)
@@ -584,10 +606,10 @@ function createBooth(zone: RoadViewBooth) {
   addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], white, 0.04)
 
   const name = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.4, 1.55),
-    new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
+    new THREE.PlaneGeometry(BOOTH_WIDTH - 0.36, 0.42),
+    new THREE.MeshBasicMaterial({ map: makeBoothMarqueeTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
-  name.position.set(0, 3.25, -halfDepth + 0.18); group.add(name)
+  name.position.set(0, wallHeight - 0.32, halfDepth + 0.025); group.add(name)
 
   addRoundedBox(group, [1.65, 1.18, 1.02], [1.55, 0.64, 0.92], white, 0.035)
   addRoundedBox(group, [1.82, 0.12, 1.18], [1.55, 1.28, 0.92], softWhite, 0.035)
