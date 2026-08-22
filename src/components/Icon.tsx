@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 
-export type IconName = 'home' | 'education' | 'shop' | 'my' | 'arrow' | 'leaf' | 'train' | 'wallet' | 'point' | 'warning' | 'search' | 'heart' | 'cart' | 'check' | 'lock'
+export type IconName = 'home' | 'education' | 'shop' | 'my' | 'arrow' | 'leaf' | 'train' | 'wallet' | 'point' | 'warning' | 'search' | 'heart' | 'cart' | 'check' | 'lock' | 'map' | 'jump'
 
 type IconProps = SVGProps<SVGSVGElement> & {
   name: IconName
@@ -34,6 +34,8 @@ export function Icon({ name, ...props }: IconProps) {
     search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></>,
     heart: <path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z" />,
     cart: <><path d="M3 3h2l2.3 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.5L21 7H6" /><circle cx="10" cy="20" r="1" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1" fill="currentColor" stroke="none" /></>,
+    map: <><path d="m3 6 5-2 8 2 5-2v14l-5 2-8-2-5 2Z" /><path d="M8 4v14M16 6v14" /></>,
+    jump: <><path d="M5 18h14" /><path d="m8 12 4-4 4 4M12 8v8" /></>,
   }
 
   return <svg {...commonProps}>{paths[name]}</svg>

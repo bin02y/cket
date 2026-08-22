@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
@@ -65,6 +65,11 @@ const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const TRAIN_BODY_BASE_Y = 0.28
 const TRAIN_ROOF_TOP_Y = 4.45
 const TRAIN_WINDOW_CENTER_Y = 2.55
+const TRAIN_NOSE_X = -(STATION_WIDTH / 2 - 0.62)
+const TRAIN_BODY_START_X = TRAIN_NOSE_X + 6.6
+const TRAIN_TAIL_X = STATION_WIDTH / 2 - 0.62
+const TRAIN_BODY_LENGTH = TRAIN_TAIL_X - TRAIN_BODY_START_X
+const TRAIN_BODY_CENTER_X = (TRAIN_BODY_START_X + TRAIN_TAIL_X) / 2
 const TRAIN_SEAT_LOCAL_XS = [-1.38, 1.05] as const
 const TRAIN_SEAT_LOCAL_ZS = [-2.9, -1.45, 1.45, 2.9] as const
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -95,7 +100,10 @@ const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: INFORMATION_ZONE_X, z: INFORMATION_ZONE_Z, gate: { x: INFORMATION_GATE_X, z: INFORMATION_ZONE_Z, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
-const TRAIN_NOSE_COLLIDER: Collider = { x1: -20.72, x2: -14, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 }
+const TRAIN_END_COLLIDERS: readonly Collider[] = [
+  { x1: TRAIN_NOSE_X - 0.12, x2: -13.6, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
+  { x1: 13.6, x2: TRAIN_TAIL_X + 0.12, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
+]
 const TRAIN_SEAT_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => booth.trainCar).flatMap((booth) =>
   TRAIN_SEAT_LOCAL_ZS.flatMap((localZ) =>
     TRAIN_SEAT_LOCAL_XS.map((localX) => {
@@ -210,7 +218,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     { x1: zone.x - halfWidth, x2: zone.x - 1.42, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
     { x1: zone.x + 1.42, x2: zone.x + halfWidth, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
   ]
-}), TRAIN_NOSE_COLLIDER, ...TRAIN_SEAT_COLLIDERS]
+}), ...TRAIN_END_COLLIDERS, ...TRAIN_SEAT_COLLIDERS]
 
 const doorCollisionPoint = new THREE.Vector3()
 
@@ -461,8 +469,7 @@ function createIntegratedTrainShell() {
   const windowMaterial = new THREE.MeshPhysicalMaterial({ color: '#263c43', transparent: true, opacity: 0.94, metalness: 0.3, roughness: 0.14, clearcoat: 0.8, clearcoatRoughness: 0.08 })
   const roofTrim = new THREE.MeshStandardMaterial({ color: '#aeb9bd', metalness: 0.62, roughness: 0.3 })
   const headlightMaterial = new THREE.MeshBasicMaterial({ color: '#f6ffff' })
-  const trainLength = 28.2
-  const halfLength = trainLength / 2
+  const trainLength = TRAIN_BODY_LENGTH
   const halfDepth = 2.8
   const openingWidth = 3.32
   const wallHeight = 3.94
@@ -474,17 +481,17 @@ function createIntegratedTrainShell() {
     geometries.push(geometry)
   }
 
-  addShellPart([trainLength, 0.3, 5.8], [0, TRAIN_BODY_BASE_Y + 0.15, 0])
-  addShellPart([trainLength, 0.34, 5.8], [0, 4.28, 0])
-  addShellPart([trainLength, wallHeight, 0.24], [0, wallCenterY, -halfDepth])
-  addShellPart([0.26, wallHeight, 5.6], [halfLength, wallCenterY, 0])
+  addShellPart([trainLength, 0.3, 5.8], [TRAIN_BODY_CENTER_X, TRAIN_BODY_BASE_Y + 0.15, 0])
+  addShellPart([trainLength, 0.34, 5.8], [TRAIN_BODY_CENTER_X, 4.28, 0])
+  addShellPart([trainLength, wallHeight, 0.24], [TRAIN_BODY_CENTER_X, wallCenterY, -halfDepth])
+  addShellPart([0.26, wallHeight, 5.6], [TRAIN_TAIL_X, wallCenterY, 0])
 
   const doorCenters = [-9.4, 0, 9.4]
   const frontSections = [
-    [-halfLength, doorCenters[0] - openingWidth / 2],
+    [TRAIN_BODY_START_X, doorCenters[0] - openingWidth / 2],
     [doorCenters[0] + openingWidth / 2, doorCenters[1] - openingWidth / 2],
     [doorCenters[1] + openingWidth / 2, doorCenters[2] - openingWidth / 2],
-    [doorCenters[2] + openingWidth / 2, halfLength],
+    [doorCenters[2] + openingWidth / 2, TRAIN_TAIL_X],
   ] as const
   for (const [start, end] of frontSections) {
     addShellPart([end - start, wallHeight, 0.24], [(start + end) / 2, wallCenterY, halfDepth])
@@ -500,13 +507,13 @@ function createIntegratedTrainShell() {
 
   const stripeHeight = 0.72
   const stripeCenterY = TRAIN_ROOF_TOP_Y - stripeHeight / 2
-  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [0, stripeCenterY, -halfDepth - 0.13], blue, 0.02)
-  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [0, stripeCenterY, halfDepth + 0.13], blue, 0.02)
+  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [TRAIN_BODY_CENTER_X, stripeCenterY, -halfDepth - 0.13], blue, 0.02)
+  addRoundedBox(group, [trainLength + 0.08, stripeHeight, 0.06], [TRAIN_BODY_CENTER_X, stripeCenterY, halfDepth + 0.13], blue, 0.02)
   const noseShape = new THREE.Shape()
-  noseShape.moveTo(-20.6, 0.28)
-  noseShape.quadraticCurveTo(-20.45, 0.72, -19.55, 1.42)
-  noseShape.quadraticCurveTo(-17.4, 3.78, -14.1, TRAIN_ROOF_TOP_Y - 0.08)
-  noseShape.lineTo(-14.1, 0.28)
+  noseShape.moveTo(TRAIN_NOSE_X, 0.28)
+  noseShape.quadraticCurveTo(TRAIN_NOSE_X + 0.15, 0.72, TRAIN_NOSE_X + 1.05, 1.42)
+  noseShape.quadraticCurveTo(TRAIN_NOSE_X + 3.2, 3.78, TRAIN_BODY_START_X, TRAIN_ROOF_TOP_Y - 0.08)
+  noseShape.lineTo(TRAIN_BODY_START_X, 0.28)
   noseShape.closePath()
   const noseGeometry = new THREE.ExtrudeGeometry(noseShape, { depth: 5.56, bevelEnabled: true, bevelSegments: 3, bevelSize: 0.08, bevelThickness: 0.08, curveSegments: 12 })
   noseGeometry.translate(0, 0, -2.78)
@@ -514,25 +521,29 @@ function createIntegratedTrainShell() {
   nose.castShadow = true; nose.receiveShadow = true; group.add(nose)
 
   const blueNoseShape = new THREE.Shape()
-  blueNoseShape.moveTo(-19.35, 1.7)
-  blueNoseShape.quadraticCurveTo(-17.35, 3.95, -14.08, TRAIN_ROOF_TOP_Y)
-  blueNoseShape.lineTo(-14.08, TRAIN_ROOF_TOP_Y - stripeHeight)
-  blueNoseShape.quadraticCurveTo(-17.15, 3.5, -18.82, 1.48)
+  blueNoseShape.moveTo(TRAIN_NOSE_X + 1.25, 1.7)
+  blueNoseShape.quadraticCurveTo(TRAIN_NOSE_X + 3.25, 3.95, TRAIN_BODY_START_X + 0.02, TRAIN_ROOF_TOP_Y)
+  blueNoseShape.lineTo(TRAIN_BODY_START_X + 0.02, TRAIN_ROOF_TOP_Y - stripeHeight)
+  blueNoseShape.quadraticCurveTo(TRAIN_NOSE_X + 3.45, 3.5, TRAIN_NOSE_X + 1.78, 1.48)
   blueNoseShape.closePath()
   const blueNose = new THREE.Mesh(new THREE.ShapeGeometry(blueNoseShape, 12), blue)
   blueNose.position.z = halfDepth + 0.14; group.add(blueNose)
   for (const z of [-1.72, 1.72]) {
     const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 10), headlightMaterial)
-    headlight.scale.set(0.48, 0.72, 1); headlight.position.set(-20.12, 1.03, z); group.add(headlight)
+    headlight.scale.set(0.48, 0.72, 1); headlight.position.set(TRAIN_NOSE_X + 0.48, 1.03, z); group.add(headlight)
   }
 
-  for (const x of [-12.56, -6.15, -3.25, 3.25, 6.15, 12.56]) {
+  const windowXs: number[] = []
+  for (let x = TRAIN_BODY_START_X + 1.45; x < TRAIN_TAIL_X - 1.2; x += 2.85) {
+    if (doorCenters.every((doorX) => Math.abs(x - doorX) > 2.1)) windowXs.push(x)
+  }
+  for (const x of windowXs) {
     for (const z of [-halfDepth - 0.17, halfDepth + 0.17]) addRoundedBox(group, [1.72, 0.76, 0.06], [x, TRAIN_WINDOW_CENTER_Y, z], windowMaterial, 0.12)
   }
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
-  ktxMark.position.set(-16.45, 2.5, halfDepth + 0.2); group.add(ktxMark)
+  ktxMark.position.set(TRAIN_NOSE_X + 4.15, 2.5, halfDepth + 0.2); group.add(ktxMark)
 
-  for (const x of [-10.8, -1.2, 8.4]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
+  for (const x of [-20.2, -10.8, -1.2, 8.4, 17.8, 27.2]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
   return group
 }
 
@@ -837,14 +848,14 @@ function buildMetaverseStation(scene: THREE.Scene) {
     scene.add(builtFacility)
     if (builtFacility.userData.hingedDoors || builtFacility.userData.slidingDoors) animated.push(builtFacility)
   }
-  const trackLength = 46
-  const trackCenterX = -1
+  const trackLength = STATION_WIDTH - 0.8
+  const trackCenterX = 0
   const ballast = new THREE.MeshStandardMaterial({ color: '#7d8588', metalness: 0.02, roughness: 0.98 })
   const sleeperMaterial = new THREE.MeshStandardMaterial({ color: '#5f554c', metalness: 0.04, roughness: 0.9 })
   const fasteningMaterial = new THREE.MeshStandardMaterial({ color: '#30383c', metalness: 0.72, roughness: 0.3 })
   const rail = new THREE.MeshStandardMaterial({ color: '#56656d', metalness: 0.92, roughness: 0.16 })
   addRoundedBox(scene, [trackLength, 0.08, 5.92], [trackCenterX, 0.04, TRAIN_CENTER_Z], ballast, 0.025)
-  const sleeperCount = 48
+  const sleeperCount = 64
   const sleeperGeometry = new RoundedBoxGeometry(0.24, 0.12, 5.34, 2, 0.025)
   const sleepers = new THREE.InstancedMesh(sleeperGeometry, sleeperMaterial, sleeperCount)
   const sleeperMatrix = new THREE.Matrix4()
@@ -867,8 +878,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
   const worldXToMap = (value: number) => ((value + STATION_WIDTH / 2) / STATION_WIDTH) * size
   const worldZToMap = (value: number) => ((value + STATION_DEPTH / 2) / STATION_DEPTH) * size
-  const trainX = worldXToMap(-14.1); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
-  const trainWidth = worldXToMap(14.1) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
+  const trainX = worldXToMap(TRAIN_NOSE_X); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
+  const trainWidth = worldXToMap(TRAIN_TAIL_X) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
   context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
   context.fillRect(trainX, trainY, trainWidth, trainHeight); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
   context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
@@ -901,6 +912,8 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
   const playerRef = useRef<Player>({ x: 0, z: 20.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
+  const jumpRef = useRef({ height: 0, velocity: 0 }); const joystickBaseRef = useRef<HTMLDivElement>(null); const joystickKnobRef = useRef<HTMLSpanElement>(null)
+  const joystickPointerRef = useRef<number | null>(null)
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
   const onGatePassedRef = useRef(onGatePassed); const gateRewardCacheRef = useRef(new Map<RoadViewGateCode, GateRewardNotice>())
   const [mapOpen, setMapOpen] = useState(false)
@@ -957,7 +970,8 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024)
     sun.shadow.bias = -0.00015; sun.shadow.normalBias = 0.035
     sun.shadow.camera.left = -36; sun.shadow.camera.right = 36; sun.shadow.camera.top = 36; sun.shadow.camera.bottom = -36; scene.add(sun)
-    const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
+    const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = jumpRef.current
+    jump.height = 0; jump.velocity = 0
     const collisionDoors = animated.flatMap((object) => (object.userData.collisionDoors as THREE.Mesh[] | undefined) ?? [])
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const animatedWorldPosition = new THREE.Vector3()
@@ -1070,20 +1084,59 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     }
   }, [onClose])
 
-  const setMovement = (key: keyof Movement, pressed: boolean) => { movementRef.current[key] = pressed }
+  const stopJoystick = () => {
+    const activePointer = joystickPointerRef.current
+    if (activePointer !== null && joystickBaseRef.current?.hasPointerCapture(activePointer)) joystickBaseRef.current.releasePointerCapture(activePointer)
+    joystickPointerRef.current = null
+    const movement = movementRef.current
+    movement.forward = false; movement.backward = false; movement.turnLeft = false; movement.turnRight = false
+    if (joystickKnobRef.current) joystickKnobRef.current.style.transform = 'translate3d(0,0,0)'
+  }
+  const updateJoystick = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (joystickPointerRef.current !== event.pointerId || !joystickBaseRef.current) return
+    const bounds = joystickBaseRef.current.getBoundingClientRect()
+    const radius = Math.min(bounds.width, bounds.height) * 0.31
+    const rawX = event.clientX - (bounds.left + bounds.width / 2)
+    const rawY = event.clientY - (bounds.top + bounds.height / 2)
+    const distance = Math.hypot(rawX, rawY)
+    const scale = distance > radius ? radius / distance : 1
+    const x = rawX * scale; const y = rawY * scale
+    if (joystickKnobRef.current) joystickKnobRef.current.style.transform = `translate3d(${x}px,${y}px,0)`
+    const threshold = radius * 0.24
+    const movement = movementRef.current
+    movement.forward = y < -threshold; movement.backward = y > threshold
+    movement.turnLeft = x < -threshold; movement.turnRight = x > threshold
+  }
+  const handleJoystickStart = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault(); joystickPointerRef.current = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); updateJoystick(event)
+  }
+  const handleJoystickEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (joystickPointerRef.current !== event.pointerId) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    stopJoystick()
+  }
+  const requestJump = () => {
+    if (overlayRef.current.mapOpen || overlayRef.current.selectedBooth || jumpRef.current.height !== 0) return
+    jumpRef.current.velocity = 6.2
+  }
+  const openMap = () => { stopJoystick(); setMapOpen(true) }
   return (
     <section className="roadview" role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
-        <div className="roadview__dpad">
-          <button type="button" aria-label="앞으로 이동" onPointerDown={() => setMovement('forward', true)} onPointerUp={() => setMovement('forward', false)} onPointerCancel={() => setMovement('forward', false)}>▲</button>
-          <button type="button" aria-label="왼쪽으로 회전" onPointerDown={() => setMovement('turnLeft', true)} onPointerUp={() => setMovement('turnLeft', false)} onPointerCancel={() => setMovement('turnLeft', false)}>◀</button>
-          <button type="button" aria-label="뒤로 이동" onPointerDown={() => setMovement('backward', true)} onPointerUp={() => setMovement('backward', false)} onPointerCancel={() => setMovement('backward', false)}>▼</button>
-          <button type="button" aria-label="오른쪽으로 회전" onPointerDown={() => setMovement('turnRight', true)} onPointerUp={() => setMovement('turnRight', false)} onPointerCancel={() => setMovement('turnRight', false)}>▶</button>
+        <div ref={joystickBaseRef} className="roadview__joystick" role="application" aria-label="이동 조이스틱" onPointerDown={handleJoystickStart} onPointerMove={updateJoystick} onPointerUp={handleJoystickEnd} onPointerCancel={handleJoystickEnd}>
+          <span className="roadview__joystick-direction roadview__joystick-direction--up">▲</span>
+          <span className="roadview__joystick-direction roadview__joystick-direction--right">▶</span>
+          <span className="roadview__joystick-direction roadview__joystick-direction--down">▼</span>
+          <span className="roadview__joystick-direction roadview__joystick-direction--left">◀</span>
+          <span ref={joystickKnobRef} className="roadview__joystick-knob" />
         </div>
-        <div className="roadview__mobile-gate-guide"><Icon name="train" /><span><strong>AUTO GATE</strong><small>개찰구 통과 시 자동 안내</small></span></div>
+        <div className="roadview__mobile-actions">
+          <button type="button" aria-label="지도 열기" onClick={openMap}><Icon name="map" /><span>지도</span></button>
+          <button type="button" aria-label="점프" onClick={requestJump}><Icon name="jump" /><span>점프</span></button>
+        </div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
         <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />

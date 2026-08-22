@@ -28,6 +28,7 @@ type BoothGuideProps = {
 }
 
 type BoothSection = 'education' | 'booths'
+type LockableScreenOrientation = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void>; unlock?: () => void }
 
 type AcademyContent = {
   label: string
@@ -187,12 +188,32 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
     })
   }, [])
 
+  const releaseRoadViewDisplay = useCallback(() => {
+    const orientation = screen.orientation as LockableScreenOrientation | undefined
+    try { orientation?.unlock?.() } catch { /* Some mobile browsers do not expose orientation unlock. */ }
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+  }, [])
+
+  const requestRoadViewLandscape = useCallback(() => {
+    if (!window.matchMedia('(max-width: 900px), (hover: none) and (pointer: coarse)').matches) return
+    const orientation = screen.orientation as LockableScreenOrientation | undefined
+    const lockLandscape = () => void orientation?.lock?.('landscape').catch(() => undefined)
+    try {
+      const fullscreenRequest = document.documentElement.requestFullscreen?.()
+      if (fullscreenRequest) void fullscreenRequest.then(lockLandscape).catch(lockLandscape)
+      else lockLandscape()
+    } catch {
+      lockLandscape()
+    }
+  }, [])
+
   const openRoadView = useCallback(() => {
     if (roadViewOpen) return
+    requestRoadViewLandscape()
     window.history.pushState({ ...window.history.state, cketRoadView: true }, '')
     roadViewHistoryEntry.current = true
     setRoadViewOpen(true)
-  }, [roadViewOpen])
+  }, [requestRoadViewLandscape, roadViewOpen])
 
   const closeRoadView = useCallback(() => {
     if (roadViewHistoryEntry.current) {
@@ -237,8 +258,11 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
     }
 
     window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [roadViewOpen])
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      releaseRoadViewDisplay()
+    }
+  }, [releaseRoadViewDisplay, roadViewOpen])
 
   useEffect(() => {
     const homeVideo = homeVideoRef.current
