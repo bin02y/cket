@@ -251,15 +251,32 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
   useEffect(() => {
     if (!roadViewOpen) return
+    let enteredFullscreen = Boolean(document.fullscreenElement)
 
     const handlePopState = () => {
       roadViewHistoryEntry.current = false
       setRoadViewOpen(false)
     }
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        enteredFullscreen = true
+        return
+      }
+      if (!enteredFullscreen) return
+      enteredFullscreen = false
+      if (roadViewHistoryEntry.current) {
+        roadViewHistoryEntry.current = false
+        window.history.back()
+      } else {
+        setRoadViewOpen(false)
+      }
+    }
 
     window.addEventListener('popstate', handlePopState)
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => {
       window.removeEventListener('popstate', handlePopState)
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
       releaseRoadViewDisplay()
     }
   }, [releaseRoadViewDisplay, roadViewOpen])

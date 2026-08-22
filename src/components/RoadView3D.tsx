@@ -954,6 +954,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
+  const useMobileControls = navigator.maxTouchPoints > 0
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
   const playerRef = useRef<Player>({ x: 0, z: 10.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
   const jumpRef = useRef({ height: 0, velocity: 0 }); const joystickBaseRef = useRef<HTMLDivElement>(null); const joystickKnobRef = useRef<HTMLSpanElement>(null)
@@ -1165,7 +1166,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   }
   const openMap = () => { stopJoystick(); setMapOpen(true) }
   return (
-    <section className="roadview" role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
+    <section className={`roadview${useMobileControls ? ' roadview--touch' : ''}`} role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
