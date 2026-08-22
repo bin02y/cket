@@ -53,7 +53,11 @@ const RESTROOM_CEILING_BOTTOM_Y = 4.75
 const RESTROOM_FLOOR_FRONT_EXTENSION = 0.17
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
-const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
+const INFORMATION_WIDTH = RESTROOM_WIDTH
+const INFORMATION_DEPTH = RESTROOM_DEPTH
+const INFORMATION_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_DEPTH / 2
+const INFORMATION_GATE_X = INFORMATION_ZONE_X - INFORMATION_DEPTH / 2
+const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_WIDTH / 2
 const BASE_MOVEMENT_SPEED = 8.6
 const SPRINT_MOVEMENT_SPEED = BASE_MOVEMENT_SPEED * 1.5
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
@@ -88,7 +92,7 @@ const BOOTHS: readonly RoadViewBooth[] = [
 
 const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: RESTROOM_ZONE_X, z: RESTROOM_ZONE_Z, gate: { x: RESTROOM_GATE_X, z: RESTROOM_ZONE_Z, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: SIDE_ZONE_X, z: INFORMATION_ZONE_Z, gate: { x: SIDE_GATE_X, z: INFORMATION_ZONE_Z, side: 'west' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: INFORMATION_ZONE_X, z: INFORMATION_ZONE_Z, gate: { x: INFORMATION_GATE_X, z: INFORMATION_ZONE_Z, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const TRAIN_NOSE_COLLIDER: Collider = { x1: -20.72, x2: -14, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 }
@@ -133,6 +137,7 @@ function zoneDisplayLabel(zone: RoadViewBooth | StationFacility) {
 function zoneSize(zone: RoadViewBooth | StationFacility) {
   if (zone.trainCar) return { width: 9.2, depth: 5.6 }
   if (zone.gateCode === 'F01') return { width: RESTROOM_DEPTH, depth: RESTROOM_WIDTH }
+  if (zone.gateCode === 'F02') return { width: INFORMATION_DEPTH, depth: INFORMATION_WIDTH }
   if (zone.gate.side === 'east' || zone.gate.side === 'west') return { width: BOOTH_DEPTH, depth: BOOTH_WIDTH }
   return { width: BOOTH_WIDTH, depth: BOOTH_DEPTH }
 }
@@ -150,9 +155,9 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     ]
     if (zone.gateCode === 'F02') return [
       ...shellWalls,
-      { x1: zone.x - 1.95, x2: zone.x - 0.85, z1: zone.z + 1.35, z2: zone.z + 3.9 },
-      { x1: zone.x + 0.05, x2: zone.x + 1.05, z1: zone.z - 2.45, z2: zone.z - 1.15 },
-      { x1: zone.x + 0.05, x2: zone.x + 1.05, z1: zone.z + 0.05, z2: zone.z + 1.35 },
+      { x1: zone.x - 2.8, x2: zone.x - 1.55, z1: zone.z + 2.85, z2: zone.z + 6 },
+      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 4.05, z2: zone.z - 2.95 },
+      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 0.75, z2: zone.z + 0.35 },
     ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
@@ -697,36 +702,40 @@ function createInformationFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
+  const halfWidth = INFORMATION_WIDTH / 2
+  const halfDepth = INFORMATION_DEPTH / 2
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
   const softWhite = new THREE.MeshStandardMaterial({ color: '#eef1f1', metalness: 0.02, roughness: 0.72 })
-  const blue = new THREE.MeshStandardMaterial({ color: '#122f84', metalness: 0.16, roughness: 0.44 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
   const chrome = new THREE.MeshStandardMaterial({ color: '#b8c3c8', metalness: 0.86, roughness: 0.16 })
   const chairWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.22 })
   const chairWood = new THREE.MeshStandardMaterial({ color: '#c9a374', metalness: 0.02, roughness: 0.7 })
   const light = new THREE.MeshBasicMaterial({ color: '#ffffff' })
 
-  addRoundedBox(group, [8.1, 0.12, 5.05], [0, 0.06, -0.02], white, 0.045)
-  addRoundedBox(group, [8.05, 4.25, 0.18], [0, 2.13, -2.42], white, 0.045)
-  addRoundedBox(group, [0.18, 4.25, 5], [-4.01, 2.13, 0], white, 0.045)
-  addRoundedBox(group, [8.05, 0.24, 0.34], [0, 4.46, -2.29], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, 4.72], [-3.9, 4.46, 0], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, 4.72], [3.9, 4.46, 0], white, 0.055)
-  addRoundedBox(group, [8.05, 0.24, 0.34], [0, 4.46, 2.29], white, 0.055)
-  addRoundedBox(group, [7.48, 0.1, 4.08], [0, 4.31, -0.08], softWhite, 0.04)
-  addRoundedBox(group, [1.12, 0.035, 1.02], [-2.92, 4.24, -1.48], blue, 0.02)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 4.25, 0.18], [0, 2.13, -halfDepth + 0.12], white, 0.045)
+  addRoundedBox(group, [0.18, 4.25, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, 2.13, 0], white, 0.045)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, 4.46, -halfDepth + 0.17], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, 4.46, 0], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, 4.46, 0], white, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, 4.46, halfDepth - 0.17], white, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, 4.31, -0.08], softWhite, 0.04)
 
-  for (const z of [-1.72, -1.36, -1, -0.64, -0.28, 0.08, 0.44, 0.8]) addRoundedBox(group, [0.055, 2.42, 0.075], [-3.87, 2.05, z], softWhite, 0.018)
-  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [3.72, 0.055, 0.07], [1.78, y, -2.29], softWhite, 0.018)
+  for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
+  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [5.4, 0.055, 0.07], [2.35, y, -halfDepth + 0.18], softWhite, 0.018)
 
-  const deskGroup = new THREE.Group(); deskGroup.position.set(2.35, 0, 1.48); deskGroup.rotation.y = -0.12; group.add(deskGroup)
+  const deskGroup = new THREE.Group(); deskGroup.position.set(4.45, 0, 2.18); deskGroup.rotation.y = -0.12; group.add(deskGroup)
   const deskShape = new THREE.Shape()
   deskShape.moveTo(-1.45, 0); deskShape.lineTo(1.45, 0); deskShape.lineTo(1.2, 1.08); deskShape.lineTo(-1.2, 1.08); deskShape.closePath()
   const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
   deskGeometry.translate(0, 0, -0.41)
   const desk = new THREE.Mesh(deskGeometry, white); desk.position.y = 0.1; desk.castShadow = true; desk.receiveShadow = true; deskGroup.add(desk)
   addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], white, 0.045)
-  addRoundedBox(deskGroup, [2.18, 0.27, 0.055], [0.04, 0.61, 0.46], blue, 0.018)
+  const deskSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.18, 0.76),
+    new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(facility.title, facility.label, facility.color), transparent: true, side: THREE.DoubleSide }),
+  )
+  deskSign.position.set(0.04, 0.62, 0.47); deskGroup.add(deskSign)
 
   const addLoungeChair = (x: number, z: number, yaw: number) => {
     const chair = new THREE.Group(); chair.position.set(x, 0, z); chair.rotation.y = yaw; group.add(chair)
@@ -750,15 +759,10 @@ function createInformationFacility(facility: StationFacility) {
       addLoungeChair(centerX + Math.cos(angle) * radius, centerZ + Math.sin(angle) * radius, Math.PI / 2 - angle)
     }
   }
-  addLoungeSet(-1.82, -0.55, [0.15, 2.15, 4.15])
-  addLoungeSet(0.72, -0.55, [-0.1, 2.05, 4.05])
+  addLoungeSet(-3.5, -0.55, [0.15, 2.15, 4.15])
+  addLoungeSet(-0.2, -0.55, [-0.1, 2.05, 4.05])
 
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.35, 0.8),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, zoneDisplayLabel(facility), facility.color, ''), transparent: true, side: THREE.DoubleSide }),
-  )
-  sign.position.set(-1.35, 3.18, -2.31); group.add(sign)
-  for (const x of [-2.35, 0, 2.35]) for (const z of [-1.25, 0.55]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
+  for (const x of [-4.25, -1.45, 1.35, 4.15]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
   return group
 }
 
