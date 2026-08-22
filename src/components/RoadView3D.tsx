@@ -32,7 +32,7 @@ type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 5.4
-const RESTROOM_WIDTH = 12.8
+const RESTROOM_WIDTH = 7.8
 const RESTROOM_DEPTH = 7.2
 const STATION_WIDTH = 32
 const STATION_DEPTH = 32
@@ -51,13 +51,16 @@ const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_INTERIOR_FLOOR_Y = 0.04
 const RESTROOM_CEILING_BOTTOM_Y = 4.75
 const RESTROOM_FLOOR_FRONT_EXTENSION = 0.17
-const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
-const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
+const RESTROOM_STALL_CENTERS = [-3, -1.75, 1.75, 3] as const
+const RESTROOM_STALL_PARTITIONS = [-2.375, -1.125, 1.125, 2.375] as const
 const INFORMATION_WIDTH = RESTROOM_WIDTH
 const INFORMATION_DEPTH = RESTROOM_DEPTH
 const INFORMATION_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_DEPTH / 2
 const INFORMATION_GATE_X = INFORMATION_ZONE_X - INFORMATION_DEPTH / 2
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_WIDTH / 2
+const FACILITY_FRONT_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH
+const FACILITY_ADJACENT_BOOTH_Z = FACILITY_FRONT_Z - BOOTH_WIDTH / 2
+const FACILITY_UPPER_BOOTH_Z = FACILITY_ADJACENT_BOOTH_Z - BOOTH_WIDTH
 const BASE_MOVEMENT_SPEED = 8.6
 const SPRINT_MOVEMENT_SPEED = BASE_MOVEMENT_SPEED * 1.5
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
@@ -88,12 +91,12 @@ const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
 }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -SIDE_ZONE_X, z: -6.55, gate: { x: -SIDE_GATE_X, z: -6.55, side: 'east' } },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -SIDE_ZONE_X, z: FACILITY_UPPER_BOOTH_Z, gate: { x: -SIDE_GATE_X, z: FACILITY_UPPER_BOOTH_Z, side: 'east' } },
   { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: TRAIN_DOOR_CENTERS[0], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[0], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: SIDE_ZONE_X, z: -6.55, gate: { x: SIDE_GATE_X, z: -6.55, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -SIDE_ZONE_X, z: -0.15, gate: { x: -SIDE_GATE_X, z: -0.15, side: 'east' } },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: SIDE_ZONE_X, z: FACILITY_UPPER_BOOTH_Z, gate: { x: SIDE_GATE_X, z: FACILITY_UPPER_BOOTH_Z, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -SIDE_ZONE_X, z: FACILITY_ADJACENT_BOOTH_Z, gate: { x: -SIDE_GATE_X, z: FACILITY_ADJACENT_BOOTH_Z, side: 'east' } },
   { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: TRAIN_DOOR_CENTERS[1], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[1], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: SIDE_ZONE_X, z: -0.15, gate: { x: SIDE_GATE_X, z: -0.15, side: 'west' } },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: SIDE_ZONE_X, z: FACILITY_ADJACENT_BOOTH_Z, gate: { x: SIDE_GATE_X, z: FACILITY_ADJACENT_BOOTH_Z, side: 'west' } },
   { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: TRAIN_DOOR_CENTERS[2], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[2], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
 ] as const
 
@@ -165,9 +168,9 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     ]
     if (zone.gateCode === 'F02') return [
       ...shellWalls,
-      { x1: zone.x - 2.8, x2: zone.x - 1.55, z1: zone.z + 2.85, z2: zone.z + 6 },
-      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 4.05, z2: zone.z - 2.95 },
-      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 0.75, z2: zone.z + 0.35 },
+      { x1: zone.x - 2.8, x2: zone.x - 1.55, z1: zone.z + 0.7, z2: zone.z + 3.8 },
+      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 3.7, z2: zone.z - 1.4 },
+      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 1.4, z2: zone.z + 0.9 },
     ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
@@ -694,7 +697,7 @@ function createRestroomFacility(facility: StationFacility) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const x of [-3.8, 3.8]) {
+  for (const x of [-2.55, 2.55]) {
     for (const z of [-2.15, 0.1, 2.25]) {
       const light = new THREE.Mesh(new THREE.CircleGeometry(0.15, 24), lightMaterial)
       light.rotation.x = Math.PI / 2; light.position.set(x, 4.73, z); group.add(light)
@@ -730,9 +733,9 @@ function createInformationFacility(facility: StationFacility) {
   addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, 4.31, -0.08], softWhite, 0.04)
 
   for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
-  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [5.4, 0.055, 0.07], [2.35, y, -halfDepth + 0.18], softWhite, 0.018)
+  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
 
-  const deskGroup = new THREE.Group(); deskGroup.position.set(4.45, 0, 2.18); deskGroup.rotation.y = -0.12; group.add(deskGroup)
+  const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); deskGroup.rotation.y = -0.12; group.add(deskGroup)
   const deskShape = new THREE.Shape()
   deskShape.moveTo(-1.45, 0); deskShape.lineTo(1.45, 0); deskShape.lineTo(1.2, 1.08); deskShape.lineTo(-1.2, 1.08); deskShape.closePath()
   const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
@@ -767,10 +770,10 @@ function createInformationFacility(facility: StationFacility) {
       addLoungeChair(centerX + Math.cos(angle) * radius, centerZ + Math.sin(angle) * radius, Math.PI / 2 - angle)
     }
   }
-  addLoungeSet(-3.5, -0.55, [0.15, 2.15, 4.15])
-  addLoungeSet(-0.2, -0.55, [-0.1, 2.05, 4.05])
+  addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
+  addLoungeSet(-0.25, -0.55, [-0.1, 2.05, 4.05])
 
-  for (const x of [-4.25, -1.45, 1.35, 4.15]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
+  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
   return group
 }
 

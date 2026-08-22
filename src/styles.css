@@ -170,8 +170,9 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .app-header__logo { width: 78px; height: 23px; }
   .app-header__logo img { width: 101px; }
   .top-navigation { width: auto; }
-  .top-navigation__item { font-size: 13px; line-height: 16px; }
-  .top-navigation__item span { transform: translateY(3px); }
+  .top-navigation__item { font-size: clamp(14px,4vw,16px); font-weight: 800; line-height: 20px; letter-spacing: -.025em; }
+  .top-navigation__item span { transform: translateY(2px); }
+  .top-navigation__item[aria-current='page'] { color: var(--blue-950); font-size: clamp(15px,4.2vw,17px); font-weight: 900; }
   .page { width: min(100% - 28px,1440px); padding-top: 20px; }
   .primary-button { width: 100%; }
   .reward-shop-page { padding-bottom: 30px; }
@@ -235,17 +236,17 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 @media (max-width: 700px) {
   .cket-ticket-board { margin-top: clamp(20px,6vw,26px); }
   .cket-ticket-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(7px,2.2vw,10px); }
-  .cket-ticket { --ticket-band-size: clamp(28px,7.7vw,32px); --ticket-stub-width: 34%; border-width: 1px; border-radius: clamp(10px,3vw,13px); }
-  .cket-ticket__header strong { overflow: hidden; padding-left: clamp(6px,1.8vw,9px); font-size: clamp(8.5px,2.45vw,10px); text-overflow: ellipsis; white-space: nowrap; }
-  .cket-ticket__header small { overflow: hidden; padding-right: clamp(5px,1.6vw,8px); font-size: clamp(5.5px,1.55vw,7px); text-overflow: ellipsis; }
-  .cket-ticket.is-visited .cket-ticket__header small { font-size: clamp(8px,2.2vw,9.5px); }
-  .cket-ticket__body { min-height: clamp(84px,23vw,98px); margin-right: -1px; margin-left: -1px; }
-  .cket-ticket p { padding: clamp(8px,2.4vw,11px) clamp(7px,2vw,10px); transform: none; }
-  .cket-ticket p strong { overflow-wrap: anywhere; font-size: clamp(10px,2.85vw,12px); line-height: 1.3; }
-  .cket-ticket__stub { grid-template-columns: minmax(0,1fr) clamp(14px,4.5vw,20px); column-gap: clamp(2px,.8vw,4px); padding: 6px clamp(3px,1vw,5px); }
-  .cket-ticket__points { font-size: clamp(8.5px,2.5vw,10.5px); }
-  .cket-ticket__stub i { height: clamp(62px,17vw,74px); transform: none; }
-  .cket-ticket__cutout { width: clamp(18px,5vw,21px); transform: translateX(-50%) scaleX(.76); }
+  .cket-ticket { --ticket-band-size: clamp(19px,5.1vw,22px); --ticket-stub-width: 34%; border-width: 1px; border-radius: clamp(8px,2.2vw,10px); }
+  .cket-ticket__header strong { overflow: hidden; padding-left: clamp(5px,1.5vw,7px); font-size: clamp(7.5px,2.2vw,9px); text-overflow: ellipsis; white-space: nowrap; }
+  .cket-ticket__header small { overflow: hidden; padding-right: clamp(4px,1.2vw,6px); font-size: clamp(5px,1.35vw,6px); text-overflow: ellipsis; }
+  .cket-ticket.is-visited .cket-ticket__header small { font-size: clamp(7px,1.9vw,8px); }
+  .cket-ticket__body { min-height: clamp(56px,15.3vw,65px); margin-right: -1px; margin-left: -1px; }
+  .cket-ticket p { padding: clamp(4px,1.5vw,7px) clamp(5px,1.6vw,8px); transform: none; }
+  .cket-ticket p strong { overflow: hidden; font-size: clamp(8.5px,2.45vw,10.5px); line-height: 1.22; word-break: keep-all; }
+  .cket-ticket__stub { grid-template-columns: minmax(0,1fr) clamp(11px,3.4vw,15px); column-gap: clamp(2px,.6vw,3px); padding: 4px clamp(2px,.8vw,4px); }
+  .cket-ticket__points { font-size: clamp(7.5px,2.2vw,9px); }
+  .cket-ticket__stub i { height: clamp(40px,11vw,49px); transform: none; }
+  .cket-ticket__cutout { width: clamp(14px,4vw,17px); height: clamp(10px,2.8vw,12px); transform: translateX(-50%) scaleX(.76); }
   .cket-ticket__cutout--bottom { transform: translateX(-50%) rotate(180deg) scaleX(.76); }
 }
 
