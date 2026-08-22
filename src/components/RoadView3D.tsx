@@ -42,7 +42,8 @@ const SIDE_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_DEPTH /
 const SIDE_GATE_X = SIDE_ZONE_X - BOOTH_DEPTH / 2
 const RESTROOM_ZONE_X = -(STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_DEPTH / 2)
 const RESTROOM_GATE_X = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
-const RESTROOM_ZONE_Z = 17
+const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH / 2
+const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const TRAIN_BODY_BASE_Y = 0.28
@@ -75,7 +76,7 @@ const BOOTHS: readonly RoadViewBooth[] = [
 
 const FACILITIES: readonly StationFacility[] = [
   { gateCode: 'F01', label: 'FACILITY 01', title: '화장실', color: '#e0bd35', x: RESTROOM_ZONE_X, z: RESTROOM_ZONE_Z, gate: { x: RESTROOM_GATE_X, z: RESTROOM_ZONE_Z, side: 'east' } },
-  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: SIDE_ZONE_X, z: 15, gate: { x: SIDE_GATE_X, z: 15, side: 'west' } },
+  { gateCode: 'F02', label: 'FACILITY 02', title: '안내센터', color: '#4b9fd3', x: SIDE_ZONE_X, z: INFORMATION_ZONE_Z, gate: { x: SIDE_GATE_X, z: INFORMATION_ZONE_Z, side: 'west' } },
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const TRAIN_NOSE_COLLIDER: Collider = { x1: -20.72, x2: -14, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 }
@@ -552,17 +553,17 @@ function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Ma
 function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
   addRoundedBox(parent, [0.3, 0.76, 0.5], [-5.94, 0.92, z], ceramic, 0.12)
   addRoundedBox(parent, [0.46, 0.13, 0.56], [-5.74, 0.59, z], ceramic, 0.06)
-  addRoundedBox(parent, [0.06, 0.3, 0.06], [-5.76, 1.42, z], metal, 0.02)
-  addRoundedBox(parent, [0.08, 0.08, 0.14], [-5.71, 1.56, z], metal, 0.025)
+  addRoundedBox(parent, [0.06, 0.3, 0.06], [-6.05, 1.42, z], metal, 0.02)
+  addRoundedBox(parent, [0.08, 0.08, 0.14], [-6.04, 1.56, z], metal, 0.025)
 }
 
 function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 1, z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
-  const basinX = wallX + direction * 0.48
+  const basinX = wallX + direction * 0.34
   addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
   addRoundedBox(parent, [0.18, 0.72, 0.18], [basinX, 0.49, z], metal, 0.04)
-  addRoundedBox(parent, [0.06, 0.48, 0.72], [wallX + direction * 0.12, 2.02, z], mirror, 0.02)
-  addRoundedBox(parent, [0.08, 0.34, 0.08], [wallX + direction * 0.16, 1.28, z], metal, 0.025)
-  addRoundedBox(parent, [0.3, 0.07, 0.08], [wallX + direction * 0.31, 1.43, z], metal, 0.02)
+  addRoundedBox(parent, [0.06, 0.48, 0.72], [wallX + direction * 0.03, 2.02, z], mirror, 0.02)
+  addRoundedBox(parent, [0.08, 0.34, 0.08], [wallX + direction * 0.04, 1.28, z], metal, 0.025)
+  addRoundedBox(parent, [0.3, 0.07, 0.08], [wallX + direction * 0.15, 1.43, z], metal, 0.02)
 }
 
 function createRestroomFacility(facility: StationFacility) {
@@ -624,8 +625,8 @@ function createRestroomFacility(facility: StationFacility) {
   for (const x of [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
   for (const z of [-1.05, 0.05, 1.15, 2.25]) addRestroomUrinal(group, z, ceramic, metal)
   for (const z of [0.45, 1.65]) {
-    addRestroomSink(group, -0.12, -1, z, ceramic, metal, mirror)
-    addRestroomSink(group, 0.12, 1, z, ceramic, metal, mirror)
+    addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
+    addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
   for (const z of [-0.5, 0.6, 1.7]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
 
