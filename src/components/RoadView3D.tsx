@@ -137,8 +137,8 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     ]
     if (zone.gateCode === 'F02') return shellWalls
     if (zone.gateCode === 'F01') {
-      const doorwayOffset = 2.35
-      const doorwayHalfWidth = 1.05
+      const doorwayOffset = 1.35
+      const doorwayHalfWidth = 0.85
       const lowerDoorCenter = zone.z - doorwayOffset
       const upperDoorCenter = zone.z + doorwayOffset
       return [
@@ -147,12 +147,6 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
         { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
-        { x1: zone.x + 0.35, x2: zone.x + 0.55, z1: zone.z - 4.15, z2: zone.z },
-        { x1: zone.x + 0.35, x2: zone.x + 0.55, z1: zone.z, z2: zone.z + 4.15 },
-        { x1: zone.x + 1.75, x2: zone.x + 3.4, z1: zone.z - 3.48, z2: zone.z - 3.32 },
-        { x1: zone.x + 1.75, x2: zone.x + 3.4, z1: zone.z - 1.38, z2: zone.z - 1.22 },
-        { x1: zone.x + 1.75, x2: zone.x + 3.4, z1: zone.z + 1.22, z2: zone.z + 1.38 },
-        { x1: zone.x + 1.75, x2: zone.x + 3.4, z1: zone.z + 3.32, z2: zone.z + 3.48 },
       ]
     }
     return [
@@ -539,7 +533,7 @@ function createBooth(zone: RoadViewBooth) {
 }
 
 function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Material, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
-  const stallWidth = 0.9
+  const stallWidth = 1.05
   const stallCenterZ = -2.72
   const stallDepth = 1.48
   for (const sideX of [x - stallWidth / 2, x + stallWidth / 2]) addRoundedBox(parent, [0.06, 2.08, stallDepth], [sideX, 1.25, stallCenterZ], partition, 0.015)
@@ -551,11 +545,11 @@ function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Ma
   addRoundedBox(parent, [0.38, 0.24, 0.5], [x, 0.36, -2.93], ceramic, 0.1)
 }
 
-function addRestroomUrinal(parent: THREE.Object3D, x: number, ceramic: THREE.Material, metal: THREE.Material) {
-  addRoundedBox(parent, [0.5, 0.76, 0.3], [x, 0.92, 0.2], ceramic, 0.12)
-  addRoundedBox(parent, [0.56, 0.13, 0.46], [x, 0.59, 0], ceramic, 0.06)
-  addRoundedBox(parent, [0.06, 0.3, 0.06], [x, 1.42, 0.25], metal, 0.02)
-  addRoundedBox(parent, [0.14, 0.08, 0.08], [x, 1.56, 0.3], metal, 0.025)
+function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
+  addRoundedBox(parent, [0.3, 0.76, 0.5], [-5.94, 0.92, z], ceramic, 0.12)
+  addRoundedBox(parent, [0.46, 0.13, 0.56], [-5.74, 0.59, z], ceramic, 0.06)
+  addRoundedBox(parent, [0.06, 0.3, 0.06], [-5.76, 1.42, z], metal, 0.02)
+  addRoundedBox(parent, [0.08, 0.08, 0.14], [-5.71, 1.56, z], metal, 0.025)
 }
 
 function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 1, z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
@@ -593,9 +587,9 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [halfWidth - 0.22, 0.1, RESTROOM_DEPTH - 0.5], [halfWidth / 2, 0.05, 0], floorMaterial, 0.02)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
 
-  const doorwayWidth = 2.1
+  const doorwayWidth = 1.7
   const doorwayHeight = 3.5
-  const doorwayCenters = [-2.35, 2.35] as const
+  const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const facadeSegments = [
     [-halfWidth, openingEdges[0][0]],
@@ -606,7 +600,7 @@ function createRestroomFacility(facility: StationFacility) {
   for (const [start, end] of facadeSegments) addRoundedBox(group, [end - start, doorwayHeight, 0.3], [(start + end) / 2, doorwayHeight / 2, frontZ], facade, 0.025)
   addRoundedBox(group, [RESTROOM_WIDTH, 1.38, 0.3], [0, doorwayHeight + 0.69, frontZ], facade, 0.025)
 
-  for (const [index, x] of [-5.12, 5.12].entries()) {
+  for (const [index, x] of [-4.85, 4.85].entries()) {
     const gender = index === 0 ? 'men' : 'women'
     const label = new THREE.Mesh(
       new THREE.PlaneGeometry(2.5, 0.62),
@@ -617,20 +611,15 @@ function createRestroomFacility(facility: StationFacility) {
     pictogram.position.set(x, 1.96, halfDepth + 0.058); group.add(pictogram)
   }
 
-  for (const x of doorwayCenters) {
-    addRoundedBox(group, [0.12, 3.5, 1.65], [x - doorwayWidth / 2, 1.75, 2.575], tile, 0.015)
-    addRoundedBox(group, [0.12, 3.5, 1.65], [x + doorwayWidth / 2, 1.75, 2.575], tile, 0.015)
+  for (const x of [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
+  for (const z of [-1.05, 0.05, 1.15, 2.25]) addRestroomUrinal(group, z, ceramic, metal)
+  for (const z of [0.45, 1.65]) {
+    addRestroomSink(group, -0.12, -1, z, ceramic, metal, mirror)
+    addRestroomSink(group, 0.12, 1, z, ceramic, metal, mirror)
   }
-
-  addRoundedBox(group, [4.15, 3.9, 0.18], [-2.075, 1.95, 0.45], tile, 0.025)
-  addRoundedBox(group, [4.15, 3.9, 0.18], [2.075, 1.95, 0.45], tile, 0.025)
-  for (const x of [-5.6, -4.55, -3.5, -2.45, 2.45, 3.5, 4.55, 5.6]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
-  for (const x of [-3.65, -2.85, -2.05, -1.25]) addRestroomUrinal(group, x, ceramic, metal)
-  for (const z of [-0.75, -1.55]) {
-    addRestroomSink(group, -6.12, 1, z, ceramic, metal, mirror)
-    addRestroomSink(group, 6.12, -1, z, ceramic, metal, mirror)
-  }
-  for (const x of [-3.25, -2.45, -1.65]) addRoundedBox(group, [0.08, 1.38, 0.72], [x, 1.16, -0.02], partition, 0.02)
+  for (const z of [-0.5, 0.6, 1.7]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
+  addRoundedBox(group, [0.46, 0.66, 0.46], [-1.05, 0.34, -1.45], partition, 0.06)
+  addRoundedBox(group, [0.46, 0.66, 0.46], [1.05, 0.34, -1.45], partition, 0.06)
 
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
