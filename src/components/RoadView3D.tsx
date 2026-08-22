@@ -48,6 +48,7 @@ const RESTROOM_STALL_BACK_Z = -3.18
 const RESTROOM_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_FLOOR_TOP_Y = 0.02
+const RESTROOM_INTERIOR_FLOOR_Y = 0.012
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -560,7 +561,7 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   const doorWidth = RESTROOM_DOOR_WIDTH
   const hingedDoor = new THREE.Group()
   hingedDoor.position.set(x - doorWidth / 2, 0, RESTROOM_STALL_FRONT_Z)
-  const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, 1.18, 0], door, 0.02)
+  const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + 0.87, 0], door, 0.02)
   panel.userData.collisionWidth = doorWidth
   panel.userData.collisionDepth = 0.07
   addRoundedBox(panel, [0.12, 0.08, 0.04], [doorWidth * 0.3, 0, 0.055], metal, 0.02)
@@ -568,10 +569,10 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   hingedDoor.userData.openDistance = 1.75
   hingedDoor.userData.collisionPanel = panel
   parent.add(hingedDoor)
-  addRoundedBox(parent, [0.5, 0.56, 0.3], [x, 0.63, -3.22], ceramic, 0.1)
+  addRoundedBox(parent, [0.5, 0.56, 0.3], [x, RESTROOM_INTERIOR_FLOOR_Y + 0.39, -3.22], ceramic, 0.1)
   const bowl = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.07, 10, 24), ceramic)
-  bowl.rotation.x = Math.PI / 2; bowl.scale.z = 1.24; bowl.position.set(x, 0.48, -2.91); parent.add(bowl)
-  addRoundedBox(parent, [0.38, 0.24, 0.5], [x, 0.36, -2.93], ceramic, 0.1)
+  bowl.rotation.x = Math.PI / 2; bowl.scale.z = 1.24; bowl.position.set(x, RESTROOM_INTERIOR_FLOOR_Y + 0.24, -2.91); parent.add(bowl)
+  addRoundedBox(parent, [0.38, 0.24, 0.5], [x, RESTROOM_INTERIOR_FLOOR_Y + 0.12, -2.93], ceramic, 0.1)
   return hingedDoor
 }
 
@@ -585,7 +586,7 @@ function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Mat
 function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 1, z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
   const basinX = wallX + direction * 0.34
   addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
-  addRoundedBox(parent, [0.18, 0.72, 0.18], [basinX, 0.49, z], metal, 0.04)
+  addRoundedBox(parent, [0.18, 0.9, 0.18], [basinX, RESTROOM_INTERIOR_FLOOR_Y + 0.45, z], metal, 0.04)
   addRoundedBox(parent, [0.06, 0.48, 0.72], [wallX + direction * 0.03, 2.02, z], mirror, 0.02)
   addRoundedBox(parent, [0.08, 0.34, 0.08], [wallX + direction * 0.04, 1.28, z], metal, 0.025)
   addRoundedBox(parent, [0.3, 0.07, 0.08], [wallX + direction * 0.15, 1.43, z], metal, 0.02)
@@ -597,8 +598,8 @@ function createRestroomFacility(facility: StationFacility) {
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
   const facade = new THREE.MeshStandardMaterial({ color: '#303b45', metalness: 0.12, roughness: 0.68 })
-  const tile = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92 })
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: '#596168', metalness: 0.02, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
+  const tile = new THREE.MeshStandardMaterial({ color: '#f4f6f5', metalness: 0, roughness: 0.82 })
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: '#f4f6f5', metalness: 0, roughness: 0.82, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
@@ -615,7 +616,7 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [0.18, 4.62, RESTROOM_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
   const restroomFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH - 0.48, RESTROOM_DEPTH - 0.52), floorMaterial)
   restroomFloor.rotation.x = -Math.PI / 2
-  restroomFloor.position.y = 0.012
+  restroomFloor.position.y = RESTROOM_INTERIOR_FLOOR_Y
   restroomFloor.receiveShadow = false
   group.add(restroomFloor)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
@@ -655,7 +656,7 @@ function createRestroomFacility(facility: StationFacility) {
   const stallPartitionDepth = RESTROOM_STALL_FRONT_Z - RESTROOM_STALL_BACK_Z
   const stallPartitionZ = (RESTROOM_STALL_FRONT_Z + RESTROOM_STALL_BACK_Z) / 2
   for (const x of RESTROOM_STALL_PARTITIONS) {
-    addRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, 1.25, stallPartitionZ], partition, 0.015)
+    addRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, RESTROOM_INTERIOR_FLOOR_Y + 1.04, stallPartitionZ], partition, 0.015)
   }
   for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
@@ -665,7 +666,7 @@ function createRestroomFacility(facility: StationFacility) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const z of [-1.7, -0.6, 0.5]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
+  for (const z of [-1.7, -0.6, 0.5]) addRoundedBox(group, [0.72, 1.83, 0.08], [-5.78, RESTROOM_INTERIOR_FLOOR_Y + 0.915, z], partition, 0.02)
 
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
