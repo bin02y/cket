@@ -30,12 +30,12 @@ type Collider = { x1: number; x2: number; z1: number; z2: number }
 type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadViewGateRewardResult['status']; points: number }
 type BoothImage = { src: string; alt: string }
 
-const BOOTH_WIDTH = 8.4
+const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 5.4
 const RESTROOM_WIDTH = 12.8
 const RESTROOM_DEPTH = 7.2
-const STATION_WIDTH = 64
-const STATION_DEPTH = 64
+const STATION_WIDTH = 32
+const STATION_DEPTH = 32
 const STATION_HEIGHT = 8.5
 const PERIMETER_WALL_THICKNESS = 0.24
 const SIDE_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_DEPTH / 2
@@ -70,6 +70,8 @@ const TRAIN_BODY_START_X = TRAIN_NOSE_X + 6.6
 const TRAIN_TAIL_X = STATION_WIDTH / 2 - 0.62
 const TRAIN_BODY_LENGTH = TRAIN_TAIL_X - TRAIN_BODY_START_X
 const TRAIN_BODY_CENTER_X = (TRAIN_BODY_START_X + TRAIN_TAIL_X) / 2
+const TRAIN_CAR_WIDTH = 7.7
+const TRAIN_DOOR_CENTERS = [-4.8, 3.1, 11] as const
 const TRAIN_SEAT_LOCAL_XS = [-1.38, 1.05] as const
 const TRAIN_SEAT_LOCAL_ZS = [-2.9, -1.45, 1.45, 2.9] as const
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
@@ -86,13 +88,13 @@ const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
 }
 
 const BOOTHS: readonly RoadViewBooth[] = [
-  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -SIDE_ZONE_X, z: -5, gate: { x: -SIDE_GATE_X, z: -5, side: 'east' } },
-  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: -9.4, z: TRAIN_CENTER_Z, gate: { x: -9.4, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
-  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: SIDE_ZONE_X, z: -5, gate: { x: SIDE_GATE_X, z: -5, side: 'west' } },
-  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -SIDE_ZONE_X, z: 5, gate: { x: -SIDE_GATE_X, z: 5, side: 'east' } },
-  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: 0, z: TRAIN_CENTER_Z, gate: { x: 0, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
-  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: SIDE_ZONE_X, z: 5, gate: { x: SIDE_GATE_X, z: 5, side: 'west' } },
-  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: 9.4, z: TRAIN_CENTER_Z, gate: { x: 9.4, z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
+  { id: 1, gateCode: 'B01', label: 'BOOTH 01', title: '녹는 빙하 위에서 펭귄을 구해내라', description: '녹는 빙하를 건너 펭귄이 안전한 곳에 도착하도록 도와주세요.', color: '#45aee8', x: -SIDE_ZONE_X, z: -6.55, gate: { x: -SIDE_GATE_X, z: -6.55, side: 'east' } },
+  { id: 2, gateCode: 'L01', label: 'KIT', title: '교육용 키트', description: '전시 열차 1호차에서 압축·응축·팽창·증발 장치를 직접 살펴보세요.', color: '#73b62f', x: TRAIN_DOOR_CENTERS[0], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[0], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
+  { id: 3, gateCode: 'B02', label: 'BOOTH 02', title: '무더운 여름에서 살아남기', description: '상황에 맞는 냉방 방법을 선택하고 에너지를 절약해 보세요.', color: '#35b981', x: SIDE_ZONE_X, z: -6.55, gate: { x: SIDE_GATE_X, z: -6.55, side: 'west' } },
+  { id: 4, gateCode: 'B03', label: 'BOOTH 03', title: '기후위기에서 동물들을 구하라', description: '생활 속 친환경 선택으로 기후 위기의 동물들을 지켜주세요.', color: '#ae7cff', x: -SIDE_ZONE_X, z: -0.15, gate: { x: -SIDE_GATE_X, z: -0.15, side: 'east' } },
+  { id: 5, gateCode: 'E01', label: 'EDU', title: '초고속 냉동사이클', description: '전시 열차 2호차에서 KTX 초고속 환경의 냉방을 유지하는 냉동공조 기술을 배워보세요.', color: '#e69a35', x: TRAIN_DOOR_CENTERS[1], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[1], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
+  { id: 6, gateCode: 'B04', label: 'BOOTH 04', title: '나비효과로부터 지구를 지켜라', description: '작은 생활 습관이 지구의 미래를 어떻게 바꾸는지 확인해 보세요.', color: '#82e76d', x: SIDE_ZONE_X, z: -0.15, gate: { x: SIDE_GATE_X, z: -0.15, side: 'west' } },
+  { id: 7, gateCode: 'R01', label: 'SHOP', title: '굿즈샵', description: '전시 열차 3호차에서 체험으로 모은 포인트로 에코 익스프레스 굿즈를 만나보세요.', color: '#e45575', x: TRAIN_DOOR_CENTERS[2], z: TRAIN_CENTER_Z, gate: { x: TRAIN_DOOR_CENTERS[2], z: TRAIN_GATE_Z, side: 'south' }, trainCar: true },
 ] as const
 
 const FACILITIES: readonly StationFacility[] = [
@@ -101,8 +103,8 @@ const FACILITIES: readonly StationFacility[] = [
 ] as const
 const ZONES: readonly (RoadViewBooth | StationFacility)[] = [...BOOTHS, ...FACILITIES]
 const TRAIN_END_COLLIDERS: readonly Collider[] = [
-  { x1: TRAIN_NOSE_X - 0.12, x2: -13.6, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
-  { x1: 13.6, x2: TRAIN_TAIL_X + 0.12, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
+  { x1: TRAIN_NOSE_X - 0.12, x2: TRAIN_DOOR_CENTERS[0] - TRAIN_CAR_WIDTH / 2, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
+  { x1: TRAIN_DOOR_CENTERS[2] + TRAIN_CAR_WIDTH / 2, x2: TRAIN_TAIL_X + 0.12, z1: TRAIN_CENTER_Z - 2.96, z2: TRAIN_CENTER_Z + 2.96 },
 ]
 const TRAIN_SEAT_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => booth.trainCar).flatMap((booth) =>
   TRAIN_SEAT_LOCAL_ZS.flatMap((localZ) =>
@@ -143,7 +145,7 @@ function zoneDisplayLabel(zone: RoadViewBooth | StationFacility) {
 }
 
 function zoneSize(zone: RoadViewBooth | StationFacility) {
-  if (zone.trainCar) return { width: 9.2, depth: 5.6 }
+  if (zone.trainCar) return { width: TRAIN_CAR_WIDTH, depth: 5.6 }
   if (zone.gateCode === 'F01') return { width: RESTROOM_DEPTH, depth: RESTROOM_WIDTH }
   if (zone.gateCode === 'F02') return { width: INFORMATION_DEPTH, depth: INFORMATION_WIDTH }
   if (zone.gate.side === 'east' || zone.gate.side === 'west') return { width: BOOTH_DEPTH, depth: BOOTH_WIDTH }
@@ -198,7 +200,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     }
     if ('id' in zone) {
       const counterWorldX = zone.x + (zone.gate.side === 'east' ? 0.9 : -0.9)
-      const counterWorldZ = zone.z + (zone.gate.side === 'east' ? -2.45 : 2.45)
+      const counterWorldZ = zone.z + (zone.gate.side === 'east' ? -1.55 : 1.55)
       return [
         ...shellWalls,
         { x1: counterWorldX - 0.65, x2: counterWorldX + 0.65, z1: counterWorldZ - 1, z2: counterWorldZ + 1 },
@@ -486,7 +488,7 @@ function createIntegratedTrainShell() {
   addShellPart([trainLength, wallHeight, 0.24], [TRAIN_BODY_CENTER_X, wallCenterY, -halfDepth])
   addShellPart([0.26, wallHeight, 5.6], [TRAIN_TAIL_X, wallCenterY, 0])
 
-  const doorCenters = [-9.4, 0, 9.4]
+  const doorCenters = TRAIN_DOOR_CENTERS
   const frontSections = [
     [TRAIN_BODY_START_X, doorCenters[0] - openingWidth / 2],
     [doorCenters[0] + openingWidth / 2, doorCenters[1] - openingWidth / 2],
@@ -543,7 +545,7 @@ function createIntegratedTrainShell() {
   const ktxMark = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.87), new THREE.MeshBasicMaterial({ map: makeTrainMarkTexture('KTX', 'CKET EXPRESS'), transparent: true }))
   ktxMark.position.set(TRAIN_NOSE_X + 4.15, 2.5, halfDepth + 0.2); group.add(ktxMark)
 
-  for (const x of [-20.2, -10.8, -1.2, 8.4, 17.8, 27.2]) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
+  for (let x = TRAIN_BODY_START_X + 2.2; x < TRAIN_TAIL_X - 1.4; x += 7.4) addRoundedBox(group, [3.45, 0.28, 1.5], [x, 4.58, 0], roofTrim, 0.08)
   return group
 }
 
@@ -584,8 +586,8 @@ function createBooth(zone: RoadViewBooth) {
   )
   name.position.set(0, 3.25, -halfDepth + 0.18); group.add(name)
 
-  addRoundedBox(group, [1.8, 1.18, 1.02], [2.45, 0.64, 0.92], white, 0.035)
-  addRoundedBox(group, [1.98, 0.12, 1.18], [2.45, 1.28, 0.92], softWhite, 0.035)
+  addRoundedBox(group, [1.65, 1.18, 1.02], [1.55, 0.64, 0.92], white, 0.035)
+  addRoundedBox(group, [1.82, 0.12, 1.18], [1.55, 1.28, 0.92], softWhite, 0.035)
   return group
 }
 
@@ -855,7 +857,7 @@ function buildMetaverseStation(scene: THREE.Scene) {
   const fasteningMaterial = new THREE.MeshStandardMaterial({ color: '#30383c', metalness: 0.72, roughness: 0.3 })
   const rail = new THREE.MeshStandardMaterial({ color: '#56656d', metalness: 0.92, roughness: 0.16 })
   addRoundedBox(scene, [trackLength, 0.08, 5.92], [trackCenterX, 0.04, TRAIN_CENTER_Z], ballast, 0.025)
-  const sleeperCount = 64
+  const sleeperCount = 32
   const sleeperGeometry = new RoundedBoxGeometry(0.24, 0.12, 5.34, 2, 0.025)
   const sleepers = new THREE.InstancedMesh(sleeperGeometry, sleeperMaterial, sleeperCount)
   const sleeperMatrix = new THREE.Matrix4()
@@ -911,7 +913,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
-  const playerRef = useRef<Player>({ x: 0, z: 20.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
+  const playerRef = useRef<Player>({ x: 0, z: 10.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
   const jumpRef = useRef({ height: 0, velocity: 0 }); const joystickBaseRef = useRef<HTMLDivElement>(null); const joystickKnobRef = useRef<HTMLSpanElement>(null)
   const joystickPointerRef = useRef<number | null>(null)
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
