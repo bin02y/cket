@@ -16,6 +16,7 @@ const tabLoadingFallback = <main id="main-content" className="page tab-loading" 
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('booths')
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
   const [orders, setOrders] = useState<RewardOrder[]>([])
@@ -93,6 +94,7 @@ function App() {
     if (!data.session) return { error: '가입 세션을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.' }
 
     setCurrentParticipant(profileFromAuthUser(data.session.user))
+    setIsAuthOpen(false)
     setActiveTab('booths')
     return {}
   }
@@ -104,6 +106,7 @@ function App() {
     if (error) return { error: translateAuthError(error.message) }
 
     setCurrentParticipant(profileFromAuthUser(data.user))
+    setIsAuthOpen(false)
     setActiveTab('booths')
     return {}
   }
@@ -163,6 +166,10 @@ function App() {
   }
 
   function navigateTo(tab: TabId) {
+    if (!currentParticipant && (tab === 'shop' || tab === 'my')) {
+      setIsAuthOpen(true)
+      return
+    }
     setActiveTab(tab)
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }
@@ -177,7 +184,9 @@ function App() {
     }
   }
 
-  if (!isAuthLoading && !currentParticipant) return <AuthScreen onLogin={login} onSignUp={signUp} />
+  if (isAuthOpen && !currentParticipant) {
+    return <AuthScreen onLogin={login} onSignUp={signUp} onClose={() => setIsAuthOpen(false)} />
+  }
 
   return (
     <div className="app-shell">
@@ -188,16 +197,21 @@ function App() {
             <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
               <img src={cketLogo} alt="" />
             </button>
+            {!currentParticipant ? (
+              <button className="app-header__auth-link" type="button" disabled={isAuthLoading} onClick={() => setIsAuthOpen(true)}>
+                로그인/회원가입 <span aria-hidden="true">&gt;</span>
+              </button>
+            ) : null}
           </div>
           <TopNavigation activeTab={activeTab} onChange={navigateTo} />
         </div>
       </header>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
-      {!currentParticipant ? (
-        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
-      ) : activeTab === 'education' ? (
+      {activeTab === 'education' ? (
         <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'booths' ? (
+        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
+      ) : !currentParticipant ? (
         <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'shop' ? (
         <Suspense fallback={tabLoadingFallback}>

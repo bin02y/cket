@@ -7,9 +7,10 @@ type AuthMode = 'login' | 'signup'
 type AuthScreenProps = {
   onLogin: (credentials: AuthCredentials) => Promise<AuthActionResult>
   onSignUp: (details: SignUpDetails) => Promise<AuthActionResult>
+  onClose: () => void
 }
 
-export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
+export function AuthScreen({ onLogin, onSignUp, onClose }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>('signup')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -69,6 +70,7 @@ export function AuthScreen({ onLogin, onSignUp }: AuthScreenProps) {
 
   return (
     <main id="main-content" className="auth-page">
+      <button className="auth-close" type="button" aria-label="홈으로 돌아가기" onClick={onClose}>×</button>
       <section className="auth-scene" aria-label="풀밭 위를 달리는 에코 익스프레스" role="img">
         <div className="auth-scene__copy">
           <h1>배우고, 실천하고,<br /><em>더 푸른 내일로</em></h1>
