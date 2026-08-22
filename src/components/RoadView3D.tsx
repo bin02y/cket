@@ -174,7 +174,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
       ...shellWalls,
       { x1: zone.x - 2.8, x2: zone.x - 1.55, z1: zone.z + 0.7, z2: zone.z + 3.8 },
       { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 3.7, z2: zone.z - 1.4 },
-      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 1.4, z2: zone.z + 0.9 },
+      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z + 1.4, z2: zone.z + 3.7 },
     ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
@@ -757,7 +757,7 @@ function createInformationFacility(facility: StationFacility) {
   for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
   for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
 
-  const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); deskGroup.rotation.y = -0.12; group.add(deskGroup)
+  const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
   const deskShape = new THREE.Shape()
   deskShape.moveTo(-1.45, 0); deskShape.lineTo(1.45, 0); deskShape.lineTo(1.2, 1.08); deskShape.lineTo(-1.2, 1.08); deskShape.closePath()
   const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
@@ -768,7 +768,7 @@ function createInformationFacility(facility: StationFacility) {
     new THREE.PlaneGeometry(2.18, 0.76),
     new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(facility.title, facility.label, facility.color), transparent: true, side: THREE.DoubleSide }),
   )
-  deskSign.position.set(0.04, 0.62, 0.47); deskGroup.add(deskSign)
+  deskSign.position.set(0, 0.62, 0.47); deskGroup.add(deskSign)
 
   const addLoungeChair = (x: number, z: number, yaw: number) => {
     const chair = new THREE.Group(); chair.position.set(x, 0, z); chair.rotation.y = yaw; group.add(chair)
@@ -793,7 +793,7 @@ function createInformationFacility(facility: StationFacility) {
     }
   }
   addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
-  addLoungeSet(-0.25, -0.55, [-0.1, 2.05, 4.05])
+  addLoungeSet(2.55, -0.55, [-0.1, 2.05, 4.05])
 
   for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
   return group
