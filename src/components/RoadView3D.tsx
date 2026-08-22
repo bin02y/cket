@@ -54,6 +54,8 @@ const RESTROOM_FLOOR_FRONT_EXTENSION = 0.17
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
+const BASE_MOVEMENT_SPEED = 8.6
+const SPRINT_MOVEMENT_SPEED = BASE_MOVEMENT_SPEED * 1.5
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
 const TRAIN_BODY_BASE_Y = 0.28
@@ -148,7 +150,9 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     ]
     if (zone.gateCode === 'F02') return [
       ...shellWalls,
-      { x1: zone.x - 1.48, x2: zone.x - 0.02, z1: zone.z - 3.05, z2: zone.z + 3.05 },
+      { x1: zone.x - 1.95, x2: zone.x - 0.85, z1: zone.z + 1.35, z2: zone.z + 3.9 },
+      { x1: zone.x + 0.05, x2: zone.x + 1.05, z1: zone.z - 2.45, z2: zone.z - 1.15 },
+      { x1: zone.x + 0.05, x2: zone.x + 1.05, z1: zone.z + 0.05, z2: zone.z + 1.35 },
     ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
@@ -177,7 +181,6 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         ...toiletColliders,
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z + 0.22, z2: zone.z + 0.98 },
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
-        { x1: zone.x - 2.6, x2: zone.x + 1.4, z1: zone.z + 5.45, z2: zone.z + 6.15 },
       ]
     }
     return [
@@ -594,13 +597,6 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   return hingedDoor
 }
 
-function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
-  addRoundedBox(parent, [0.3, 0.76, 0.5], [-5.94, 0.92, z], ceramic, 0.12)
-  addRoundedBox(parent, [0.46, 0.13, 0.56], [-5.74, 0.59, z], ceramic, 0.06)
-  addRoundedBox(parent, [0.06, 0.3, 0.06], [-6.05, 1.42, z], metal, 0.02)
-  addRoundedBox(parent, [0.08, 0.08, 0.14], [-6.04, 1.56, z], metal, 0.025)
-}
-
 function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 1, z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
   const basinX = wallX + direction * 0.34
   addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
@@ -681,13 +677,10 @@ function createRestroomFacility(facility: StationFacility) {
   for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
   group.userData.collisionDoors = hingedDoors.map((door) => door.userData.collisionPanel as THREE.Mesh)
-  for (const z of [-2.9, -1.8, -0.7, 0.4]) addRestroomUrinal(group, z, ceramic, metal)
   for (const z of [0.45, 1.65]) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const z of [-2.35, -1.25, -0.15]) addRoundedBox(group, [0.72, 1.83, 0.08], [-5.78, RESTROOM_INTERIOR_FLOOR_Y + 0.915, z], partition, 0.02)
-
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
       const light = new THREE.Mesh(new THREE.CircleGeometry(0.15, 24), lightMaterial)
@@ -704,62 +697,68 @@ function createInformationFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
-  const charcoal = new THREE.MeshStandardMaterial({ color: '#171a1b', metalness: 0.12, roughness: 0.62 })
-  const deepBlack = new THREE.MeshStandardMaterial({ color: '#0f1213', metalness: 0.2, roughness: 0.5 })
-  const wood = new THREE.MeshStandardMaterial({ color: '#b7895d', metalness: 0.02, roughness: 0.7 })
-  const paleWood = new THREE.MeshStandardMaterial({ color: '#d8b88e', metalness: 0.02, roughness: 0.68 })
-  const white = new THREE.MeshPhysicalMaterial({ color: '#f8f7f2', metalness: 0.04, roughness: 0.32, clearcoat: 0.45, clearcoatRoughness: 0.3 })
-  const glass = new THREE.MeshPhysicalMaterial({ color: '#315766', transparent: true, opacity: 0.78, metalness: 0.28, roughness: 0.16, clearcoat: 0.75, clearcoatRoughness: 0.08 })
-  const planter = new THREE.MeshStandardMaterial({ color: '#f4f1e9', metalness: 0.05, roughness: 0.58 })
-  const leaf = new THREE.MeshStandardMaterial({ color: '#5f7e42', metalness: 0, roughness: 0.86 })
-  const light = new THREE.MeshBasicMaterial({ color: '#fff7dc' })
+  const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
+  const softWhite = new THREE.MeshStandardMaterial({ color: '#eef1f1', metalness: 0.02, roughness: 0.72 })
+  const blue = new THREE.MeshStandardMaterial({ color: '#122f84', metalness: 0.16, roughness: 0.44 })
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
+  const chrome = new THREE.MeshStandardMaterial({ color: '#b8c3c8', metalness: 0.86, roughness: 0.16 })
+  const chairWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.22 })
+  const chairWood = new THREE.MeshStandardMaterial({ color: '#c9a374', metalness: 0.02, roughness: 0.7 })
+  const light = new THREE.MeshBasicMaterial({ color: '#ffffff' })
 
-  addRoundedBox(group, [8.1, 0.14, 5.05], [0, 0.07, -0.02], paleWood, 0.05)
-  addRoundedBox(group, [6.9, 3.55, 0.18], [0, 2.02, -2.32], charcoal, 0.06)
-  addRoundedBox(group, [8.05, 0.24, 4.58], [0, 4.68, -0.02], white, 0.12)
-  addRoundedBox(group, [7.62, 0.13, 4.2], [-0.06, 4.5, -0.02], wood, 0.06)
+  addRoundedBox(group, [8.1, 0.12, 5.05], [0, 0.06, -0.02], white, 0.045)
+  addRoundedBox(group, [8.05, 4.25, 0.18], [0, 2.13, -2.42], white, 0.045)
+  addRoundedBox(group, [0.18, 4.25, 5], [-4.01, 2.13, 0], white, 0.045)
+  addRoundedBox(group, [8.05, 0.24, 0.34], [0, 4.46, -2.29], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, 4.72], [-3.9, 4.46, 0], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, 4.72], [3.9, 4.46, 0], white, 0.055)
+  addRoundedBox(group, [8.05, 0.24, 0.34], [0, 4.46, 2.29], white, 0.055)
+  addRoundedBox(group, [7.48, 0.1, 4.08], [0, 4.31, -0.08], softWhite, 0.04)
+  addRoundedBox(group, [1.12, 0.035, 1.02], [-2.92, 4.24, -1.48], blue, 0.02)
 
-  for (const z of [-1.85, -1.15, -0.45, 0.25, 0.95, 1.65]) {
-    addRoundedBox(group, [7.25, 0.055, 0.075], [-0.12, 4.38, z], paleWood, 0.018)
-    addRoundedBox(group, [0.075, 4.05, 0.075], [3.48, 2.33, z], paleWood, 0.018)
-  }
-  addRoundedBox(group, [0.2, 4.28, 4.35], [3.77, 2.46, -0.02], white, 0.07)
-  for (const x of [-2.75, -2.47, -2.19, -1.91, -1.63]) addRoundedBox(group, [0.075, 1.62, 0.075], [x, 3.22, -1.92], paleWood, 0.018)
+  for (const z of [-1.72, -1.36, -1, -0.64, -0.28, 0.08, 0.44, 0.8]) addRoundedBox(group, [0.055, 2.42, 0.075], [-3.87, 2.05, z], softWhite, 0.018)
+  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [3.72, 0.055, 0.07], [1.78, y, -2.29], softWhite, 0.018)
 
+  const deskGroup = new THREE.Group(); deskGroup.position.set(2.35, 0, 1.48); deskGroup.rotation.y = -0.12; group.add(deskGroup)
   const deskShape = new THREE.Shape()
-  deskShape.moveTo(-2.95, 0)
-  deskShape.lineTo(2.95, 0)
-  deskShape.lineTo(2.48, 1.32)
-  deskShape.lineTo(-2.48, 1.32)
-  deskShape.closePath()
-  const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.9, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.05, bevelThickness: 0.05 })
-  deskGeometry.translate(0, 0, -0.45)
-  const desk = new THREE.Mesh(deskGeometry, deepBlack)
-  desk.position.set(0, 0.12, 0.92); desk.castShadow = true; desk.receiveShadow = true; group.add(desk)
-  addRoundedBox(group, [5.35, 0.14, 1.12], [0, 1.49, 0.64], charcoal, 0.045)
-  for (const direction of [-1, 1]) {
-    const panel = addRoundedBox(group, [0.72, 0.82, 0.06], [direction * 2.26, 0.74, 1.4], glass, 0.025)
-    panel.rotation.z = direction * 0.17
-  }
+  deskShape.moveTo(-1.45, 0); deskShape.lineTo(1.45, 0); deskShape.lineTo(1.2, 1.08); deskShape.lineTo(-1.2, 1.08); deskShape.closePath()
+  const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
+  deskGeometry.translate(0, 0, -0.41)
+  const desk = new THREE.Mesh(deskGeometry, white); desk.position.y = 0.1; desk.castShadow = true; desk.receiveShadow = true; deskGroup.add(desk)
+  addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], white, 0.045)
+  addRoundedBox(deskGroup, [2.18, 0.27, 0.055], [0.04, 0.61, 0.46], blue, 0.018)
 
-  addRoundedBox(group, [3.82, 0.12, 0.62], [-0.72, 2.04, -2.12], white, 0.035)
-  for (const x of [-1.48, 0.02]) addRoundedBox(group, [1.28, 0.72, 0.08], [x, 2.42, -2.01], deepBlack, 0.025)
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.45, 0.86),
-    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, zoneDisplayLabel(facility), facility.color, ''), transparent: true, side: THREE.DoubleSide }),
-  )
-  sign.position.set(-1.42, 3.36, -2.2); group.add(sign)
-
-  for (const x of [-2.82, 2.78]) {
-    addRoundedBox(group, [1.15, 0.34, 0.58], [x, 0.31, -1.58], planter, 0.05)
-    for (const offset of [-0.4, -0.2, 0, 0.2, 0.4]) {
-      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.035, 0.72 + Math.abs(offset) * 0.24, 8), leaf)
-      stalk.position.set(x + offset, 0.78 + Math.abs(offset) * 0.12, -1.58); stalk.rotation.z = offset * 0.35; group.add(stalk)
+  const addLoungeChair = (x: number, z: number, yaw: number) => {
+    const chair = new THREE.Group(); chair.position.set(x, 0, z); chair.rotation.y = yaw; group.add(chair)
+    addRoundedBox(chair, [0.62, 0.13, 0.58], [0, 0.55, 0], chairWhite, 0.08)
+    const back = addRoundedBox(chair, [0.62, 0.64, 0.12], [0, 0.87, 0.24], chairWhite, 0.1)
+    back.rotation.x = -0.1
+    for (const legX of [-0.21, 0.21]) for (const legZ of [-0.18, 0.18]) {
+      const leg = addRoundedBox(chair, [0.045, 0.5, 0.045], [legX, 0.27, legZ], chairWood, 0.012)
+      leg.rotation.z = legX * 0.28
     }
   }
-  for (const x of [-2.45, 0, 2.45]) {
-    for (const z of [-1.15, 0.65]) addRoundedBox(group, [0.9, 0.035, 0.46], [x, 4.28, z], light, 0.025)
+  const addLoungeSet = (centerX: number, centerZ: number, angles: readonly number[]) => {
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 0.055, 32), glass)
+    top.position.set(centerX, 0.75, centerZ); top.castShadow = true; group.add(top)
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.065, 0.62, 16), chrome)
+    stem.position.set(centerX, 0.42, centerZ); group.add(stem)
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.4, 0.055, 24), chrome)
+    base.position.set(centerX, 0.09, centerZ); group.add(base)
+    for (const angle of angles) {
+      const radius = 1.05
+      addLoungeChair(centerX + Math.cos(angle) * radius, centerZ + Math.sin(angle) * radius, Math.PI / 2 - angle)
+    }
   }
+  addLoungeSet(-1.82, -0.55, [0.15, 2.15, 4.15])
+  addLoungeSet(0.72, -0.55, [-0.1, 2.05, 4.05])
+
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.35, 0.8),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, zoneDisplayLabel(facility), facility.color, ''), transparent: true, side: THREE.DoubleSide }),
+  )
+  sign.position.set(-1.35, 3.18, -2.31); group.add(sign)
+  for (const x of [-2.35, 0, 2.35]) for (const z of [-1.25, 0.55]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
   return group
 }
 
@@ -996,7 +995,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       const delta = Math.min(clock.getDelta(), 0.04); const elapsed = clock.elapsedTime; const player = playerRef.current; const movement = movementRef.current
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         player.yaw += (Number(movement.turnLeft) - Number(movement.turnRight)) * delta * 1.9
-        const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = (movement.sprint ? 8.6 : 5.15) * delta
+        const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = (movement.sprint ? SPRINT_MOVEMENT_SPEED : BASE_MOVEMENT_SPEED) * delta
         const moveX = (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) / magnitude * speed; const moveZ = (-Math.cos(player.yaw) * forward - Math.sin(player.yaw) * side) / magnitude * speed
         if (isWalkable(player.x + moveX, player.z, collisionDoors)) player.x += moveX; if (isWalkable(player.x, player.z + moveZ, collisionDoors)) player.z += moveZ
       }
