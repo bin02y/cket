@@ -34,6 +34,7 @@ const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 7.2
 const RESTROOM_WIDTH = 7.8
 const RESTROOM_DEPTH = 7.2
+const FACILITY_HEIGHT = 5.16
 const STATION_WIDTH = 32
 const STATION_DEPTH = 32
 const STATION_HEIGHT = 8.5
@@ -345,7 +346,7 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
 
 function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH, omitBottom = false) {
   const wallThickness = 0.34
-  const height = 5.16
+  const height = FACILITY_HEIGHT
   if (omitBottom) {
     const parts = [
       new THREE.BoxGeometry(wallThickness, height, depth).translate(-width / 2 + wallThickness / 2, height / 2, 0),
@@ -400,7 +401,7 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
 }
 
 function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (readonly [number, number])[], frontZ: number, material: THREE.Material, doorwayBottom: number, doorwayHeight: number) {
-  const wallHeight = 5.16
+  const wallHeight = FACILITY_HEIGHT
   const thickness = 0.3
   const halfWidth = RESTROOM_WIDTH / 2
   const segments = [
@@ -596,7 +597,7 @@ function createBooth(zone: RoadViewBooth) {
   const softWhite = new THREE.MeshStandardMaterial({ color: '#f0f3f4', metalness: 0.02, roughness: 0.7 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
-  const wallHeight = 5.16
+  const wallHeight = FACILITY_HEIGHT
 
   addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], white, 0.035)
   addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], white, 0.035)
@@ -744,18 +745,20 @@ function createInformationFacility(facility: StationFacility) {
   const chairWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.22 })
   const chairWood = new THREE.MeshStandardMaterial({ color: '#c9a374', metalness: 0.02, roughness: 0.7 })
   const light = new THREE.MeshBasicMaterial({ color: '#ffffff' })
+  const wallHeight = FACILITY_HEIGHT - 0.24
+  const roofCenterY = FACILITY_HEIGHT - 0.12
 
   addRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 4.25, 0.18], [0, 2.13, -halfDepth + 0.12], white, 0.045)
-  addRoundedBox(group, [0.18, 4.25, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, 2.13, 0], white, 0.045)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, 4.46, -halfDepth + 0.17], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, 4.46, 0], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, 4.46, 0], white, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, 4.46, halfDepth - 0.17], white, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, 4.31, -0.08], softWhite, 0.04)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], white, 0.045)
+  addRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], white, 0.045)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, roofCenterY, 0], white, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, roofCenterY, 0], white, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], white, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], softWhite, 0.04)
 
   for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
-  for (const y of [2.92, 3.14, 3.36, 3.58, 3.8, 4.02]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
+  for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
   const deskShape = new THREE.Shape()
@@ -795,7 +798,7 @@ function createInformationFacility(facility: StationFacility) {
   addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
   addLoungeSet(2.55, -0.55, [-0.1, 2.05, 4.05])
 
-  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, 4.23, z], light, 0.018)
+  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, FACILITY_HEIGHT - 0.37, z], light, 0.018)
   return group
 }
 
