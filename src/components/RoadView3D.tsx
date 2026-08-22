@@ -140,6 +140,8 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
         { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
+        { x1: zone.x + 0.72, x2: zone.x + 0.92, z1: zone.z - 4.05, z2: zone.z - 1.35 },
+        { x1: zone.x + 0.72, x2: zone.x + 0.92, z1: zone.z + 1.35, z2: zone.z + 4.05 },
       ]
     }
     return [
@@ -313,18 +315,14 @@ function makeRestroomPictogramTexture(gender: 'men' | 'women') {
   if (!context) return new THREE.CanvasTexture(canvas)
   context.clearRect(0, 0, canvas.width, canvas.height)
   context.fillStyle = '#f4f7f8'; context.textAlign = 'center'
-  context.font = '700 42px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? '남자화장실' : '여자화장실', 256, 66)
-  context.font = '500 31px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? 'MEN  M ♂' : 'WOMEN  W ♀', 256, 110)
-  context.beginPath(); context.arc(256, 216, 62, 0, Math.PI * 2); context.fill()
-  context.lineCap = 'round'; context.lineJoin = 'round'; context.strokeStyle = '#f4f7f8'; context.lineWidth = 52
+  context.font = '700 42px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? '남자화장실' : '여자화장실', 256, 62)
+  context.beginPath(); context.arc(256, 182, 62, 0, Math.PI * 2); context.fill()
   if (gender === 'men') {
-    context.beginPath(); context.roundRect(192, 300, 128, 240, 32); context.fill()
-    context.beginPath(); context.moveTo(186, 326); context.lineTo(142, 466); context.moveTo(326, 326); context.lineTo(370, 466); context.stroke()
-    context.lineWidth = 56; context.beginPath(); context.moveTo(228, 514); context.lineTo(224, 676); context.moveTo(284, 514); context.lineTo(288, 676); context.stroke()
+    context.beginPath(); context.roundRect(116, 286, 280, 250, 26); context.fill()
+    context.fillRect(178, 500, 68, 196); context.fillRect(266, 500, 68, 196)
   } else {
-    context.beginPath(); context.moveTo(256, 288); context.lineTo(154, 535); context.lineTo(358, 535); context.closePath(); context.fill()
-    context.lineWidth = 48; context.beginPath(); context.moveTo(205, 324); context.lineTo(145, 472); context.moveTo(307, 324); context.lineTo(367, 472); context.stroke()
-    context.lineWidth = 55; context.beginPath(); context.moveTo(224, 520); context.lineTo(220, 676); context.moveTo(288, 520); context.lineTo(292, 676); context.stroke()
+    context.beginPath(); context.moveTo(256, 278); context.lineTo(142, 532); context.lineTo(370, 532); context.closePath(); context.fill()
+    context.fillRect(204, 510, 44, 186); context.fillRect(264, 510, 44, 186)
   }
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
@@ -518,21 +516,20 @@ function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Ma
   addRoundedBox(parent, [0.38, 0.24, 0.5], [x, 0.36, -2.05], ceramic, 0.1)
 }
 
-function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
-  addRoundedBox(parent, [0.3, 0.76, 0.5], [-3.94, 0.92, z], ceramic, 0.12)
-  addRoundedBox(parent, [0.46, 0.13, 0.56], [-3.74, 0.59, z], ceramic, 0.06)
-  addRoundedBox(parent, [0.06, 0.3, 0.06], [-3.76, 1.42, z], metal, 0.02)
-  addRoundedBox(parent, [0.08, 0.08, 0.14], [-3.71, 1.56, z], metal, 0.025)
+function addRestroomUrinal(parent: THREE.Object3D, x: number, ceramic: THREE.Material, metal: THREE.Material) {
+  addRoundedBox(parent, [0.5, 0.76, 0.3], [x, 0.92, 0.67], ceramic, 0.12)
+  addRoundedBox(parent, [0.56, 0.13, 0.46], [x, 0.59, 0.47], ceramic, 0.06)
+  addRoundedBox(parent, [0.06, 0.3, 0.06], [x, 1.42, 0.49], metal, 0.02)
+  addRoundedBox(parent, [0.14, 0.08, 0.08], [x, 1.56, 0.44], metal, 0.025)
 }
 
-function addRestroomSink(parent: THREE.Object3D, side: 'men' | 'women', z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
-  const direction = side === 'men' ? -1 : 1
-  const basinX = direction * 0.48
+function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 1, z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
+  const basinX = wallX + direction * 0.48
   addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
   addRoundedBox(parent, [0.18, 0.72, 0.18], [basinX, 0.49, z], metal, 0.04)
-  addRoundedBox(parent, [0.06, 0.48, 0.72], [direction * 0.13, 2.02, z], mirror, 0.02)
-  addRoundedBox(parent, [0.07, 0.28, 0.07], [direction * 0.42, 1.24, z], metal, 0.025)
-  addRoundedBox(parent, [0.22, 0.06, 0.07], [direction * 0.5, 1.35, z], metal, 0.02)
+  addRoundedBox(parent, [0.06, 0.48, 0.72], [wallX + direction * 0.12, 2.02, z], mirror, 0.02)
+  addRoundedBox(parent, [0.07, 0.28, 0.07], [wallX + direction * 0.42, 1.24, z], metal, 0.025)
+  addRoundedBox(parent, [0.22, 0.06, 0.07], [wallX + direction * 0.5, 1.35, z], metal, 0.02)
 }
 
 function createRestroomFacility(facility: StationFacility) {
@@ -587,13 +584,15 @@ function createRestroomFacility(facility: StationFacility) {
     addRoundedBox(group, [0.12, 3.5, 1.36], [x + doorwayWidth / 2, 1.75, 1.94], tile, 0.015)
   }
 
+  addRoundedBox(group, [2.7, 3.9, 0.18], [-2.7, 1.95, 0.82], tile, 0.025)
+  addRoundedBox(group, [2.7, 3.9, 0.18], [2.7, 1.95, 0.82], tile, 0.025)
   for (const x of [-3.58, -2.58, -1.58, -0.58, 0.58, 1.58, 2.58, 3.58]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
-  for (const z of [-0.72, 0.08, 0.88, 1.68]) addRestroomUrinal(group, z, ceramic, metal)
-  for (const z of [0.25, 1.35]) {
-    addRestroomSink(group, 'men', z, ceramic, metal, mirror)
-    addRestroomSink(group, 'women', z, ceramic, metal, mirror)
+  for (const x of [-3.65, -2.85, -2.05, -1.25]) addRestroomUrinal(group, x, ceramic, metal)
+  for (const z of [-0.05, -0.75]) {
+    addRestroomSink(group, -3.96, 1, z, ceramic, metal, mirror)
+    addRestroomSink(group, 3.96, -1, z, ceramic, metal, mirror)
   }
-  for (const z of [-0.32, 0.48, 1.28]) addRoundedBox(group, [0.72, 1.38, 0.08], [-3.62, 1.16, z], partition, 0.02)
+  for (const x of [-3.25, -2.45, -1.65]) addRoundedBox(group, [0.08, 1.38, 0.72], [x, 1.16, 0.45], partition, 0.02)
 
   for (const x of doorwayCenters) {
     for (const z of [-0.72, 1.15]) {
