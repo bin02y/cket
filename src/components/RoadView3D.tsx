@@ -45,7 +45,8 @@ const RESTROOM_GATE_X = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
 const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH / 2
 const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
-const RESTROOM_DOOR_WIDTH = 1.15
+const RESTROOM_ENTRANCE_DOOR_WIDTH = 1.4
+const RESTROOM_STALL_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_INTERIOR_FLOOR_Y = 0.04
 const RESTROOM_CEILING_BOTTOM_Y = 4.75
@@ -147,7 +148,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     if (zone.gateCode === 'F02') return shellWalls
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
-      const doorwayHalfWidth = RESTROOM_DOOR_WIDTH / 2
+      const doorwayHalfWidth = RESTROOM_ENTRANCE_DOOR_WIDTH / 2
       const lowerDoorCenter = zone.z - doorwayOffset
       const upperDoorCenter = zone.z + doorwayOffset
       const stallPartitionColliders = RESTROOM_STALL_PARTITIONS.map((localX) => ({
@@ -200,7 +201,6 @@ function isWalkable(x: number, z: number, collisionDoors: readonly THREE.Mesh[] 
   if (x < -horizontalLimit || x > horizontalLimit || z < -verticalLimit || z > verticalLimit) return false
   if (COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)) return false
   return !collisionDoors.some((door) => {
-    if (door.userData.disableCollisionWhenOpen && Math.abs(door.parent?.rotation.y ?? 0) > 0.9) return false
     doorCollisionPoint.set(x, 0, z)
     door.worldToLocal(doorCollisionPoint)
     const halfWidth = (door.userData.collisionWidth as number) / 2 + radius
@@ -284,11 +284,25 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
   return mesh
 }
 
-function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH, recessBottom = false) {
+function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH, omitBottom = false) {
   const wallThickness = 0.34
   const height = 5.16
-  const outerBottom = recessBottom ? -wallThickness - 0.08 : 0
-  const interiorBottom = recessBottom ? -0.08 : wallThickness
+  if (omitBottom) {
+    const parts = [
+      new THREE.BoxGeometry(wallThickness, height, depth).translate(-width / 2 + wallThickness / 2, height / 2, 0),
+      new THREE.BoxGeometry(wallThickness, height, depth).translate(width / 2 - wallThickness / 2, height / 2, 0),
+      new THREE.BoxGeometry(width, wallThickness, depth).translate(0, height - wallThickness / 2, 0),
+      new THREE.BoxGeometry(width, height, wallThickness).translate(0, height / 2, -depth / 2 + wallThickness / 2),
+    ]
+    const geometry = mergeGeometries(parts, false)
+    parts.forEach((part) => part.dispose())
+    geometry.computeVertexNormals()
+    const shell = new THREE.Mesh(geometry, material)
+    shell.castShadow = true; shell.receiveShadow = true; parent.add(shell)
+    return { interiorBackZ: -depth / 2 + wallThickness + 0.06, height }
+  }
+  const outerBottom = 0
+  const interiorBottom = wallThickness
   const outer = new THREE.Shape()
   outer.moveTo(-width / 2, outerBottom)
   outer.lineTo(width / 2, outerBottom)
@@ -558,7 +572,7 @@ function createBooth(zone: RoadViewBooth) {
 }
 
 function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
-  const doorWidth = RESTROOM_DOOR_WIDTH
+  const doorWidth = RESTROOM_STALL_DOOR_WIDTH
   const hingedDoor = new THREE.Group()
   hingedDoor.position.set(x - doorWidth / 2, 0, RESTROOM_STALL_FRONT_Z)
   const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + 0.87, 0], door, 0.02)
@@ -608,7 +622,7 @@ function createRestroomFacility(facility: StationFacility) {
   const lightMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff' })
   const halfWidth = RESTROOM_WIDTH / 2
   const halfDepth = RESTROOM_DEPTH / 2
-  const { interiorBackZ } = addIntegratedBoothShell(group, facade, RESTROOM_WIDTH, RESTROOM_DEPTH, true)
+  const { interiorBackZ } = addIntegratedBoothShell(group, interiorSurface, RESTROOM_WIDTH, RESTROOM_DEPTH, true)
 
   const interiorWallHeight = RESTROOM_CEILING_BOTTOM_Y - RESTROOM_INTERIOR_FLOOR_Y
   const interiorWallCenterY = RESTROOM_INTERIOR_FLOOR_Y + interiorWallHeight / 2
@@ -624,7 +638,7 @@ function createRestroomFacility(facility: StationFacility) {
   group.add(cleanFloor)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], interiorSurface, 0.03)
 
-  const doorwayWidth = RESTROOM_DOOR_WIDTH
+  const doorwayWidth = RESTROOM_ENTRANCE_DOOR_WIDTH
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const frontZ = halfDepth + 0.02
@@ -640,9 +654,8 @@ function createRestroomFacility(facility: StationFacility) {
     const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], stallDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
-    panel.userData.disableCollisionWhenOpen = true
     addRoundedBox(panel, [0.12, 0.08, 0.04], [-hingeSide * doorWidth * 0.3, 0, 0.055], metal, 0.02)
-    hingedDoor.userData.openRotation = -hingeSide * 1.5
+    hingedDoor.userData.openRotation = -hingeSide * 1.55
     hingedDoor.userData.openDistance = 4.8
     hingedDoor.userData.collisionPanel = panel
     group.add(hingedDoor)
@@ -651,7 +664,7 @@ function createRestroomFacility(facility: StationFacility) {
 
   for (const [index, direction] of [-1, 1].entries()) {
     const gender = index === 0 ? 'men' : 'women'
-    const pictogramX = direction * 2.38
+    const pictogramX = direction * 2.55
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
     pictogram.position.set(pictogramX, 1.12, frontZ + 0.178); group.add(pictogram)
   }
@@ -664,12 +677,12 @@ function createRestroomFacility(facility: StationFacility) {
   for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
   group.userData.collisionDoors = hingedDoors.map((door) => door.userData.collisionPanel as THREE.Mesh)
-  for (const z of [-2.25, -1.15, -0.05, 1.05]) addRestroomUrinal(group, z, ceramic, metal)
+  for (const z of [-2.9, -1.8, -0.7, 0.4]) addRestroomUrinal(group, z, ceramic, metal)
   for (const z of [0.45, 1.65]) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const z of [-1.7, -0.6, 0.5]) addRoundedBox(group, [0.72, 1.83, 0.08], [-5.78, RESTROOM_INTERIOR_FLOOR_Y + 0.915, z], partition, 0.02)
+  for (const z of [-2.35, -1.25, -0.15]) addRoundedBox(group, [0.72, 1.83, 0.08], [-5.78, RESTROOM_INTERIOR_FLOOR_Y + 0.915, z], partition, 0.02)
 
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
@@ -712,8 +725,27 @@ function createFacility(facility: StationFacility) {
 function buildMetaverseStation(scene: THREE.Scene) {
   const animated: THREE.Object3D[] = []
   const envelopeMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92, side: THREE.DoubleSide })
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
-  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
+  const stationFloorShape = new THREE.Shape()
+  stationFloorShape.moveTo(-STATION_WIDTH / 2, -STATION_DEPTH / 2)
+  stationFloorShape.lineTo(-STATION_WIDTH / 2, STATION_DEPTH / 2)
+  stationFloorShape.lineTo(STATION_WIDTH / 2, STATION_DEPTH / 2)
+  stationFloorShape.lineTo(STATION_WIDTH / 2, -STATION_DEPTH / 2)
+  stationFloorShape.closePath()
+  const restroomFloorHole = new THREE.Path()
+  const restroomWorldXMin = RESTROOM_ZONE_X - RESTROOM_DEPTH / 2
+  const restroomWorldXMax = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
+  const restroomShapeYMin = -(RESTROOM_ZONE_Z + RESTROOM_WIDTH / 2)
+  const restroomShapeYMax = -(RESTROOM_ZONE_Z - RESTROOM_WIDTH / 2)
+  restroomFloorHole.moveTo(restroomWorldXMin, restroomShapeYMin)
+  restroomFloorHole.lineTo(restroomWorldXMax, restroomShapeYMin)
+  restroomFloorHole.lineTo(restroomWorldXMax, restroomShapeYMax)
+  restroomFloorHole.lineTo(restroomWorldXMin, restroomShapeYMax)
+  restroomFloorHole.closePath()
+  stationFloorShape.holes.push(restroomFloorHole)
+  const floorGeometry = new THREE.ShapeGeometry(stationFloorShape)
+  floorGeometry.rotateX(-Math.PI / 2)
+  const floor = new THREE.Mesh(floorGeometry, envelopeMaterial)
+  floor.receiveShadow = true; scene.add(floor)
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(STATION_WIDTH, STATION_DEPTH), envelopeMaterial)
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, STATION_HEIGHT, 0); ceiling.castShadow = false; ceiling.receiveShadow = false; scene.add(ceiling)
   const addEnvelopeWall = (size: [number, number, number], position: [number, number, number]) => {
