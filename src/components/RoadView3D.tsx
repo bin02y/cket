@@ -756,17 +756,17 @@ function createBooth(zone: RoadViewBooth) {
   if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
-  const boothBlack = new THREE.MeshPhysicalMaterial({ color: '#05070a', metalness: 0.08, roughness: 0.5, clearcoat: 0.22, clearcoatRoughness: 0.34 })
+  const boothWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.4, clearcoat: 0.3, clearcoatRoughness: 0.28 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
   const wallHeight = FACILITY_HEIGHT
 
-  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothBlack, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothBlack, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothBlack, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothBlack, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothBlack, 0.045)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothBlack, 0.04)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothWhite, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothWhite, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothWhite, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothWhite, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothWhite, 0.045)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothWhite, 0.04)
 
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(BOOTH_WIDTH - 0.36, 0.42),
@@ -813,9 +813,9 @@ function createRestroomFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
-  const restroomBlue = '#1d2731'
-  const interiorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide })
-  const floorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
+  const restroomWhite = '#ffffff'
+  const interiorSurface = new THREE.MeshStandardMaterial({ color: restroomWhite, roughness: 0.72, side: THREE.DoubleSide })
+  const floorSurface = new THREE.MeshStandardMaterial({ color: restroomWhite, roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
@@ -858,7 +858,7 @@ function createRestroomFacility(facility: StationFacility) {
     panel.userData.collisionDepth = 0.08
     addRoundedBox(panel, [0.12, 0.08, 0.04], [-hingeSide * doorWidth * 0.3, 0, 0.055], metal, 0.02)
     hingedDoor.userData.openRotation = -hingeSide * 1.55
-    hingedDoor.userData.openDistance = 4.8
+    hingedDoor.userData.openDistance = 1.45
     hingedDoor.userData.collisionPanel = panel
     group.add(hingedDoor)
     hingedDoors.push(hingedDoor)
