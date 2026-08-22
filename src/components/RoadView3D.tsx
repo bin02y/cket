@@ -44,8 +44,6 @@ const TRAIN_ROOF_TOP_Y = 4.45
 const TRAIN_WINDOW_CENTER_Y = 2.55
 const TRAIN_SEAT_LOCAL_XS = [-1.38, 1.05] as const
 const TRAIN_SEAT_LOCAL_ZS = [-2.9, -1.45, 1.45, 2.9] as const
-const FACILITY_DOOR_WIDTH = 2.08
-const FACILITY_DOOR_HEIGHT = 3.05
 const EMPTY_MOVEMENT: Movement = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, sprint: false }
 const KEY_TO_MOVEMENT: Readonly<Record<string, keyof Movement>> = {
   w: 'forward',
@@ -131,6 +129,19 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
       { x1: backX - 0.22, x2: backX + 0.22, z1: zone.z - halfDepth, z2: zone.z + halfDepth },
     ]
     if (zone.gateCode === 'F02') return shellWalls
+    if (zone.gateCode === 'F01') {
+      const doorwayOffset = 2.05
+      const doorwayHalfWidth = 0.98
+      const lowerDoorCenter = zone.z - doorwayOffset
+      const upperDoorCenter = zone.z + doorwayOffset
+      return [
+        ...shellWalls,
+        { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: lowerDoorCenter - doorwayHalfWidth },
+        { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
+        { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
+        { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
+      ]
+    }
     return [
       ...shellWalls,
       { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: zone.z - 1.42 },
@@ -270,24 +281,54 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
   return { interiorBackZ: -BOOTH_DEPTH / 2 + wallThickness + 0.06, height }
 }
 
-function addIntegratedDoorFacade(parent: THREE.Object3D, material: THREE.Material) {
-  const facadeHeight = 4.86
-  const openingWidth = FACILITY_DOOR_WIDTH
-  const openingHeight = FACILITY_DOOR_HEIGHT
-  const sideWidth = (BOOTH_WIDTH - openingWidth) / 2
-  const depth = 0.24
-  const frontZ = BOOTH_DEPTH / 2 - depth / 2
-  const left = new THREE.BoxGeometry(sideWidth, facadeHeight, depth)
-  left.translate(-(openingWidth + sideWidth) / 2, facadeHeight / 2, frontZ)
-  const right = new THREE.BoxGeometry(sideWidth, facadeHeight, depth)
-  right.translate((openingWidth + sideWidth) / 2, facadeHeight / 2, frontZ)
-  const header = new THREE.BoxGeometry(openingWidth, facadeHeight - openingHeight, depth)
-  header.translate(0, openingHeight + (facadeHeight - openingHeight) / 2, frontZ)
-  const geometry = mergeGeometries([left, right, header], false)
-  left.dispose(); right.dispose(); header.dispose()
-  geometry.computeVertexNormals()
-  const facade = new THREE.Mesh(geometry, material)
-  facade.castShadow = true; facade.receiveShadow = true; parent.add(facade)
+function makeRestroomTileTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512; canvas.height = 512
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+  context.fillStyle = '#bfc3c2'; context.fillRect(0, 0, canvas.width, canvas.height)
+  const rows = 10; const rowHeight = canvas.height / rows
+  for (let row = 0; row < rows; row += 1) {
+    const brickWidth = row % 3 === 0 ? 128 : 96
+    const offset = row % 2 === 0 ? -brickWidth / 2 : 0
+    for (let x = offset; x < canvas.width; x += brickWidth) {
+      const shade = 72 + ((row * 17 + x / brickWidth * 11) % 48)
+      context.fillStyle = `rgb(${shade},${shade + 5},${shade + 8})`
+      context.fillRect(x + 4, row * rowHeight + 4, brickWidth - 8, rowHeight - 8)
+      context.fillStyle = `rgba(255,255,255,${row % 2 === 0 ? 0.08 : 0.04})`
+      context.fillRect(x + 8, row * rowHeight + 8, brickWidth - 16, 5)
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(2.4, 1.6); texture.anisotropy = 4
+  return texture
+}
+
+function makeRestroomPictogramTexture(gender: 'men' | 'women') {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512; canvas.height = 768
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#f4f7f8'; context.textAlign = 'center'
+  context.font = '700 42px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? '남자화장실' : '여자화장실', 256, 66)
+  context.font = '500 31px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? 'MEN  M ♂' : 'WOMEN  W ♀', 256, 110)
+  context.beginPath(); context.arc(256, 216, 62, 0, Math.PI * 2); context.fill()
+  context.lineCap = 'round'; context.lineJoin = 'round'; context.strokeStyle = '#f4f7f8'; context.lineWidth = 52
+  if (gender === 'men') {
+    context.beginPath(); context.roundRect(192, 300, 128, 240, 32); context.fill()
+    context.beginPath(); context.moveTo(186, 326); context.lineTo(142, 466); context.moveTo(326, 326); context.lineTo(370, 466); context.stroke()
+    context.lineWidth = 56; context.beginPath(); context.moveTo(228, 514); context.lineTo(224, 676); context.moveTo(284, 514); context.lineTo(288, 676); context.stroke()
+  } else {
+    context.beginPath(); context.moveTo(256, 288); context.lineTo(154, 535); context.lineTo(358, 535); context.closePath(); context.fill()
+    context.lineWidth = 48; context.beginPath(); context.moveTo(205, 324); context.lineTo(145, 472); context.moveTo(307, 324); context.lineTo(367, 472); context.stroke()
+    context.lineWidth = 55; context.beginPath(); context.moveTo(224, 520); context.lineTo(220, 676); context.moveTo(288, 520); context.lineTo(292, 676); context.stroke()
+  }
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
 }
 
 function createGate(zone: RoadViewBooth) {
@@ -464,7 +505,109 @@ function createBooth(zone: RoadViewBooth) {
   return group
 }
 
+function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Material, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
+  const stallWidth = 0.9
+  const stallCenterZ = -1.84
+  const stallDepth = 1.48
+  for (const sideX of [x - stallWidth / 2, x + stallWidth / 2]) addRoundedBox(parent, [0.06, 2.08, stallDepth], [sideX, 1.25, stallCenterZ], partition, 0.015)
+  addRoundedBox(parent, [stallWidth - 0.1, 1.74, 0.07], [x, 1.18, -1.1], door, 0.02)
+  addRoundedBox(parent, [0.12, 0.08, 0.04], [x + stallWidth * 0.28, 1.18, -1.05], metal, 0.02)
+  addRoundedBox(parent, [0.5, 0.56, 0.3], [x, 0.63, -2.34], ceramic, 0.1)
+  const bowl = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.07, 10, 24), ceramic)
+  bowl.rotation.x = Math.PI / 2; bowl.scale.z = 1.24; bowl.position.set(x, 0.48, -2.03); parent.add(bowl)
+  addRoundedBox(parent, [0.38, 0.24, 0.5], [x, 0.36, -2.05], ceramic, 0.1)
+}
+
+function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
+  addRoundedBox(parent, [0.3, 0.76, 0.5], [-3.94, 0.92, z], ceramic, 0.12)
+  addRoundedBox(parent, [0.46, 0.13, 0.56], [-3.74, 0.59, z], ceramic, 0.06)
+  addRoundedBox(parent, [0.06, 0.3, 0.06], [-3.76, 1.42, z], metal, 0.02)
+  addRoundedBox(parent, [0.08, 0.08, 0.14], [-3.71, 1.56, z], metal, 0.025)
+}
+
+function addRestroomSink(parent: THREE.Object3D, side: 'men' | 'women', z: number, ceramic: THREE.Material, metal: THREE.Material, mirror: THREE.Material) {
+  const direction = side === 'men' ? -1 : 1
+  const basinX = direction * 0.48
+  addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
+  addRoundedBox(parent, [0.18, 0.72, 0.18], [basinX, 0.49, z], metal, 0.04)
+  addRoundedBox(parent, [0.06, 0.48, 0.72], [direction * 0.13, 2.02, z], mirror, 0.02)
+  addRoundedBox(parent, [0.07, 0.28, 0.07], [direction * 0.42, 1.24, z], metal, 0.025)
+  addRoundedBox(parent, [0.22, 0.06, 0.07], [direction * 0.5, 1.35, z], metal, 0.02)
+}
+
+function createRestroomFacility(facility: StationFacility) {
+  const group = new THREE.Group(); group.position.set(facility.x, 0, facility.z)
+  if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
+
+  const facade = new THREE.MeshStandardMaterial({ color: '#303b45', metalness: 0.12, roughness: 0.68 })
+  const tile = new THREE.MeshStandardMaterial({ color: '#ffffff', map: makeRestroomTileTexture(), metalness: 0.04, roughness: 0.76 })
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: '#596168', metalness: 0.06, roughness: 0.8 })
+  const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
+  const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
+  const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
+  const metal = new THREE.MeshStandardMaterial({ color: '#aebbc0', metalness: 0.82, roughness: 0.18 })
+  const mirror = new THREE.MeshPhysicalMaterial({ color: '#bbdce4', metalness: 0.76, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.03 })
+  const lightMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff' })
+  const halfDepth = BOOTH_DEPTH / 2
+  const { interiorBackZ } = addIntegratedBoothShell(group, facade)
+
+  addRoundedBox(group, [BOOTH_WIDTH - 0.46, 4.45, 0.08], [0, 2.42, interiorBackZ + 0.05], tile, 0.02)
+  addRoundedBox(group, [0.1, 4.45, BOOTH_DEPTH - 0.46], [-BOOTH_WIDTH / 2 + 0.27, 2.42, 0], tile, 0.02)
+  addRoundedBox(group, [0.1, 4.45, BOOTH_DEPTH - 0.46], [BOOTH_WIDTH / 2 - 0.27, 2.42, 0], tile, 0.02)
+  addRoundedBox(group, [0.18, 4.62, BOOTH_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
+  addRoundedBox(group, [3.86, 0.1, BOOTH_DEPTH - 0.5], [-2.06, 0.05, 0], floorMaterial, 0.02)
+  addRoundedBox(group, [3.86, 0.1, BOOTH_DEPTH - 0.5], [2.06, 0.05, 0], floorMaterial, 0.02)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.44, 0.16, BOOTH_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
+
+  const doorwayWidth = 1.96
+  const doorwayHeight = 3.5
+  const doorwayCenters = [-2.05, 2.05] as const
+  const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
+  const facadeSegments = [
+    [-BOOTH_WIDTH / 2, openingEdges[0][0]],
+    [openingEdges[0][1], openingEdges[1][0]],
+    [openingEdges[1][1], BOOTH_WIDTH / 2],
+  ] as const
+  const frontZ = halfDepth - 0.12
+  for (const [start, end] of facadeSegments) addRoundedBox(group, [end - start, doorwayHeight, 0.3], [(start + end) / 2, doorwayHeight / 2, frontZ], facade, 0.025)
+  addRoundedBox(group, [BOOTH_WIDTH, 1.38, 0.3], [0, doorwayHeight + 0.69, frontZ], facade, 0.025)
+
+  for (const [index, x] of [-3.62, 3.62].entries()) {
+    const gender = index === 0 ? 'men' : 'women'
+    const pictogram = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.0, 1.72),
+      new THREE.MeshBasicMaterial({ map: makeRestroomPictogramTexture(gender), transparent: true, side: THREE.DoubleSide }),
+    )
+    pictogram.position.set(x, 2.12, halfDepth + 0.055); group.add(pictogram)
+  }
+
+  for (const x of doorwayCenters) {
+    addRoundedBox(group, [0.12, 3.5, 1.36], [x - doorwayWidth / 2, 1.75, 1.94], tile, 0.015)
+    addRoundedBox(group, [0.12, 3.5, 1.36], [x + doorwayWidth / 2, 1.75, 1.94], tile, 0.015)
+  }
+
+  for (const x of [-3.58, -2.58, -1.58, -0.58, 0.58, 1.58, 2.58, 3.58]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
+  for (const z of [-0.72, 0.08, 0.88, 1.68]) addRestroomUrinal(group, z, ceramic, metal)
+  for (const z of [0.25, 1.35]) {
+    addRestroomSink(group, 'men', z, ceramic, metal, mirror)
+    addRestroomSink(group, 'women', z, ceramic, metal, mirror)
+  }
+  for (const z of [-0.32, 0.48, 1.28]) addRoundedBox(group, [0.72, 1.38, 0.08], [-3.62, 1.16, z], partition, 0.02)
+
+  for (const x of doorwayCenters) {
+    for (const z of [-0.72, 1.15]) {
+      const light = new THREE.Mesh(new THREE.CircleGeometry(0.15, 24), lightMaterial)
+      light.rotation.x = Math.PI / 2; light.position.set(x, 4.73, z); group.add(light)
+    }
+    const pointLight = new THREE.PointLight('#f4fbff', 0.65, 5.2, 2)
+    pointLight.position.set(x, 4.46, 0.18); group.add(pointLight)
+  }
+  return group
+}
+
 function createFacility(facility: StationFacility) {
+  if (facility.gateCode === 'F01') return createRestroomFacility(facility)
   const group = new THREE.Group(); group.position.set(facility.x, 0, facility.z)
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
@@ -473,9 +616,6 @@ function createFacility(facility: StationFacility) {
   const wall = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.84), metalness: 0.08, roughness: 0.48 })
   const fixture = new THREE.MeshStandardMaterial({ color: '#dbe5e9', metalness: 0.36, roughness: 0.3 })
   const dark = new THREE.MeshStandardMaterial({ color: '#21465a', metalness: 0.18, roughness: 0.42 })
-  const ceramic = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.04, roughness: 0.18, clearcoat: 0.82, clearcoatRoughness: 0.16 })
-  const mirror = new THREE.MeshPhysicalMaterial({ color: '#bfe8f2', metalness: 0.78, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.04 })
-  const halfDepth = BOOTH_DEPTH / 2; const backLocalZ = -halfDepth
   const { interiorBackZ } = addIntegratedBoothShell(group, shell)
   addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], wall, 0.04)
   const englishTitle = zoneDisplayLabel(facility)
@@ -483,41 +623,12 @@ function createFacility(facility: StationFacility) {
     new THREE.PlaneGeometry(4.15, 1.46),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, englishTitle, facility.color, ''), transparent: true, side: THREE.DoubleSide }),
   )
-  if (facility.gateCode === 'F01') {
-    addIntegratedDoorFacade(group, wall)
-    sign.position.set(0, 4.0, halfDepth + 0.18); sign.scale.setScalar(0.7); group.add(sign)
-    const doorWidth = FACILITY_DOOR_WIDTH + 0.04
-    const doorHeight = FACILITY_DOOR_HEIGHT + 0.04
-    const doorPivot = new THREE.Group(); doorPivot.position.set(-doorWidth / 2, -0.02, halfDepth - 0.08); group.add(doorPivot)
-    addRoundedBox(doorPivot, [doorWidth, doorHeight, 0.14], [doorWidth / 2, doorHeight / 2, 0], fixture, 0.01)
-    addRoundedBox(doorPivot, [0.12, 0.12, 0.08], [doorWidth * 0.84, doorHeight / 2, -0.11], dark, 0.03)
-    group.userData.hingedDoor = doorPivot
-
-    addRoundedBox(group, [1.72, 1.5, 0.12], [-2.35, 2.2, interiorBackZ + 0.05], fixture, 0.05)
-    addRoundedBox(group, [1.5, 1.28, 0.06], [-2.35, 2.2, interiorBackZ + 0.14], mirror, 0.04)
-    addRoundedBox(group, [1.55, 0.28, 0.82], [-2.35, 1.0, -1.75], ceramic, 0.12)
-    addRoundedBox(group, [0.92, 0.06, 0.48], [-2.35, 1.16, -1.75], dark, 0.03)
-    addRoundedBox(group, [0.2, 0.75, 0.2], [-2.35, 0.58, -1.75], fixture, 0.05)
-    addRoundedBox(group, [0.12, 0.48, 0.12], [-2.35, 1.42, -2.02], fixture, 0.04)
-    addRoundedBox(group, [0.5, 0.12, 0.12], [-2.12, 1.62, -2.02], fixture, 0.04)
-
-    addRoundedBox(group, [0.78, 1.0, 0.42], [0, 1.08, backLocalZ + 0.35], ceramic, 0.16)
-    addRoundedBox(group, [0.46, 0.42, 0.38], [0, 0.48, backLocalZ + 0.5], fixture, 0.12)
-
-    const toiletBowl = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.14, 12, 32), ceramic)
-    toiletBowl.rotation.x = Math.PI / 2; toiletBowl.position.set(2.25, 0.72, -1.62); toiletBowl.scale.z = 1.3; group.add(toiletBowl)
-    addRoundedBox(group, [0.66, 0.5, 0.68], [2.25, 0.42, -1.62], ceramic, 0.16)
-    addRoundedBox(group, [1.08, 1.08, 0.4], [2.25, 1.08, -2.18], ceramic, 0.12)
-    addRoundedBox(group, [0.28, 0.12, 0.06], [2.25, 1.32, -1.96], fixture, 0.03)
-    addRoundedBox(group, [0.16, 3.15, 2.15], [1.15, 1.62, -1.55], wall, 0.05)
-  } else {
-    sign.position.set(0, 3.42, interiorBackZ + 0.07); group.add(sign)
-    addRoundedBox(group, [5.2, 1.08, 0.86], [0, 0.68, -0.7], fixture, 0.14)
-    addRoundedBox(group, [4.7, 0.16, 0.94], [0, 1.24, -0.7], dark, 0.05)
-    for (const x of [-1.35, 1.35]) {
-      addRoundedBox(group, [0.82, 0.56, 0.12], [x, 1.7, -0.88], dark, 0.06)
-      addRoundedBox(group, [0.1, 0.42, 0.1], [x, 1.43, -0.88], fixture, 0.03)
-    }
+  sign.position.set(0, 3.42, interiorBackZ + 0.07); group.add(sign)
+  addRoundedBox(group, [5.2, 1.08, 0.86], [0, 0.68, -0.7], fixture, 0.14)
+  addRoundedBox(group, [4.7, 0.16, 0.94], [0, 1.24, -0.7], dark, 0.05)
+  for (const x of [-1.35, 1.35]) {
+    addRoundedBox(group, [0.82, 0.56, 0.12], [x, 1.7, -0.88], dark, 0.06)
+    addRoundedBox(group, [0.1, 0.42, 0.1], [x, 1.43, -0.88], fixture, 0.03)
   }
   return group
 }
