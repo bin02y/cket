@@ -47,7 +47,7 @@ const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
 const RESTROOM_DOOR_WIDTH = 0.95
 const RESTROOM_DOOR_HEIGHT = 1.74
-const RESTROOM_FLOOR_TOP_Y = 0.1
+const RESTROOM_FLOOR_TOP_Y = 0.02
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -282,20 +282,22 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
   return mesh
 }
 
-function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH) {
+function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH, recessBottom = false) {
   const wallThickness = 0.34
   const height = 5.16
+  const outerBottom = recessBottom ? -wallThickness - 0.08 : 0
+  const interiorBottom = recessBottom ? -0.08 : wallThickness
   const outer = new THREE.Shape()
-  outer.moveTo(-width / 2, 0)
-  outer.lineTo(width / 2, 0)
+  outer.moveTo(-width / 2, outerBottom)
+  outer.lineTo(width / 2, outerBottom)
   outer.lineTo(width / 2, height)
   outer.lineTo(-width / 2, height)
   outer.closePath()
   const interior = new THREE.Path()
-  interior.moveTo(-width / 2 + wallThickness, wallThickness)
+  interior.moveTo(-width / 2 + wallThickness, interiorBottom)
   interior.lineTo(-width / 2 + wallThickness, height - wallThickness)
   interior.lineTo(width / 2 - wallThickness, height - wallThickness)
-  interior.lineTo(width / 2 - wallThickness, wallThickness)
+  interior.lineTo(width / 2 - wallThickness, interiorBottom)
   interior.closePath()
   outer.holes.push(interior)
 
@@ -340,29 +342,11 @@ function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (reado
   const header = new THREE.BoxGeometry(RESTROOM_WIDTH, wallHeight - doorwayTop, thickness)
   header.translate(0, doorwayTop + (wallHeight - doorwayTop) / 2, frontZ)
   parts.push(header)
-  if (doorwayBottom > 0) {
-    const sill = new THREE.BoxGeometry(RESTROOM_WIDTH, doorwayBottom, thickness)
-    sill.translate(0, doorwayBottom / 2, frontZ)
-    parts.push(sill)
-  }
   const geometry = mergeGeometries(parts, false)
   parts.forEach((part) => part.dispose())
   geometry.computeVertexNormals()
   const facade = new THREE.Mesh(geometry, material)
   facade.castShadow = true; facade.receiveShadow = true; parent.add(facade)
-}
-
-function makeRestroomLabelTexture(gender: 'men' | 'women') {
-  const canvas = document.createElement('canvas')
-  canvas.width = 512; canvas.height = 128
-  const context = canvas.getContext('2d')
-  if (!context) return new THREE.CanvasTexture(canvas)
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = '#f4f7f8'; context.textAlign = 'center'
-  context.font = '700 54px Paperlogy, sans-serif'; context.fillText(gender === 'men' ? '남자화장실' : '여자화장실', 256, 82)
-  const texture = new THREE.CanvasTexture(canvas)
-  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
-  return texture
 }
 
 function makeRestroomIconMaterial(gender: 'men' | 'women') {
@@ -622,13 +606,13 @@ function createRestroomFacility(facility: StationFacility) {
   const lightMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff' })
   const halfWidth = RESTROOM_WIDTH / 2
   const halfDepth = RESTROOM_DEPTH / 2
-  const { interiorBackZ } = addIntegratedBoothShell(group, facade, RESTROOM_WIDTH, RESTROOM_DEPTH)
+  const { interiorBackZ } = addIntegratedBoothShell(group, facade, RESTROOM_WIDTH, RESTROOM_DEPTH, true)
 
   addRoundedBox(group, [RESTROOM_WIDTH - 0.46, 4.45, 0.08], [0, 2.42, interiorBackZ + 0.05], tile, 0.02)
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.18, 4.62, RESTROOM_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.1, RESTROOM_DEPTH - 0.5], [0, 0.05, 0], floorMaterial, 0.02)
+  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, RESTROOM_FLOOR_TOP_Y, RESTROOM_DEPTH - 0.5], [0, RESTROOM_FLOOR_TOP_Y / 2, 0], floorMaterial, 0.005)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
 
   const doorwayWidth = RESTROOM_DOOR_WIDTH
@@ -657,12 +641,7 @@ function createRestroomFacility(facility: StationFacility) {
 
   for (const [index, direction] of [-1, 1].entries()) {
     const gender = index === 0 ? 'men' : 'women'
-    const pictogramX = direction * 2.82
-    const label = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.45, 0.62),
-      new THREE.MeshBasicMaterial({ map: makeRestroomLabelTexture(gender), transparent: true, side: THREE.DoubleSide }),
-    )
-    label.position.set(pictogramX, 3.13, frontZ + 0.175); group.add(label)
+    const pictogramX = direction * 2.25
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
     pictogram.position.set(pictogramX, 1.86, frontZ + 0.178); group.add(pictogram)
   }
