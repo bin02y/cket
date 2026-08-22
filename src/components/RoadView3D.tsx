@@ -45,6 +45,9 @@ const RESTROOM_GATE_X = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
 const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH / 2
 const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
+const RESTROOM_DOOR_WIDTH = 0.95
+const RESTROOM_DOOR_HEIGHT = 1.74
+const RESTROOM_FLOOR_TOP_Y = 0.1
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -143,7 +146,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     if (zone.gateCode === 'F02') return shellWalls
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
-      const doorwayHalfWidth = 0.85
+      const doorwayHalfWidth = RESTROOM_DOOR_WIDTH / 2
       const lowerDoorCenter = zone.z - doorwayOffset
       const upperDoorCenter = zone.z + doorwayOffset
       const stallPartitionColliders = RESTROOM_STALL_PARTITIONS.map((localX) => ({
@@ -319,8 +322,7 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
   return { interiorBackZ: -depth / 2 + wallThickness + 0.06, height }
 }
 
-function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (readonly [number, number])[], frontZ: number, material: THREE.Material) {
-  const doorwayHeight = 3.5
+function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (readonly [number, number])[], frontZ: number, material: THREE.Material, doorwayBottom: number, doorwayHeight: number) {
   const wallHeight = 5.16
   const thickness = 0.3
   const halfWidth = RESTROOM_WIDTH / 2
@@ -331,12 +333,18 @@ function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (reado
   ] as const
   const parts = segments.map(([start, end]) => {
     const geometry = new THREE.BoxGeometry(end - start, doorwayHeight, thickness)
-    geometry.translate((start + end) / 2, doorwayHeight / 2, frontZ)
+    geometry.translate((start + end) / 2, doorwayBottom + doorwayHeight / 2, frontZ)
     return geometry
   })
-  const header = new THREE.BoxGeometry(RESTROOM_WIDTH, wallHeight - doorwayHeight, thickness)
-  header.translate(0, doorwayHeight + (wallHeight - doorwayHeight) / 2, frontZ)
+  const doorwayTop = doorwayBottom + doorwayHeight
+  const header = new THREE.BoxGeometry(RESTROOM_WIDTH, wallHeight - doorwayTop, thickness)
+  header.translate(0, doorwayTop + (wallHeight - doorwayTop) / 2, frontZ)
   parts.push(header)
+  if (doorwayBottom > 0) {
+    const sill = new THREE.BoxGeometry(RESTROOM_WIDTH, doorwayBottom, thickness)
+    sill.translate(0, doorwayBottom / 2, frontZ)
+    parts.push(sill)
+  }
   const geometry = mergeGeometries(parts, false)
   parts.forEach((part) => part.dispose())
   geometry.computeVertexNormals()
@@ -564,8 +572,7 @@ function createBooth(zone: RoadViewBooth) {
 }
 
 function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
-  const stallWidth = 1.05
-  const doorWidth = stallWidth - 0.1
+  const doorWidth = RESTROOM_DOOR_WIDTH
   const hingedDoor = new THREE.Group()
   hingedDoor.position.set(x - doorWidth / 2, 0, RESTROOM_STALL_FRONT_Z)
   const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, 1.18, 0], door, 0.02)
@@ -624,23 +631,23 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.1, RESTROOM_DEPTH - 0.5], [0, 0.05, 0], floorMaterial, 0.02)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
 
-  const doorwayWidth = 1.7
+  const doorwayWidth = RESTROOM_DOOR_WIDTH
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const frontZ = halfDepth + 0.02
-  addRestroomFacade(group, openingEdges, frontZ, facade)
+  addRestroomFacade(group, openingEdges, frontZ, facade, RESTROOM_FLOOR_TOP_Y, RESTROOM_DOOR_HEIGHT)
 
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
     const hingeSide = center < 0 ? -1 : 1
     const doorWidth = doorwayWidth
-    const doorHeight = 3.4
+    const doorHeight = RESTROOM_DOOR_HEIGHT
     const hingedDoor = new THREE.Group()
     hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
-    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, 1.8, 0], stallDoor, 0.025)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_FLOOR_TOP_Y + doorHeight / 2, 0], stallDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
-    addRoundedBox(panel, [0.13, 0.09, 0.05], [-hingeSide * doorWidth * 0.34, -0.1, 0.065], metal, 0.02)
+    addRoundedBox(panel, [0.12, 0.08, 0.04], [-hingeSide * doorWidth * 0.3, 0, 0.055], metal, 0.02)
     hingedDoor.userData.openRotation = -hingeSide * 1.24
     hingedDoor.userData.openDistance = 4.8
     hingedDoor.userData.collisionPanel = panel
