@@ -32,6 +32,11 @@ type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 7.2
+const BOOTH_TURNSTILE_OFFSET = 0.62
+const BOOTH_TURNSTILE_BODY_WIDTH = 0.48
+const BOOTH_TURNSTILE_BODY_DEPTH = 1.2
+const BOOTH_TURNSTILE_BODY_LATERAL = 0.95
+const BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH = BOOTH_TURNSTILE_BODY_LATERAL - BOOTH_TURNSTILE_BODY_WIDTH / 2
 const RESTROOM_WIDTH = 7.8
 const RESTROOM_DEPTH = 7.2
 const FACILITY_HEIGHT = 5.16
@@ -123,6 +128,13 @@ const TRAIN_SEAT_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => booth
     }),
   ),
 )
+const BOOTH_TURNSTILE_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => !booth.trainCar).flatMap((booth) => {
+  const gateCenterX = booth.gate.x + (booth.gate.side === 'east' ? BOOTH_TURNSTILE_OFFSET : -BOOTH_TURNSTILE_OFFSET)
+  return [
+    { x1: gateCenterX - BOOTH_TURNSTILE_BODY_DEPTH / 2, x2: gateCenterX + BOOTH_TURNSTILE_BODY_DEPTH / 2, z1: booth.z - BOOTH_WIDTH / 2, z2: booth.z - BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH },
+    { x1: gateCenterX - BOOTH_TURNSTILE_BODY_DEPTH / 2, x2: gateCenterX + BOOTH_TURNSTILE_BODY_DEPTH / 2, z1: booth.z + BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH, z2: booth.z + BOOTH_WIDTH / 2 },
+  ]
+})
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
   3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
@@ -221,7 +233,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     { x1: zone.x - halfWidth, x2: zone.x - 1.42, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
     { x1: zone.x + 1.42, x2: zone.x + halfWidth, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
   ]
-}), ...TRAIN_END_COLLIDERS, ...TRAIN_SEAT_COLLIDERS]
+}), ...BOOTH_TURNSTILE_COLLIDERS, ...TRAIN_END_COLLIDERS, ...TRAIN_SEAT_COLLIDERS]
 
 const doorCollisionPoint = new THREE.Vector3()
 
@@ -243,7 +255,7 @@ function isWalkable(x: number, z: number, collisionDoors: readonly THREE.Mesh[] 
 function crossedGate(player: Player) {
   return BOOTHS.find((booth) => {
     if (booth.gate.side === 'east' || booth.gate.side === 'west') {
-      if (Math.abs(player.z - booth.gate.z) > 1.08) return false
+      if (Math.abs(player.z - booth.gate.z) > BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH) return false
       if (booth.gate.side === 'east') return player.x < booth.gate.x - 0.24 && player.x > booth.gate.x - 1.6
       return player.x > booth.gate.x + 0.24 && player.x < booth.gate.x + 1.6
     }
@@ -321,6 +333,23 @@ function makeInformationSignTexture() {
   context.fillText('i', 250, 198)
   context.fillStyle = '#080808'; context.font = '800 162px Arial, sans-serif'; context.textAlign = 'left'
   context.fillText('Information', 420, 220, 1050)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
+function makeTurnstileArrowTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 256; canvas.height = 256
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+
+  context.fillStyle = '#07110d'; context.beginPath(); context.roundRect(8, 8, 240, 240, 22); context.fill()
+  context.strokeStyle = '#54ff6b'; context.lineWidth = 26; context.lineCap = 'round'; context.lineJoin = 'round'
+  context.shadowColor = '#54ff6b'; context.shadowBlur = 22
+  context.beginPath(); context.moveTo(126, 48); context.lineTo(126, 168); context.stroke()
+  context.beginPath(); context.moveTo(70, 122); context.lineTo(126, 178); context.lineTo(182, 122); context.stroke()
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
@@ -494,6 +523,38 @@ function createTrainDoor(zone: RoadViewBooth) {
     new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
   sign.position.set(0, 4.15, 0); group.add(sign)
+  return group
+}
+
+function createBoothTurnstile(zone: RoadViewBooth) {
+  const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
+  if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
+
+  const silver = new THREE.MeshStandardMaterial({ color: '#aeb9bf', metalness: 0.84, roughness: 0.2 })
+  const edge = new THREE.MeshStandardMaterial({ color: '#2c67ac', metalness: 0.48, roughness: 0.25 })
+  const dark = new THREE.MeshStandardMaterial({ color: '#101b20', metalness: 0.38, roughness: 0.2 })
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#9bd8e9', transparent: true, opacity: 0.34, metalness: 0.08, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04, depthWrite: false })
+  const arrowMaterial = new THREE.MeshBasicMaterial({ map: makeTurnstileArrowTexture(), side: THREE.DoubleSide })
+  const localZ = BOOTH_DEPTH / 2 + BOOTH_TURNSTILE_OFFSET
+
+  for (const lateral of [-BOOTH_TURNSTILE_BODY_LATERAL, BOOTH_TURNSTILE_BODY_LATERAL]) {
+    addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH, 1.34, BOOTH_TURNSTILE_BODY_DEPTH], [lateral, 0.67, localZ], silver, 0.09)
+    addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH + 0.08, 0.11, BOOTH_TURNSTILE_BODY_DEPTH + 0.08], [lateral, 1.37, localZ], edge, 0.035)
+    addRoundedBox(group, [0.3, 0.045, 0.42], [lateral, 1.445, localZ - 0.18], dark, 0.025)
+    addRoundedBox(group, [0.14, 0.56, 0.16], [lateral, 1.7, localZ + 0.18], edge, 0.035)
+    addRoundedBox(group, [0.38, 0.28, 0.12], [lateral, 1.94, localZ + 0.18], edge, 0.04)
+    const arrow = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.38), arrowMaterial)
+    arrow.position.set(lateral, 0.7, localZ + BOOTH_TURNSTILE_BODY_DEPTH / 2 + 0.008); group.add(arrow)
+  }
+
+  const guardInnerEdge = BOOTH_TURNSTILE_BODY_LATERAL + BOOTH_TURNSTILE_BODY_WIDTH / 2
+  const guardWidth = BOOTH_WIDTH / 2 - guardInnerEdge
+  const guardCenter = guardInnerEdge + guardWidth / 2
+  for (const direction of [-1, 1]) {
+    addRoundedBox(group, [guardWidth, 0.72, 0.08], [direction * guardCenter, 0.73, localZ], glass, 0.025)
+    addRoundedBox(group, [guardWidth, 0.07, 0.12], [direction * guardCenter, 1.1, localZ], edge, 0.025)
+  }
   return group
 }
 
@@ -885,6 +946,8 @@ function buildMetaverseStation(scene: THREE.Scene) {
     if (booth.trainCar) {
       const entrance = createTrainDoor(booth)
       scene.add(entrance); animated.push(entrance)
+    } else {
+      scene.add(createBoothTurnstile(booth))
     }
   }
   for (const facility of FACILITIES) {
