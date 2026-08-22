@@ -537,17 +537,21 @@ function createBooth(zone: RoadViewBooth) {
   return group
 }
 
-function addRestroomStall(parent: THREE.Object3D, x: number, partition: THREE.Material, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
+function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Material, ceramic: THREE.Material, metal: THREE.Material) {
   const stallWidth = 1.05
-  const stallCenterZ = -2.72
-  const stallDepth = 1.48
-  for (const sideX of [x - stallWidth / 2, x + stallWidth / 2]) addRoundedBox(parent, [0.06, 2.08, stallDepth], [sideX, 1.25, stallCenterZ], partition, 0.015)
-  addRoundedBox(parent, [stallWidth - 0.1, 1.74, 0.07], [x, 1.18, -1.98], door, 0.02)
-  addRoundedBox(parent, [0.12, 0.08, 0.04], [x + stallWidth * 0.28, 1.18, -1.93], metal, 0.02)
+  const doorWidth = stallWidth - 0.1
+  const hingedDoor = new THREE.Group()
+  hingedDoor.position.set(x - doorWidth / 2, 0, -1.98)
+  const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, 1.18, 0], door, 0.02)
+  addRoundedBox(panel, [0.12, 0.08, 0.04], [doorWidth * 0.3, 0, 0.055], metal, 0.02)
+  hingedDoor.userData.openRotation = 1.18
+  hingedDoor.userData.openDistance = 1.75
+  parent.add(hingedDoor)
   addRoundedBox(parent, [0.5, 0.56, 0.3], [x, 0.63, -3.22], ceramic, 0.1)
   const bowl = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.07, 10, 24), ceramic)
   bowl.rotation.x = Math.PI / 2; bowl.scale.z = 1.24; bowl.position.set(x, 0.48, -2.91); parent.add(bowl)
   addRoundedBox(parent, [0.38, 0.24, 0.5], [x, 0.36, -2.93], ceramic, 0.1)
+  return hingedDoor
 }
 
 function addRestroomUrinal(parent: THREE.Object3D, z: number, ceramic: THREE.Material, metal: THREE.Material) {
@@ -576,7 +580,6 @@ function createRestroomFacility(facility: StationFacility) {
   const floorMaterial = new THREE.MeshStandardMaterial({ color: '#596168', metalness: 0.06, roughness: 0.8 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
-  const entranceDoor = new THREE.MeshStandardMaterial({ color: '#dce2e5', metalness: 0.16, roughness: 0.48 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
   const metal = new THREE.MeshStandardMaterial({ color: '#aebbc0', metalness: 0.82, roughness: 0.18 })
   const mirror = new THREE.MeshPhysicalMaterial({ color: '#bbdce4', metalness: 0.76, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.03 })
@@ -598,31 +601,38 @@ function createRestroomFacility(facility: StationFacility) {
   const frontZ = halfDepth + 0.02
   addRestroomFacade(group, openingEdges, frontZ, facade)
 
-  const slidingDoors: THREE.Mesh[] = []
+  const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
-    for (const direction of [-1, 1] as const) {
-      const closedX = center + direction * 0.43
-      const door = addRoundedBox(group, [0.78, 3.16, 0.1], [closedX, 1.58, frontZ + 0.2], entranceDoor, 0.025)
-      door.userData.closedX = closedX
-      door.userData.openX = center + direction * 1.18
-      slidingDoors.push(door)
-    }
+    const doorWidth = doorwayWidth - 0.14
+    const hingedDoor = new THREE.Group()
+    hingedDoor.position.set(center - doorWidth / 2, 0, frontZ + 0.2)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, 3, 0.08], [doorWidth / 2, 1.7, 0], stallDoor, 0.025)
+    addRoundedBox(panel, [0.13, 0.09, 0.05], [doorWidth * 0.34, -0.16, 0.065], metal, 0.02)
+    hingedDoor.userData.openRotation = 1.24
+    hingedDoor.userData.openDistance = 4.8
+    group.add(hingedDoor)
+    hingedDoors.push(hingedDoor)
   }
-  group.userData.slidingDoors = slidingDoors
-  group.userData.restroomDoors = true
 
-  for (const [index, x] of [-4.85, 4.85].entries()) {
+  for (const [index, direction] of [-1, 1].entries()) {
     const gender = index === 0 ? 'men' : 'women'
+    const pictogramX = direction * 2.82
+    const labelX = direction * 4.45
     const label = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.5, 0.62),
+      new THREE.PlaneGeometry(2.45, 0.62),
       new THREE.MeshBasicMaterial({ map: makeRestroomLabelTexture(gender), transparent: true, side: THREE.DoubleSide }),
     )
-    label.position.set(x, 3.58, frontZ + 0.175); group.add(label)
-    const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 2.36), makeRestroomIconMaterial(gender))
-    pictogram.position.set(x, 1.96, frontZ + 0.178); group.add(pictogram)
+    label.position.set(labelX, 1.9, frontZ + 0.175); group.add(label)
+    const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
+    pictogram.position.set(pictogramX, 1.9, frontZ + 0.178); group.add(pictogram)
   }
 
-  for (const x of [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
+  const stallCenters = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
+  for (const x of [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875]) {
+    addRoundedBox(group, [0.06, 2.08, 1.48], [x, 1.25, -2.72], partition, 0.015)
+  }
+  for (const x of stallCenters) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
+  group.userData.hingedDoors = hingedDoors
   for (const z of [-1.05, 0.05, 1.15, 2.25]) addRestroomUrinal(group, z, ceramic, metal)
   for (const z of [0.45, 1.65]) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
@@ -693,7 +703,7 @@ function buildMetaverseStation(scene: THREE.Scene) {
   for (const facility of FACILITIES) {
     const builtFacility = createFacility(facility)
     scene.add(builtFacility)
-    if (builtFacility.userData.hingedDoor || builtFacility.userData.slidingDoors) animated.push(builtFacility)
+    if (builtFacility.userData.hingedDoors || builtFacility.userData.slidingDoors) animated.push(builtFacility)
   }
   const trackLength = 46
   const trackCenterX = -1
@@ -816,6 +826,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     sun.shadow.camera.left = -36; sun.shadow.camera.right = 36; sun.shadow.camera.top = 36; sun.shadow.camera.bottom = -36; scene.add(sun)
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
+    const animatedWorldPosition = new THREE.Vector3()
     const resize = () => {
       const bounds = canvas.getBoundingClientRect()
       const width = Math.max(1, Math.round(bounds.width))
@@ -880,10 +891,15 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
             if (Math.abs(door.position.x - targetX) < 0.01) door.position.x = targetX
           })
         }
-        const hingedDoor = object.userData.hingedDoor as THREE.Group | undefined
-        if (hingedDoor) {
-          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 4.1
-          hingedDoor.rotation.y = THREE.MathUtils.lerp(hingedDoor.rotation.y, open ? 1.18 : 0, 0.12)
+        const hingedDoors = object.userData.hingedDoors as THREE.Group[] | undefined
+        if (hingedDoors) {
+          hingedDoors.forEach((door) => {
+            door.getWorldPosition(animatedWorldPosition)
+            const openDistance = door.userData.openDistance as number
+            const open = Math.hypot(animatedWorldPosition.x - player.x, animatedWorldPosition.z - player.z) < openDistance
+            const openRotation = door.userData.openRotation as number
+            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, open ? openRotation : 0, 0.12)
+          })
         }
       }
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
