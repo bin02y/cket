@@ -348,8 +348,8 @@ function makeTurnstileArrowTexture() {
   context.fillStyle = '#07110d'; context.beginPath(); context.roundRect(8, 8, 240, 240, 22); context.fill()
   context.strokeStyle = '#54ff6b'; context.lineWidth = 26; context.lineCap = 'round'; context.lineJoin = 'round'
   context.shadowColor = '#54ff6b'; context.shadowBlur = 22
-  context.beginPath(); context.moveTo(126, 48); context.lineTo(126, 168); context.stroke()
-  context.beginPath(); context.moveTo(70, 122); context.lineTo(126, 178); context.lineTo(182, 122); context.stroke()
+  context.beginPath(); context.moveTo(178, 70); context.lineTo(78, 170); context.stroke()
+  context.beginPath(); context.moveTo(78, 110); context.lineTo(78, 170); context.lineTo(138, 170); context.stroke()
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
@@ -542,8 +542,6 @@ function createBoothTurnstile(zone: RoadViewBooth) {
     addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH, 1.34, BOOTH_TURNSTILE_BODY_DEPTH], [lateral, 0.67, localZ], silver, 0.09)
     addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH + 0.08, 0.11, BOOTH_TURNSTILE_BODY_DEPTH + 0.08], [lateral, 1.37, localZ], edge, 0.035)
     addRoundedBox(group, [0.3, 0.045, 0.42], [lateral, 1.445, localZ - 0.18], dark, 0.025)
-    addRoundedBox(group, [0.14, 0.56, 0.16], [lateral, 1.7, localZ + 0.18], edge, 0.035)
-    addRoundedBox(group, [0.38, 0.28, 0.12], [lateral, 1.94, localZ + 0.18], edge, 0.04)
     const arrow = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.38), arrowMaterial)
     arrow.position.set(lateral, 0.7, localZ + BOOTH_TURNSTILE_BODY_DEPTH / 2 + 0.008); group.add(arrow)
   }
@@ -551,9 +549,10 @@ function createBoothTurnstile(zone: RoadViewBooth) {
   const guardInnerEdge = BOOTH_TURNSTILE_BODY_LATERAL + BOOTH_TURNSTILE_BODY_WIDTH / 2
   const guardWidth = BOOTH_WIDTH / 2 - guardInnerEdge
   const guardCenter = guardInnerEdge + guardWidth / 2
+  const guardLocalZ = BOOTH_DEPTH / 2 + 0.04
   for (const direction of [-1, 1]) {
-    addRoundedBox(group, [guardWidth, 0.72, 0.08], [direction * guardCenter, 0.73, localZ], glass, 0.025)
-    addRoundedBox(group, [guardWidth, 0.07, 0.12], [direction * guardCenter, 1.1, localZ], edge, 0.025)
+    addRoundedBox(group, [guardWidth, 0.72, 0.08], [direction * guardCenter, 0.73, guardLocalZ], glass, 0.025)
+    addRoundedBox(group, [guardWidth, 0.07, 0.12], [direction * guardCenter, 1.1, guardLocalZ], edge, 0.025)
   }
   return group
 }
