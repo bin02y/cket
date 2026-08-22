@@ -45,6 +45,8 @@ const RESTROOM_GATE_X = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
 const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH / 2
 const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
+const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
+const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
@@ -144,16 +146,29 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
       const doorwayHalfWidth = 0.85
       const lowerDoorCenter = zone.z - doorwayOffset
       const upperDoorCenter = zone.z + doorwayOffset
+      const stallPartitionColliders = RESTROOM_STALL_PARTITIONS.map((localX) => ({
+        x1: zone.x + RESTROOM_STALL_BACK_Z - 0.05,
+        x2: zone.x + RESTROOM_STALL_FRONT_Z + 0.05,
+        z1: zone.z - localX - 0.07,
+        z2: zone.z - localX + 0.07,
+      }))
+      const toiletColliders = RESTROOM_STALL_CENTERS.map((localX) => ({
+        x1: zone.x - 3.4,
+        x2: zone.x - 2.4,
+        z1: zone.z - localX - 0.38,
+        z2: zone.z - localX + 0.38,
+      }))
       return [
         ...shellWalls,
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: lowerDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
         { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
-        { x1: zone.x - 3.5, x2: zone.x - 1.25, z1: zone.z - 6.1, z2: zone.z + 6.1 },
+        ...stallPartitionColliders,
+        ...toiletColliders,
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z + 0.22, z2: zone.z + 0.98 },
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
-        { x1: zone.x - 1.4, x2: zone.x + 2.6, z1: zone.z + 5.45, z2: zone.z + 6.15 },
+        { x1: zone.x - 2.6, x2: zone.x + 1.4, z1: zone.z + 5.45, z2: zone.z + 6.15 },
       ]
     }
     return [
@@ -172,12 +187,21 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
   ]
 }), TRAIN_NOSE_COLLIDER, ...TRAIN_SEAT_COLLIDERS]
 
-function isWalkable(x: number, z: number) {
+const doorCollisionPoint = new THREE.Vector3()
+
+function isWalkable(x: number, z: number, collisionDoors: readonly THREE.Mesh[] = []) {
   const radius = 0.32
   const horizontalLimit = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - radius - 0.05
   const verticalLimit = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - radius - 0.05
   if (x < -horizontalLimit || x > horizontalLimit || z < -verticalLimit || z > verticalLimit) return false
-  return !COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)
+  if (COLLIDERS.some((wall) => x + radius > wall.x1 && x - radius < wall.x2 && z + radius > wall.z1 && z - radius < wall.z2)) return false
+  return !collisionDoors.some((door) => {
+    doorCollisionPoint.set(x, 0, z)
+    door.worldToLocal(doorCollisionPoint)
+    const halfWidth = (door.userData.collisionWidth as number) / 2 + radius
+    const halfDepth = (door.userData.collisionDepth as number) / 2 + radius
+    return Math.abs(doorCollisionPoint.x) < halfWidth && Math.abs(doorCollisionPoint.z) < halfDepth
+  })
 }
 
 function crossedGate(player: Player) {
@@ -545,9 +569,12 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   const hingedDoor = new THREE.Group()
   hingedDoor.position.set(x - doorWidth / 2, 0, RESTROOM_STALL_FRONT_Z)
   const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, 1.18, 0], door, 0.02)
+  panel.userData.collisionWidth = doorWidth
+  panel.userData.collisionDepth = 0.07
   addRoundedBox(panel, [0.12, 0.08, 0.04], [doorWidth * 0.3, 0, 0.055], metal, 0.02)
   hingedDoor.userData.openRotation = 1.18
   hingedDoor.userData.openDistance = 1.75
+  hingedDoor.userData.collisionPanel = panel
   parent.add(hingedDoor)
   addRoundedBox(parent, [0.5, 0.56, 0.3], [x, 0.63, -3.22], ceramic, 0.1)
   const bowl = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.07, 10, 24), ceramic)
@@ -606,14 +633,17 @@ function createRestroomFacility(facility: StationFacility) {
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
     const hingeSide = center < 0 ? -1 : 1
-    const doorWidth = doorwayWidth - 0.08
-    const doorHeight = 3.22
+    const doorWidth = doorwayWidth
+    const doorHeight = 3.4
     const hingedDoor = new THREE.Group()
     hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
-    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, doorHeight / 2 + 0.04, 0], stallDoor, 0.025)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, 1.8, 0], stallDoor, 0.025)
+    panel.userData.collisionWidth = doorWidth
+    panel.userData.collisionDepth = 0.08
     addRoundedBox(panel, [0.13, 0.09, 0.05], [-hingeSide * doorWidth * 0.34, -0.1, 0.065], metal, 0.02)
     hingedDoor.userData.openRotation = -hingeSide * 1.24
     hingedDoor.userData.openDistance = 4.8
+    hingedDoor.userData.collisionPanel = panel
     group.add(hingedDoor)
     hingedDoors.push(hingedDoor)
   }
@@ -630,20 +660,20 @@ function createRestroomFacility(facility: StationFacility) {
     pictogram.position.set(pictogramX, 1.86, frontZ + 0.178); group.add(pictogram)
   }
 
-  const stallCenters = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
   const stallPartitionDepth = RESTROOM_STALL_FRONT_Z - RESTROOM_STALL_BACK_Z
   const stallPartitionZ = (RESTROOM_STALL_FRONT_Z + RESTROOM_STALL_BACK_Z) / 2
-  for (const x of [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875]) {
+  for (const x of RESTROOM_STALL_PARTITIONS) {
     addRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, 1.25, stallPartitionZ], partition, 0.015)
   }
-  for (const x of stallCenters) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
+  for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
-  for (const z of [-1.05, 0.05, 1.15, 2.25]) addRestroomUrinal(group, z, ceramic, metal)
+  group.userData.collisionDoors = hingedDoors.map((door) => door.userData.collisionPanel as THREE.Mesh)
+  for (const z of [-2.25, -1.15, -0.05, 1.05]) addRestroomUrinal(group, z, ceramic, metal)
   for (const z of [0.45, 1.65]) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const z of [-0.5, 0.6, 1.7]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
+  for (const z of [-1.7, -0.6, 0.5]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
 
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
@@ -830,6 +860,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024)
     sun.shadow.camera.left = -36; sun.shadow.camera.right = 36; sun.shadow.camera.top = 36; sun.shadow.camera.bottom = -36; scene.add(sun)
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = { height: 0, velocity: 0 }
+    const collisionDoors = animated.flatMap((object) => (object.userData.collisionDoors as THREE.Mesh[] | undefined) ?? [])
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const animatedWorldPosition = new THREE.Vector3()
     const resize = () => {
@@ -869,7 +900,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         player.yaw += (Number(movement.turnLeft) - Number(movement.turnRight)) * delta * 1.9
         const forward = Number(movement.forward) - Number(movement.backward); const side = Number(movement.right) - Number(movement.left); const magnitude = Math.hypot(forward, side) || 1; const speed = (movement.sprint ? 8.6 : 5.15) * delta
         const moveX = (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * side) / magnitude * speed; const moveZ = (-Math.cos(player.yaw) * forward - Math.sin(player.yaw) * side) / magnitude * speed
-        if (isWalkable(player.x + moveX, player.z)) player.x += moveX; if (isWalkable(player.x, player.z + moveZ)) player.z += moveZ
+        if (isWalkable(player.x + moveX, player.z, collisionDoors)) player.x += moveX; if (isWalkable(player.x, player.z + moveZ, collisionDoors)) player.z += moveZ
       }
       if (jump.height > 0 || jump.velocity > 0) {
         jump.velocity -= 15.5 * delta; jump.height += jump.velocity * delta
