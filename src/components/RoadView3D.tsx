@@ -50,6 +50,7 @@ const RESTROOM_STALL_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_INTERIOR_FLOOR_Y = 0.04
 const RESTROOM_CEILING_BOTTOM_Y = 4.75
+const RESTROOM_FLOOR_FRONT_EXTENSION = 0.6
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -611,7 +612,7 @@ function createRestroomFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
-  const restroomBlue = '#303b45'
+  const restroomBlue = '#1d2731'
   const facade = new THREE.MeshStandardMaterial({ color: restroomBlue, metalness: 0.12, roughness: 0.68 })
   const interiorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide })
   const floorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
@@ -631,9 +632,9 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
   addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
   addRoundedBox(group, [0.18, interiorWallHeight, RESTROOM_DEPTH - 0.28], [0, interiorWallCenterY, -0.02], interiorSurface, 0.025)
-  const cleanFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH, RESTROOM_DEPTH), floorSurface)
+  const cleanFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH, RESTROOM_DEPTH + RESTROOM_FLOOR_FRONT_EXTENSION), floorSurface)
   cleanFloor.rotation.x = -Math.PI / 2
-  cleanFloor.position.y = RESTROOM_INTERIOR_FLOOR_Y
+  cleanFloor.position.set(0, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_FLOOR_FRONT_EXTENSION / 2)
   cleanFloor.renderOrder = 2
   cleanFloor.receiveShadow = false
   group.add(cleanFloor)
@@ -665,7 +666,7 @@ function createRestroomFacility(facility: StationFacility) {
 
   for (const [index, direction] of [-1, 1].entries()) {
     const gender = index === 0 ? 'men' : 'women'
-    const pictogramX = direction * 2.55
+    const pictogramX = direction * 2.8
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
     pictogram.position.set(pictogramX, 1.12, frontZ + 0.178); group.add(pictogram)
   }
@@ -734,7 +735,7 @@ function buildMetaverseStation(scene: THREE.Scene) {
   stationFloorShape.closePath()
   const restroomFloorHole = new THREE.Path()
   const restroomWorldXMin = RESTROOM_ZONE_X - RESTROOM_DEPTH / 2
-  const restroomWorldXMax = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
+  const restroomWorldXMax = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2 + RESTROOM_FLOOR_FRONT_EXTENSION
   const restroomShapeYMin = -(RESTROOM_ZONE_Z + RESTROOM_WIDTH / 2)
   const restroomShapeYMax = -(RESTROOM_ZONE_Z - RESTROOM_WIDTH / 2)
   restroomFloorHole.moveTo(restroomWorldXMin, restroomShapeYMin)
