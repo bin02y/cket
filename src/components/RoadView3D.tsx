@@ -50,7 +50,7 @@ const RESTROOM_STALL_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_INTERIOR_FLOOR_Y = 0.04
 const RESTROOM_CEILING_BOTTOM_Y = 4.75
-const RESTROOM_FLOOR_FRONT_EXTENSION = 0.6
+const RESTROOM_FLOOR_FRONT_EXTENSION = 0.17
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -146,7 +146,10 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
       { x1: zone.x - halfWidth, x2: zone.x + halfWidth, z1: zone.z + halfDepth - 0.28, z2: zone.z + halfDepth + 0.18 },
       { x1: backX - 0.22, x2: backX + 0.22, z1: zone.z - halfDepth, z2: zone.z + halfDepth },
     ]
-    if (zone.gateCode === 'F02') return shellWalls
+    if (zone.gateCode === 'F02') return [
+      ...shellWalls,
+      { x1: zone.x - 1.48, x2: zone.x - 0.02, z1: zone.z - 3.05, z2: zone.z + 3.05 },
+    ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
       const doorwayHalfWidth = RESTROOM_ENTRANCE_DOOR_WIDTH / 2
@@ -613,7 +616,6 @@ function createRestroomFacility(facility: StationFacility) {
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
   const restroomBlue = '#1d2731'
-  const facade = new THREE.MeshStandardMaterial({ color: restroomBlue, metalness: 0.12, roughness: 0.68 })
   const interiorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide })
   const floorSurface = new THREE.MeshBasicMaterial({ color: restroomBlue, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
@@ -644,7 +646,7 @@ function createRestroomFacility(facility: StationFacility) {
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const frontZ = halfDepth + 0.02
-  addRestroomFacade(group, openingEdges, frontZ, facade, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
+  addRestroomFacade(group, openingEdges, frontZ, interiorSurface, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
 
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
@@ -697,8 +699,73 @@ function createRestroomFacility(facility: StationFacility) {
   return group
 }
 
+function createInformationFacility(facility: StationFacility) {
+  const group = new THREE.Group(); group.position.set(facility.x, 0, facility.z)
+  if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
+  else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
+
+  const charcoal = new THREE.MeshStandardMaterial({ color: '#171a1b', metalness: 0.12, roughness: 0.62 })
+  const deepBlack = new THREE.MeshStandardMaterial({ color: '#0f1213', metalness: 0.2, roughness: 0.5 })
+  const wood = new THREE.MeshStandardMaterial({ color: '#b7895d', metalness: 0.02, roughness: 0.7 })
+  const paleWood = new THREE.MeshStandardMaterial({ color: '#d8b88e', metalness: 0.02, roughness: 0.68 })
+  const white = new THREE.MeshPhysicalMaterial({ color: '#f8f7f2', metalness: 0.04, roughness: 0.32, clearcoat: 0.45, clearcoatRoughness: 0.3 })
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#315766', transparent: true, opacity: 0.78, metalness: 0.28, roughness: 0.16, clearcoat: 0.75, clearcoatRoughness: 0.08 })
+  const planter = new THREE.MeshStandardMaterial({ color: '#f4f1e9', metalness: 0.05, roughness: 0.58 })
+  const leaf = new THREE.MeshStandardMaterial({ color: '#5f7e42', metalness: 0, roughness: 0.86 })
+  const light = new THREE.MeshBasicMaterial({ color: '#fff7dc' })
+
+  addRoundedBox(group, [8.1, 0.14, 5.05], [0, 0.07, -0.02], paleWood, 0.05)
+  addRoundedBox(group, [6.9, 3.55, 0.18], [0, 2.02, -2.32], charcoal, 0.06)
+  addRoundedBox(group, [8.05, 0.24, 4.58], [0, 4.68, -0.02], white, 0.12)
+  addRoundedBox(group, [7.62, 0.13, 4.2], [-0.06, 4.5, -0.02], wood, 0.06)
+
+  for (const z of [-1.85, -1.15, -0.45, 0.25, 0.95, 1.65]) {
+    addRoundedBox(group, [7.25, 0.055, 0.075], [-0.12, 4.38, z], paleWood, 0.018)
+    addRoundedBox(group, [0.075, 4.05, 0.075], [3.48, 2.33, z], paleWood, 0.018)
+  }
+  addRoundedBox(group, [0.2, 4.28, 4.35], [3.77, 2.46, -0.02], white, 0.07)
+  for (const x of [-2.75, -2.47, -2.19, -1.91, -1.63]) addRoundedBox(group, [0.075, 1.62, 0.075], [x, 3.22, -1.92], paleWood, 0.018)
+
+  const deskShape = new THREE.Shape()
+  deskShape.moveTo(-2.95, 0)
+  deskShape.lineTo(2.95, 0)
+  deskShape.lineTo(2.48, 1.32)
+  deskShape.lineTo(-2.48, 1.32)
+  deskShape.closePath()
+  const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.9, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.05, bevelThickness: 0.05 })
+  deskGeometry.translate(0, 0, -0.45)
+  const desk = new THREE.Mesh(deskGeometry, deepBlack)
+  desk.position.set(0, 0.12, 0.92); desk.castShadow = true; desk.receiveShadow = true; group.add(desk)
+  addRoundedBox(group, [5.35, 0.14, 1.12], [0, 1.49, 0.64], charcoal, 0.045)
+  for (const direction of [-1, 1]) {
+    const panel = addRoundedBox(group, [0.72, 0.82, 0.06], [direction * 2.26, 0.74, 1.4], glass, 0.025)
+    panel.rotation.z = direction * 0.17
+  }
+
+  addRoundedBox(group, [3.82, 0.12, 0.62], [-0.72, 2.04, -2.12], white, 0.035)
+  for (const x of [-1.48, 0.02]) addRoundedBox(group, [1.28, 0.72, 0.08], [x, 2.42, -2.01], deepBlack, 0.025)
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.45, 0.86),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(facility.title, zoneDisplayLabel(facility), facility.color, ''), transparent: true, side: THREE.DoubleSide }),
+  )
+  sign.position.set(-1.42, 3.36, -2.2); group.add(sign)
+
+  for (const x of [-2.82, 2.78]) {
+    addRoundedBox(group, [1.15, 0.34, 0.58], [x, 0.31, -1.58], planter, 0.05)
+    for (const offset of [-0.4, -0.2, 0, 0.2, 0.4]) {
+      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.035, 0.72 + Math.abs(offset) * 0.24, 8), leaf)
+      stalk.position.set(x + offset, 0.78 + Math.abs(offset) * 0.12, -1.58); stalk.rotation.z = offset * 0.35; group.add(stalk)
+    }
+  }
+  for (const x of [-2.45, 0, 2.45]) {
+    for (const z of [-1.15, 0.65]) addRoundedBox(group, [0.9, 0.035, 0.46], [x, 4.28, z], light, 0.025)
+  }
+  return group
+}
+
 function createFacility(facility: StationFacility) {
   if (facility.gateCode === 'F01') return createRestroomFacility(facility)
+  if (facility.gateCode === 'F02') return createInformationFacility(facility)
   const group = new THREE.Group(); group.position.set(facility.x, 0, facility.z)
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
