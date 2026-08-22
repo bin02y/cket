@@ -206,14 +206,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
       ]
     }
-    if ('id' in zone) {
-      const counterWorldX = zone.x + (zone.gate.side === 'east' ? 0.9 : -0.9)
-      const counterWorldZ = zone.z + (zone.gate.side === 'east' ? -1.55 : 1.55)
-      return [
-        ...shellWalls,
-        { x1: counterWorldX - 0.65, x2: counterWorldX + 0.65, z1: counterWorldZ - 1, z2: counterWorldZ + 1 },
-      ]
-    }
+    if ('id' in zone) return shellWalls
     return [
       ...shellWalls,
       { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: zone.z - 1.42 },
@@ -311,6 +304,24 @@ function makeTrainBoothSignTexture(title: string, subtitle: string, accent: stri
   context.restore()
   context.beginPath(); context.roundRect(16, 16, 992, 328, 42)
   context.strokeStyle = '#244f99'; context.lineWidth = 10; context.stroke()
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
+function makeInformationSignTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1536; canvas.height = 420
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+
+  context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#080808'; context.beginPath(); context.arc(250, 210, 118, 0, Math.PI * 2); context.fill()
+  context.fillStyle = '#ffffff'; context.font = 'italic 900 208px Georgia, serif'; context.textAlign = 'center'; context.textBaseline = 'middle'
+  context.fillText('i', 250, 198)
+  context.fillStyle = '#080808'; context.font = '800 162px Arial, sans-serif'; context.textAlign = 'left'
+  context.fillText('Information', 420, 220, 1050)
+
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
   return texture
@@ -594,7 +605,6 @@ function createBooth(zone: RoadViewBooth) {
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfd', metalness: 0.03, roughness: 0.36, clearcoat: 0.42, clearcoatRoughness: 0.28 })
-  const softWhite = new THREE.MeshStandardMaterial({ color: '#f0f3f4', metalness: 0.02, roughness: 0.7 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
   const wallHeight = FACILITY_HEIGHT
@@ -612,8 +622,6 @@ function createBooth(zone: RoadViewBooth) {
   )
   name.position.set(0, wallHeight - 0.32, halfDepth + 0.025); group.add(name)
 
-  addRoundedBox(group, [1.65, 1.18, 1.02], [1.55, 0.64, 0.92], white, 0.035)
-  addRoundedBox(group, [1.82, 0.12, 1.18], [1.55, 1.28, 0.92], softWhite, 0.035)
   return group
 }
 
@@ -742,8 +750,11 @@ function createInformationFacility(facility: StationFacility) {
   const softWhite = new THREE.MeshStandardMaterial({ color: '#eef1f1', metalness: 0.02, roughness: 0.72 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
   const chrome = new THREE.MeshStandardMaterial({ color: '#b8c3c8', metalness: 0.86, roughness: 0.16 })
-  const chairWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.22 })
+  const chairMaterials = ['#ef6f6c', '#f2b84b', '#62b879', '#4f9bd8', '#8b73d8', '#df78b8'].map((color) => (
+    new THREE.MeshPhysicalMaterial({ color, metalness: 0.02, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.22 })
+  ))
   const chairWood = new THREE.MeshStandardMaterial({ color: '#c9a374', metalness: 0.02, roughness: 0.7 })
+  const signTop = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.16, roughness: 0.3 })
   const light = new THREE.MeshBasicMaterial({ color: '#ffffff' })
   const wallHeight = FACILITY_HEIGHT - 0.24
   const roofCenterY = FACILITY_HEIGHT - 0.12
@@ -766,17 +777,20 @@ function createInformationFacility(facility: StationFacility) {
   const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
   deskGeometry.translate(0, 0, -0.41)
   const desk = new THREE.Mesh(deskGeometry, white); desk.position.y = 0.1; desk.castShadow = true; desk.receiveShadow = true; deskGroup.add(desk)
-  addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], white, 0.045)
+  addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], signTop, 0.025)
   const deskSign = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.18, 0.76),
-    new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(facility.title, facility.label, facility.color), transparent: true, side: THREE.DoubleSide }),
+    new THREE.PlaneGeometry(2.4, 0.66),
+    new THREE.MeshBasicMaterial({ map: makeInformationSignTexture(), side: THREE.DoubleSide }),
   )
   deskSign.position.set(0, 0.62, 0.47); deskGroup.add(deskSign)
 
+  let chairColorIndex = 0
   const addLoungeChair = (x: number, z: number, yaw: number) => {
     const chair = new THREE.Group(); chair.position.set(x, 0, z); chair.rotation.y = yaw; group.add(chair)
-    addRoundedBox(chair, [0.62, 0.13, 0.58], [0, 0.55, 0], chairWhite, 0.08)
-    const back = addRoundedBox(chair, [0.62, 0.64, 0.12], [0, 0.87, 0.24], chairWhite, 0.1)
+    const chairMaterial = chairMaterials[chairColorIndex % chairMaterials.length]
+    chairColorIndex += 1
+    addRoundedBox(chair, [0.62, 0.13, 0.58], [0, 0.55, 0], chairMaterial, 0.08)
+    const back = addRoundedBox(chair, [0.62, 0.64, 0.12], [0, 0.87, 0.24], chairMaterial, 0.1)
     back.rotation.x = -0.1
     for (const legX of [-0.21, 0.21]) for (const legZ of [-0.18, 0.18]) {
       const leg = addRoundedBox(chair, [0.045, 0.5, 0.045], [legX, 0.27, legZ], chairWood, 0.012)
