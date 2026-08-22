@@ -188,6 +188,14 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
       ]
     }
+    if ('id' in zone) {
+      const counterWorldX = zone.x + (zone.gate.side === 'east' ? 0.9 : -0.9)
+      const counterWorldZ = zone.z + (zone.gate.side === 'east' ? -2.45 : 2.45)
+      return [
+        ...shellWalls,
+        { x1: counterWorldX - 0.65, x2: counterWorldX + 0.65, z1: counterWorldZ - 1, z2: counterWorldZ + 1 },
+      ]
+    }
     return [
       ...shellWalls,
       { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: zone.z - halfDepth, z2: zone.z - 1.42 },
@@ -409,30 +417,6 @@ function makeRestroomIconMaterial(gender: 'men' | 'women') {
   })
 }
 
-function createGate(zone: RoadViewBooth) {
-  const group = new THREE.Group()
-  group.position.set(zone.gate.x, 0, zone.gate.z)
-  if (zone.gate.side === 'north') group.rotation.y = Math.PI
-  else if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
-  else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
-  const accent = new THREE.Color(zone.color)
-  const darkMaterial = new THREE.MeshStandardMaterial({ color: '#d7e1e7', metalness: 0.72, roughness: 0.2 })
-  const glowMaterial = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.72, metalness: 0.35, roughness: 0.25 })
-  const glassMaterial = new THREE.MeshPhysicalMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.45, roughness: 0.08, metalness: 0.15, side: THREE.DoubleSide })
-  for (const x of [-1.35, 1.35]) {
-    addRoundedBox(group, [0.62, 0.1, 0.76], [x, 0.05, 0], darkMaterial, 0.03)
-    addRoundedBox(group, [0.46, 1.42, 0.62], [x, 0.81, 0], darkMaterial, 0.14)
-    addRoundedBox(group, [0.33, 0.12, 0.46], [x, 1.48, 0], glowMaterial, 0.06)
-    const scanner = new THREE.Mesh(new THREE.CircleGeometry(0.09, 24), new THREE.MeshBasicMaterial({ color: '#dffff8' }))
-    scanner.rotation.x = -Math.PI / 2; scanner.position.set(x, 1.55, 0); group.add(scanner)
-  }
-  const leftWing = new THREE.Mesh(new RoundedBoxGeometry(0.82, 0.72, 0.05, 3, 0.06), glassMaterial)
-  leftWing.position.set(-0.66, 0.87, 0)
-  const rightWing = leftWing.clone(); rightWing.position.x = 0.66
-  group.add(leftWing, rightWing); group.userData.wings = [leftWing, rightWing]
-  return group
-}
-
 function createTrainDoor(zone: RoadViewBooth) {
   const group = new THREE.Group(); group.position.set(zone.gate.x, 0, zone.gate.z)
   if (zone.gate.side === 'north') group.rotation.y = Math.PI
@@ -570,16 +554,27 @@ function createBooth(zone: RoadViewBooth) {
   if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
-  const accent = new THREE.Color(zone.color)
-  const shell = new THREE.MeshPhysicalMaterial({ color: '#f8fbfc', metalness: 0.24, roughness: 0.25, clearcoat: 0.72, clearcoatRoughness: 0.2 })
-  const panel = new THREE.MeshStandardMaterial({ color: accent.clone().lerp(new THREE.Color('#ffffff'), 0.7), emissive: accent, emissiveIntensity: 0.12, metalness: 0.16, roughness: 0.4 })
-  const { interiorBackZ } = addIntegratedBoothShell(group, shell)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.82, 4.34, 0.08], [0, 2.55, interiorBackZ], panel, 0.04)
+  const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfd', metalness: 0.03, roughness: 0.36, clearcoat: 0.42, clearcoatRoughness: 0.28 })
+  const softWhite = new THREE.MeshStandardMaterial({ color: '#f0f3f4', metalness: 0.02, roughness: 0.7 })
+  const halfWidth = BOOTH_WIDTH / 2
+  const halfDepth = BOOTH_DEPTH / 2
+  const wallHeight = 4.5
+
+  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], white, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], white, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], white, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], white, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], white, 0.045)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], white, 0.04)
+
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(4.4, 1.55),
     new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
-  name.position.set(0, 3.4, interiorBackZ + 0.07); group.add(name)
+  name.position.set(0, 3.25, -halfDepth + 0.18); group.add(name)
+
+  addRoundedBox(group, [1.8, 1.18, 1.02], [2.45, 0.64, 0.92], white, 0.035)
+  addRoundedBox(group, [1.98, 0.12, 1.18], [2.45, 1.28, 0.92], softWhite, 0.035)
   return group
 }
 
@@ -832,8 +827,10 @@ function buildMetaverseStation(scene: THREE.Scene) {
   scene.add(createIntegratedTrainShell())
   for (const booth of BOOTHS) {
     scene.add(createBooth(booth))
-    const entrance = booth.trainCar ? createTrainDoor(booth) : createGate(booth)
-    scene.add(entrance); animated.push(entrance)
+    if (booth.trainCar) {
+      const entrance = createTrainDoor(booth)
+      scene.add(entrance); animated.push(entrance)
+    }
   }
   for (const facility of FACILITIES) {
     const builtFacility = createFacility(facility)
