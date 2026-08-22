@@ -26,6 +26,7 @@ type RoadViewBooth = { id: number; gateCode: RoadViewGateCode; label: string; ti
 type StationFacility = Omit<RoadViewBooth, 'id' | 'description' | 'gateCode'> & { gateCode: string }
 type Player = { x: number; z: number; yaw: number; pitch: number }
 type Movement = { forward: boolean; backward: boolean; left: boolean; right: boolean; turnLeft: boolean; turnRight: boolean; sprint: boolean }
+type MobileDirection = 'forward' | 'backward' | 'left' | 'right'
 type Collider = { x1: number; x2: number; z1: number; z2: number }
 type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadViewGateRewardResult['status']; points: number }
 type BoothImage = { src: string; alt: string }
@@ -135,6 +136,12 @@ const BOOTH_TURNSTILE_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => 
     { x1: gateCenterX - BOOTH_TURNSTILE_BODY_DEPTH / 2, x2: gateCenterX + BOOTH_TURNSTILE_BODY_DEPTH / 2, z1: booth.z + BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH, z2: booth.z + BOOTH_WIDTH / 2 },
   ]
 })
+const BOOTH_SCULPTURE_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => !booth.trainCar).map((booth) => ({
+  x1: booth.x - 0.82,
+  x2: booth.x + 0.82,
+  z1: booth.z - 0.82,
+  z2: booth.z + 0.82,
+}))
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
   3: { src: boothTwoImage, alt: '무더운 여름에 냉방 방법을 선택하는 2번 부스 안내 이미지' },
@@ -233,7 +240,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     { x1: zone.x - halfWidth, x2: zone.x - 1.42, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
     { x1: zone.x + 1.42, x2: zone.x + halfWidth, z1: zone.gate.z - 0.2, z2: zone.gate.z + 0.2 },
   ]
-}), ...BOOTH_TURNSTILE_COLLIDERS, ...TRAIN_END_COLLIDERS, ...TRAIN_SEAT_COLLIDERS]
+}), ...BOOTH_TURNSTILE_COLLIDERS, ...BOOTH_SCULPTURE_COLLIDERS, ...TRAIN_END_COLLIDERS, ...TRAIN_SEAT_COLLIDERS]
 
 const doorCollisionPoint = new THREE.Vector3()
 
@@ -658,6 +665,83 @@ function createTrainCarBooth(zone: RoadViewBooth) {
   return group
 }
 
+function addSculptureSphere(parent: THREE.Object3D, radius: number, scale: [number, number, number], position: [number, number, number], material: THREE.Material) {
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 28, 20), material)
+  mesh.scale.set(...scale); mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
+  return mesh
+}
+
+function createBoothSculpture(boothId: number) {
+  const group = new THREE.Group()
+  const pedestal = new THREE.MeshPhysicalMaterial({ color: '#f5f8fa', metalness: 0.12, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2 })
+  const pedestalTrim = new THREE.MeshStandardMaterial({ color: '#2c6d9c', metalness: 0.42, roughness: 0.24 })
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.98, 0.3, 40), pedestal)
+  base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true; group.add(base)
+  const trim = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.035, 8, 40), pedestalTrim)
+  trim.rotation.x = Math.PI / 2; trim.position.y = 0.3; group.add(trim)
+
+  if (boothId === 1) {
+    const black = new THREE.MeshStandardMaterial({ color: '#172731', metalness: 0.04, roughness: 0.58 })
+    const white = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.02, roughness: 0.34, clearcoat: 0.28 })
+    const orange = new THREE.MeshStandardMaterial({ color: '#f2a13b', metalness: 0.02, roughness: 0.5 })
+    addSculptureSphere(group, 0.78, [0.78, 1.18, 0.7], [0, 1.18, 0], black)
+    addSculptureSphere(group, 0.58, [1, 0.9, 0.92], [0, 2.05, 0.02], black)
+    addSculptureSphere(group, 0.53, [0.62, 0.92, 0.72], [0, 1.2, 0.5], white)
+    addSculptureSphere(group, 0.14, [1, 0.7, 0.7], [-0.2, 2.1, 0.5], white)
+    addSculptureSphere(group, 0.14, [1, 0.7, 0.7], [0.2, 2.1, 0.5], white)
+    addSculptureSphere(group, 0.04, [1, 1, 0.55], [-0.2, 2.12, 0.61], black)
+    addSculptureSphere(group, 0.04, [1, 1, 0.55], [0.2, 2.12, 0.61], black)
+    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.36, 4), orange)
+    beak.rotation.x = Math.PI / 2; beak.rotation.z = Math.PI / 4; beak.position.set(0, 1.92, 0.68); group.add(beak)
+    for (const direction of [-1, 1]) {
+      const wing = addSculptureSphere(group, 0.55, [0.28, 1.12, 0.32], [direction * 0.58, 1.22, 0], black)
+      wing.rotation.z = -direction * 0.28
+      addSculptureSphere(group, 0.3, [1.2, 0.28, 1.5], [direction * 0.25, 0.42, 0.23], orange)
+    }
+  } else if (boothId === 3) {
+    const fanMaterial = new THREE.MeshPhysicalMaterial({ color: '#45b9c5', metalness: 0.04, roughness: 0.34, clearcoat: 0.5, clearcoatRoughness: 0.18, side: THREE.DoubleSide })
+    const ribMaterial = new THREE.MeshStandardMaterial({ color: '#d7ae72', metalness: 0.03, roughness: 0.62 })
+    const fan = new THREE.Mesh(new THREE.CircleGeometry(1.18, 40, 0, Math.PI), fanMaterial)
+    fan.position.set(0, 0.76, 0); fan.castShadow = true; group.add(fan)
+    for (let index = 0; index <= 10; index += 1) {
+      const angle = index / 10 * Math.PI
+      const rib = addRoundedBox(group, [0.035, 1.04, 0.035], [Math.cos(angle) * 0.52, 0.76 + Math.sin(angle) * 0.52, 0.035], ribMaterial, 0.012)
+      rib.rotation.z = angle - Math.PI / 2
+    }
+    addSculptureSphere(group, 0.14, [1, 1, 0.45], [0, 0.76, 0.08], pedestalTrim)
+  } else if (boothId === 4) {
+    const fur = new THREE.MeshPhysicalMaterial({ color: '#f4f7f6', metalness: 0.01, roughness: 0.52, clearcoat: 0.18 })
+    const dark = new THREE.MeshStandardMaterial({ color: '#1f2b30', metalness: 0.02, roughness: 0.5 })
+    addSculptureSphere(group, 0.82, [1.15, 0.82, 0.68], [0, 1.05, 0], fur)
+    addSculptureSphere(group, 0.58, [1, 0.92, 0.92], [0, 1.82, 0.28], fur)
+    addSculptureSphere(group, 0.2, [1, 1, 0.72], [-0.37, 2.18, 0.23], fur)
+    addSculptureSphere(group, 0.2, [1, 1, 0.72], [0.37, 2.18, 0.23], fur)
+    addSculptureSphere(group, 0.28, [1.08, 0.7, 0.75], [0, 1.68, 0.78], fur)
+    addSculptureSphere(group, 0.09, [1, 0.72, 0.65], [0, 1.72, 0.98], dark)
+    for (const x of [-0.22, 0.22]) addSculptureSphere(group, 0.045, [1, 1, 0.55], [x, 1.94, 0.78], dark)
+    for (const x of [-0.52, 0.52]) addSculptureSphere(group, 0.3, [0.72, 1.35, 0.75], [x, 0.52, 0.16], fur)
+  } else {
+    const ocean = new THREE.MeshPhysicalMaterial({ color: '#2f8ed4', metalness: 0.08, roughness: 0.3, clearcoat: 0.7, clearcoatRoughness: 0.18 })
+    const land = new THREE.MeshStandardMaterial({ color: '#67b85b', metalness: 0.02, roughness: 0.52 })
+    const metal = new THREE.MeshStandardMaterial({ color: '#9aacb5', metalness: 0.74, roughness: 0.2 })
+    addRoundedBox(group, [0.16, 0.78, 0.16], [0, 0.66, 0], metal, 0.04)
+    const globe = addSculptureSphere(group, 0.86, [1, 1, 1], [0, 1.72, 0], ocean)
+    globe.rotation.z = -0.18
+    for (const [x, y, z, sx, sy, rotation] of [
+      [-0.3, 1.95, 0.76, 0.33, 0.18, 0.35], [0.2, 1.56, 0.82, 0.28, 0.42, -0.2], [0.47, 2.05, 0.62, 0.27, 0.18, -0.35],
+    ] as const) {
+      const patch = addSculptureSphere(group, 0.3, [sx / 0.3, sy / 0.3, 0.16], [x, y, z], land)
+      patch.rotation.z = rotation
+    }
+    const meridian = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.035, 10, 48), metal)
+    meridian.position.y = 1.72; meridian.rotation.z = -0.18; group.add(meridian)
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.62, 0.12, 32), metal)
+    foot.position.y = 0.34; group.add(foot)
+  }
+
+  return group
+}
+
 function createBooth(zone: RoadViewBooth) {
   if (zone.trainCar) return createTrainCarBooth(zone)
   const group = new THREE.Group(); group.position.set(zone.x, 0, zone.z)
@@ -681,6 +765,7 @@ function createBooth(zone: RoadViewBooth) {
     new THREE.MeshBasicMaterial({ map: makeBoothMarqueeTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
   name.position.set(0, wallHeight - 0.32, halfDepth + 0.025); group.add(name)
+  group.add(createBoothSculpture(zone.id))
 
   return group
 }
@@ -1016,11 +1101,10 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
-  const useMobileControls = navigator.maxTouchPoints > 0
+  const useMobileControls = navigator.maxTouchPoints > 0 && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
   const sceneRef = useRef<HTMLCanvasElement>(null); const mapRef = useRef<HTMLCanvasElement>(null)
   const playerRef = useRef<Player>({ x: 0, z: 10.2, yaw: 0, pitch: -0.03 }); const movementRef = useRef<Movement>({ ...EMPTY_MOVEMENT })
-  const jumpRef = useRef({ height: 0, velocity: 0 }); const joystickBaseRef = useRef<HTMLDivElement>(null); const joystickKnobRef = useRef<HTMLSpanElement>(null)
-  const joystickPointerRef = useRef<number | null>(null)
+  const jumpRef = useRef({ height: 0, velocity: 0 })
   const overlayRef = useRef({ mapOpen: false, selectedBooth: null as RoadViewBooth | null }); const lastGateRef = useRef<number | null>(null)
   const onGatePassedRef = useRef(onGatePassed); const gateRewardCacheRef = useRef(new Map<RoadViewGateCode, GateRewardNotice>())
   const [mapOpen, setMapOpen] = useState(false)
@@ -1191,58 +1275,53 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     }
   }, [onClose])
 
-  const stopJoystick = () => {
-    const activePointer = joystickPointerRef.current
-    if (activePointer !== null && joystickBaseRef.current?.hasPointerCapture(activePointer)) joystickBaseRef.current.releasePointerCapture(activePointer)
-    joystickPointerRef.current = null
+  const stopMobileMovement = () => {
     const movement = movementRef.current
-    movement.forward = false; movement.backward = false; movement.turnLeft = false; movement.turnRight = false
-    if (joystickKnobRef.current) joystickKnobRef.current.style.transform = 'translate3d(0,0,0)'
+    movement.forward = false; movement.backward = false; movement.left = false; movement.right = false
   }
-  const updateJoystick = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (joystickPointerRef.current !== event.pointerId || !joystickBaseRef.current) return
-    const bounds = joystickBaseRef.current.getBoundingClientRect()
-    const radius = Math.min(bounds.width, bounds.height) * 0.31
-    const rawX = event.clientX - (bounds.left + bounds.width / 2)
-    const rawY = event.clientY - (bounds.top + bounds.height / 2)
-    const distance = Math.hypot(rawX, rawY)
-    const scale = distance > radius ? radius / distance : 1
-    const x = rawX * scale; const y = rawY * scale
-    if (joystickKnobRef.current) joystickKnobRef.current.style.transform = `translate3d(${x}px,${y}px,0)`
-    const threshold = radius * 0.24
-    const movement = movementRef.current
-    movement.forward = y < -threshold; movement.backward = y > threshold
-    movement.turnLeft = x < -threshold; movement.turnRight = x > threshold
+  const startMobileMovement = (event: ReactPointerEvent<HTMLButtonElement>, direction: MobileDirection) => {
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    movementRef.current[direction] = true
   }
-  const handleJoystickStart = (event: ReactPointerEvent<HTMLDivElement>) => {
-    event.preventDefault(); joystickPointerRef.current = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); updateJoystick(event)
-  }
-  const handleJoystickEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (joystickPointerRef.current !== event.pointerId) return
+  const stopMobileDirection = (event: ReactPointerEvent<HTMLButtonElement>, direction: MobileDirection) => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-    stopJoystick()
+    movementRef.current[direction] = false
   }
   const requestJump = () => {
     if (overlayRef.current.mapOpen || overlayRef.current.selectedBooth || jumpRef.current.height !== 0) return
     jumpRef.current.velocity = 6.2
   }
-  const openMap = () => { stopJoystick(); setMapOpen(true) }
+  const openMap = () => { stopMobileMovement(); setMapOpen(true) }
   return (
     <section className={`roadview${useMobileControls ? ' roadview--touch' : ''}`} role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
       <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
-        <div ref={joystickBaseRef} className="roadview__joystick" role="application" aria-label="이동 조이스틱" onPointerDown={handleJoystickStart} onPointerMove={updateJoystick} onPointerUp={handleJoystickEnd} onPointerCancel={handleJoystickEnd}>
-          <span className="roadview__joystick-direction roadview__joystick-direction--up">▲</span>
-          <span className="roadview__joystick-direction roadview__joystick-direction--right">▶</span>
-          <span className="roadview__joystick-direction roadview__joystick-direction--down">▼</span>
-          <span className="roadview__joystick-direction roadview__joystick-direction--left">◀</span>
-          <span ref={joystickKnobRef} className="roadview__joystick-knob" />
+        <div className="roadview__dpad" role="group" aria-label="상하좌우 이동과 점프">
+          {([
+            ['forward', 'up', '위로 이동', 0],
+            ['right', 'right', '오른쪽으로 이동', 90],
+            ['backward', 'down', '아래로 이동', 180],
+            ['left', 'left', '왼쪽으로 이동', -90],
+          ] as const).map(([direction, className, label, rotation]) => (
+            <button
+              key={direction}
+              type="button"
+              className={`roadview__dpad-key roadview__dpad-key--${className}`}
+              aria-label={label}
+              onPointerDown={(event) => startMobileMovement(event, direction)}
+              onPointerUp={(event) => stopMobileDirection(event, direction)}
+              onPointerCancel={(event) => stopMobileDirection(event, direction)}
+            >
+              <svg viewBox="0 0 32 32" aria-hidden="true" style={{ transform: `rotate(${rotation}deg)` }}><path d="M16 3 3.5 15.5h7V29h11V15.5h7z" /></svg>
+            </button>
+          ))}
+          <button type="button" className="roadview__dpad-jump" aria-label="점프" onClick={requestJump}><Icon name="jump" /></button>
         </div>
         <div className="roadview__mobile-actions">
           <button type="button" aria-label="지도 열기" onClick={openMap}><Icon name="map" /><span>지도</span></button>
-          <button type="button" aria-label="점프" onClick={requestJump}><Icon name="jump" /><span>점프</span></button>
         </div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
