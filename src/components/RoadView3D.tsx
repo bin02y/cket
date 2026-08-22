@@ -46,8 +46,8 @@ const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_
 const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
 const RESTROOM_DOOR_WIDTH = 0.95
-const RESTROOM_DOOR_HEIGHT = 1.74
-const RESTROOM_FLOOR_TOP_Y = 0.02
+const RESTROOM_DOOR_HEIGHT = 2.45
+const RESTROOM_FLOOR_TOP_Y = 0
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -597,7 +597,6 @@ function createRestroomFacility(facility: StationFacility) {
 
   const facade = new THREE.MeshStandardMaterial({ color: '#303b45', metalness: 0.12, roughness: 0.68 })
   const tile = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92 })
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: '#596168', metalness: 0.06, roughness: 0.8 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
@@ -612,7 +611,6 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.18, 4.62, RESTROOM_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, RESTROOM_FLOOR_TOP_Y, RESTROOM_DEPTH - 0.5], [0, RESTROOM_FLOOR_TOP_Y / 2, 0], floorMaterial, 0.005)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
 
   const doorwayWidth = RESTROOM_DOOR_WIDTH
@@ -643,7 +641,7 @@ function createRestroomFacility(facility: StationFacility) {
     const gender = index === 0 ? 'men' : 'women'
     const pictogramX = direction * 2.25
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
-    pictogram.position.set(pictogramX, 1.86, frontZ + 0.178); group.add(pictogram)
+    pictogram.position.set(pictogramX, 1.12, frontZ + 0.178); group.add(pictogram)
   }
 
   const stallPartitionDepth = RESTROOM_STALL_FRONT_Z - RESTROOM_STALL_BACK_Z
