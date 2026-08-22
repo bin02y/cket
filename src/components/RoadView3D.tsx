@@ -674,11 +674,18 @@ function addSculptureSphere(parent: THREE.Object3D, radius: number, scale: [numb
 function createBoothSculpture(boothId: number) {
   const group = new THREE.Group()
   const pedestal = new THREE.MeshPhysicalMaterial({ color: '#f5f8fa', metalness: 0.12, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2 })
-  const pedestalTrim = new THREE.MeshStandardMaterial({ color: '#2c6d9c', metalness: 0.42, roughness: 0.24 })
+  const pedestalTrim = new THREE.MeshStandardMaterial({ color: '#258dff', emissive: '#0879f4', emissiveIntensity: 3.2, metalness: 0.24, roughness: 0.18 })
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.98, 0.3, 40), pedestal)
   base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true; group.add(base)
-  const trim = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.035, 8, 40), pedestalTrim)
+  const trim = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.06, 10, 48), pedestalTrim)
   trim.rotation.x = Math.PI / 2; trim.position.y = 0.3; group.add(trim)
+  const glow = new THREE.Mesh(
+    new THREE.TorusGeometry(0.92, 0.1, 10, 48),
+    new THREE.MeshBasicMaterial({ color: '#42a8ff', transparent: true, opacity: 0.34, blending: THREE.AdditiveBlending, depthWrite: false }),
+  )
+  glow.rotation.x = Math.PI / 2; glow.position.y = 0.3; group.add(glow)
+  const pedestalLight = new THREE.PointLight('#168cff', 3.4, 4.8, 2)
+  pedestalLight.position.set(0, 0.5, 0); group.add(pedestalLight)
 
   if (boothId === 1) {
     const black = new THREE.MeshStandardMaterial({ color: '#172731', metalness: 0.04, roughness: 0.58 })
@@ -739,6 +746,7 @@ function createBoothSculpture(boothId: number) {
     foot.position.y = 0.34; group.add(foot)
   }
 
+  group.userData.autoRotate = true
   return group
 }
 
@@ -748,24 +756,26 @@ function createBooth(zone: RoadViewBooth) {
   if (zone.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
-  const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfd', metalness: 0.03, roughness: 0.36, clearcoat: 0.42, clearcoatRoughness: 0.28 })
+  const boothBlack = new THREE.MeshPhysicalMaterial({ color: '#05070a', metalness: 0.08, roughness: 0.5, clearcoat: 0.22, clearcoatRoughness: 0.34 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
   const wallHeight = FACILITY_HEIGHT
 
-  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], white, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], white, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], white, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], white, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], white, 0.045)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], white, 0.04)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothBlack, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothBlack, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothBlack, 0.035)
+  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothBlack, 0.035)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothBlack, 0.045)
+  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothBlack, 0.04)
 
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(BOOTH_WIDTH - 0.36, 0.42),
     new THREE.MeshBasicMaterial({ map: makeBoothMarqueeTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
   )
   name.position.set(0, wallHeight - 0.32, halfDepth + 0.025); group.add(name)
-  group.add(createBoothSculpture(zone.id))
+  const sculpture = createBoothSculpture(zone.id)
+  group.add(sculpture)
+  group.userData.rotatingSculpture = sculpture
 
   return group
 }
@@ -893,6 +903,8 @@ function createInformationFacility(facility: StationFacility) {
   const halfDepth = INFORMATION_DEPTH / 2
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
   const softWhite = new THREE.MeshStandardMaterial({ color: '#eef1f1', metalness: 0.02, roughness: 0.72 })
+  const woodCeiling = new THREE.MeshPhysicalMaterial({ color: '#a97845', metalness: 0.02, roughness: 0.54, clearcoat: 0.22, clearcoatRoughness: 0.36 })
+  const roofFrame = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.14, roughness: 0.36 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
   const chrome = new THREE.MeshStandardMaterial({ color: '#b8c3c8', metalness: 0.86, roughness: 0.16 })
   const chairMaterials = ['#ef6f6c', '#f2b84b', '#62b879', '#4f9bd8', '#8b73d8', '#df78b8'].map((color) => (
@@ -907,11 +919,11 @@ function createInformationFacility(facility: StationFacility) {
   addRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
   addRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], white, 0.045)
   addRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], white, 0.045)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, roofCenterY, 0], white, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, roofCenterY, 0], white, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], white, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], softWhite, 0.04)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], roofFrame, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, roofCenterY, 0], roofFrame, 0.055)
+  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, roofCenterY, 0], roofFrame, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.055)
+  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], woodCeiling, 0.04)
 
   for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
   for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
@@ -1026,11 +1038,13 @@ function buildMetaverseStation(scene: THREE.Scene) {
   addEnvelopeWall([PERIMETER_WALL_THICKNESS, STATION_HEIGHT, STATION_DEPTH], [STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS / 2, STATION_HEIGHT / 2, 0])
   scene.add(createIntegratedTrainShell())
   for (const booth of BOOTHS) {
-    scene.add(createBooth(booth))
+    const builtBooth = createBooth(booth)
+    scene.add(builtBooth)
     if (booth.trainCar) {
       const entrance = createTrainDoor(booth)
       scene.add(entrance); animated.push(entrance)
     } else {
+      animated.push(builtBooth)
       scene.add(createBoothTurnstile(booth))
     }
   }
@@ -1064,7 +1078,9 @@ function buildMetaverseStation(scene: THREE.Scene) {
 
 function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const context = canvas.getContext('2d'); if (!context) return
-  const ratio = Math.min(window.devicePixelRatio || 1, 2); const size = Math.min(canvas.clientWidth, canvas.clientHeight)
+  const ratio = Math.min(window.devicePixelRatio || 1, 2)
+  const bounds = canvas.getBoundingClientRect()
+  const size = Math.max(1, Math.floor(Math.min(bounds.width, bounds.height || bounds.width)))
   canvas.width = Math.round(size * ratio); canvas.height = Math.round(size * ratio); context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
   const worldXToMap = (value: number) => ((value + STATION_WIDTH / 2) / STATION_WIDTH) * size
@@ -1213,6 +1229,8 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       const bob = walking && jump.height === 0 ? Math.sin(elapsed * (movement.sprint ? 13 : 8)) * (movement.sprint ? 0.035 : 0.018) : 0
       camera.position.set(player.x, 1.68 + jump.height + bob, player.z); camera.rotation.set(player.pitch, player.yaw, 0)
       for (const object of animated) {
+        const rotatingSculpture = object.userData.rotatingSculpture as THREE.Object3D | undefined
+        if (rotatingSculpture) rotatingSculpture.rotation.y = elapsed * 0.72
         const wings = object.userData.wings as THREE.Mesh[] | undefined
         if (wings) {
           const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.25
@@ -1318,7 +1336,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
               <svg viewBox="0 0 32 32" aria-hidden="true" style={{ transform: `rotate(${rotation}deg)` }}><path d="M16 3 3.5 15.5h7V29h11V15.5h7z" /></svg>
             </button>
           ))}
-          <button type="button" className="roadview__dpad-jump" aria-label="점프" onClick={requestJump}><Icon name="jump" /></button>
+          <button type="button" className="roadview__dpad-jump" aria-label="점프" onClick={requestJump}><span aria-hidden="true" /></button>
         </div>
         <div className="roadview__mobile-actions">
           <button type="button" aria-label="지도 열기" onClick={openMap}><Icon name="map" /><span>지도</span></button>
