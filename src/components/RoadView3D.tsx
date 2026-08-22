@@ -47,8 +47,8 @@ const RESTROOM_STALL_FRONT_Z = -1.32
 const RESTROOM_STALL_BACK_Z = -3.18
 const RESTROOM_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
-const RESTROOM_FLOOR_TOP_Y = 0.02
-const RESTROOM_INTERIOR_FLOOR_Y = 0.012
+const RESTROOM_INTERIOR_FLOOR_Y = 0.04
+const RESTROOM_CEILING_BOTTOM_Y = 4.75
 const RESTROOM_STALL_CENTERS = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
 const RESTROOM_STALL_PARTITIONS = [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875] as const
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
@@ -335,12 +335,12 @@ function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (reado
     [openingEdges[0][1], openingEdges[1][0]],
     [openingEdges[1][1], halfWidth],
   ] as const
+  const doorwayTop = doorwayBottom + doorwayHeight
   const parts = segments.map(([start, end]) => {
-    const geometry = new THREE.BoxGeometry(end - start, doorwayHeight, thickness)
-    geometry.translate((start + end) / 2, doorwayBottom + doorwayHeight / 2, frontZ)
+    const geometry = new THREE.BoxGeometry(end - start, doorwayTop, thickness)
+    geometry.translate((start + end) / 2, doorwayTop / 2, frontZ)
     return geometry
   })
-  const doorwayTop = doorwayBottom + doorwayHeight
   const header = new THREE.BoxGeometry(RESTROOM_WIDTH, wallHeight - doorwayTop, thickness)
   header.translate(0, doorwayTop + (wallHeight - doorwayTop) / 2, frontZ)
   parts.push(header)
@@ -598,8 +598,8 @@ function createRestroomFacility(facility: StationFacility) {
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
   const facade = new THREE.MeshStandardMaterial({ color: '#303b45', metalness: 0.12, roughness: 0.68 })
-  const tile = new THREE.MeshStandardMaterial({ color: '#f4f6f5', metalness: 0, roughness: 0.82 })
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: '#f4f6f5', metalness: 0, roughness: 0.82, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
+  const interiorSurface = new THREE.MeshBasicMaterial({ color: '#f4f6f5', side: THREE.DoubleSide })
+  const floorSurface = new THREE.MeshBasicMaterial({ color: '#f4f6f5', side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
@@ -610,22 +610,25 @@ function createRestroomFacility(facility: StationFacility) {
   const halfDepth = RESTROOM_DEPTH / 2
   const { interiorBackZ } = addIntegratedBoothShell(group, facade, RESTROOM_WIDTH, RESTROOM_DEPTH, true)
 
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.46, 4.45, 0.08], [0, 2.42, interiorBackZ + 0.05], tile, 0.02)
-  addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, 2.42, 0], tile, 0.02)
-  addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, 2.42, 0], tile, 0.02)
-  addRoundedBox(group, [0.18, 4.62, RESTROOM_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
-  const restroomFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH - 0.48, RESTROOM_DEPTH - 0.52), floorMaterial)
-  restroomFloor.rotation.x = -Math.PI / 2
-  restroomFloor.position.y = RESTROOM_INTERIOR_FLOOR_Y
-  restroomFloor.receiveShadow = false
-  group.add(restroomFloor)
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
+  const interiorWallHeight = RESTROOM_CEILING_BOTTOM_Y - RESTROOM_INTERIOR_FLOOR_Y
+  const interiorWallCenterY = RESTROOM_INTERIOR_FLOOR_Y + interiorWallHeight / 2
+  addRoundedBox(group, [RESTROOM_WIDTH - 0.46, interiorWallHeight, 0.08], [0, interiorWallCenterY, interiorBackZ + 0.05], interiorSurface, 0.02)
+  addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
+  addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
+  addRoundedBox(group, [0.18, interiorWallHeight, RESTROOM_DEPTH - 0.28], [0, interiorWallCenterY, -0.02], interiorSurface, 0.025)
+  const cleanFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH, RESTROOM_DEPTH), floorSurface)
+  cleanFloor.rotation.x = -Math.PI / 2
+  cleanFloor.position.y = RESTROOM_INTERIOR_FLOOR_Y
+  cleanFloor.renderOrder = 2
+  cleanFloor.receiveShadow = false
+  group.add(cleanFloor)
+  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], interiorSurface, 0.03)
 
   const doorwayWidth = RESTROOM_DOOR_WIDTH
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const frontZ = halfDepth + 0.02
-  addRestroomFacade(group, openingEdges, frontZ, facade, RESTROOM_FLOOR_TOP_Y, RESTROOM_DOOR_HEIGHT)
+  addRestroomFacade(group, openingEdges, frontZ, facade, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
 
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
@@ -634,7 +637,7 @@ function createRestroomFacility(facility: StationFacility) {
     const doorHeight = RESTROOM_DOOR_HEIGHT
     const hingedDoor = new THREE.Group()
     hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
-    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_FLOOR_TOP_Y + doorHeight / 2, 0], stallDoor, 0.02)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], stallDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
     panel.userData.disableCollisionWhenOpen = true
