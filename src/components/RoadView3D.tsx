@@ -43,6 +43,8 @@ const SIDE_GATE_X = SIDE_ZONE_X - BOOTH_DEPTH / 2
 const RESTROOM_ZONE_X = -(STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_DEPTH / 2)
 const RESTROOM_GATE_X = RESTROOM_ZONE_X + RESTROOM_DEPTH / 2
 const RESTROOM_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH / 2
+const RESTROOM_STALL_FRONT_Z = -1.32
+const RESTROOM_STALL_BACK_Z = -3.18
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - BOOTH_WIDTH / 2
 const TRAIN_CENTER_Z = -(STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - 2.96)
 const TRAIN_GATE_Z = TRAIN_CENTER_Z + 3
@@ -148,7 +150,7 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
         { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
-        { x1: zone.x - 3.5, x2: zone.x - 1.9, z1: zone.z - 6.1, z2: zone.z + 6.1 },
+        { x1: zone.x - 3.5, x2: zone.x - 1.25, z1: zone.z - 6.1, z2: zone.z + 6.1 },
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z + 0.22, z2: zone.z + 0.98 },
         { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
         { x1: zone.x - 1.4, x2: zone.x + 2.6, z1: zone.z + 5.45, z2: zone.z + 6.15 },
@@ -541,7 +543,7 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   const stallWidth = 1.05
   const doorWidth = stallWidth - 0.1
   const hingedDoor = new THREE.Group()
-  hingedDoor.position.set(x - doorWidth / 2, 0, -1.98)
+  hingedDoor.position.set(x - doorWidth / 2, 0, RESTROOM_STALL_FRONT_Z)
   const panel = addRoundedBox(hingedDoor, [doorWidth, 1.74, 0.07], [doorWidth / 2, 1.18, 0], door, 0.02)
   addRoundedBox(panel, [0.12, 0.08, 0.04], [doorWidth * 0.3, 0, 0.055], metal, 0.02)
   hingedDoor.userData.openRotation = 1.18
@@ -603,12 +605,14 @@ function createRestroomFacility(facility: StationFacility) {
 
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
-    const doorWidth = doorwayWidth - 0.14
+    const hingeSide = center < 0 ? -1 : 1
+    const doorWidth = doorwayWidth - 0.08
+    const doorHeight = 3.22
     const hingedDoor = new THREE.Group()
-    hingedDoor.position.set(center - doorWidth / 2, 0, frontZ + 0.2)
-    const panel = addRoundedBox(hingedDoor, [doorWidth, 3, 0.08], [doorWidth / 2, 1.7, 0], stallDoor, 0.025)
-    addRoundedBox(panel, [0.13, 0.09, 0.05], [doorWidth * 0.34, -0.16, 0.065], metal, 0.02)
-    hingedDoor.userData.openRotation = 1.24
+    hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, doorHeight / 2 + 0.04, 0], stallDoor, 0.025)
+    addRoundedBox(panel, [0.13, 0.09, 0.05], [-hingeSide * doorWidth * 0.34, -0.1, 0.065], metal, 0.02)
+    hingedDoor.userData.openRotation = -hingeSide * 1.24
     hingedDoor.userData.openDistance = 4.8
     group.add(hingedDoor)
     hingedDoors.push(hingedDoor)
@@ -617,19 +621,20 @@ function createRestroomFacility(facility: StationFacility) {
   for (const [index, direction] of [-1, 1].entries()) {
     const gender = index === 0 ? 'men' : 'women'
     const pictogramX = direction * 2.82
-    const labelX = direction * 4.45
     const label = new THREE.Mesh(
       new THREE.PlaneGeometry(2.45, 0.62),
       new THREE.MeshBasicMaterial({ map: makeRestroomLabelTexture(gender), transparent: true, side: THREE.DoubleSide }),
     )
-    label.position.set(labelX, 1.9, frontZ + 0.175); group.add(label)
+    label.position.set(pictogramX, 3.13, frontZ + 0.175); group.add(label)
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
-    pictogram.position.set(pictogramX, 1.9, frontZ + 0.178); group.add(pictogram)
+    pictogram.position.set(pictogramX, 1.86, frontZ + 0.178); group.add(pictogram)
   }
 
   const stallCenters = [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5] as const
+  const stallPartitionDepth = RESTROOM_STALL_FRONT_Z - RESTROOM_STALL_BACK_Z
+  const stallPartitionZ = (RESTROOM_STALL_FRONT_Z + RESTROOM_STALL_BACK_Z) / 2
   for (const x of [-4.875, -3.625, -2.375, -1.125, 1.125, 2.375, 3.625, 4.875]) {
-    addRoundedBox(group, [0.06, 2.08, 1.48], [x, 1.25, -2.72], partition, 0.015)
+    addRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, 1.25, stallPartitionZ], partition, 0.015)
   }
   for (const x of stallCenters) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
