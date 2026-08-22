@@ -147,6 +147,10 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: lowerDoorCenter + doorwayHalfWidth, z2: upperDoorCenter - doorwayHalfWidth },
         { x1: zone.gate.x - 0.2, x2: zone.gate.x + 0.2, z1: upperDoorCenter + doorwayHalfWidth, z2: zone.z + halfDepth },
         { x1: backX, x2: zone.gate.x + 0.05, z1: zone.z - 0.14, z2: zone.z + 0.14 },
+        { x1: zone.x - 3.5, x2: zone.x - 1.9, z1: zone.z - 6.1, z2: zone.z + 6.1 },
+        { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z + 0.22, z2: zone.z + 0.98 },
+        { x1: zone.x + 0.1, x2: zone.x + 2, z1: zone.z - 0.98, z2: zone.z - 0.22 },
+        { x1: zone.x - 1.4, x2: zone.x + 2.6, z1: zone.z + 5.45, z2: zone.z + 6.15 },
       ]
     }
     return [
@@ -288,29 +292,29 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
   return { interiorBackZ: -depth / 2 + wallThickness + 0.06, height }
 }
 
-function makeRestroomTileTexture() {
-  const canvas = document.createElement('canvas')
-  canvas.width = 512; canvas.height = 512
-  const context = canvas.getContext('2d')
-  if (!context) return new THREE.CanvasTexture(canvas)
-  context.fillStyle = '#bfc3c2'; context.fillRect(0, 0, canvas.width, canvas.height)
-  const rows = 10; const rowHeight = canvas.height / rows
-  for (let row = 0; row < rows; row += 1) {
-    const brickWidth = row % 3 === 0 ? 128 : 96
-    const offset = row % 2 === 0 ? -brickWidth / 2 : 0
-    for (let x = offset; x < canvas.width; x += brickWidth) {
-      const shade = 72 + ((row * 17 + x / brickWidth * 11) % 48)
-      context.fillStyle = `rgb(${shade},${shade + 5},${shade + 8})`
-      context.fillRect(x + 4, row * rowHeight + 4, brickWidth - 8, rowHeight - 8)
-      context.fillStyle = `rgba(255,255,255,${row % 2 === 0 ? 0.08 : 0.04})`
-      context.fillRect(x + 8, row * rowHeight + 8, brickWidth - 16, 5)
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas)
-  texture.colorSpace = THREE.SRGBColorSpace
-  texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping
-  texture.repeat.set(2.4, 1.6); texture.anisotropy = 4
-  return texture
+function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (readonly [number, number])[], frontZ: number, material: THREE.Material) {
+  const doorwayHeight = 3.5
+  const wallHeight = 5.16
+  const thickness = 0.3
+  const halfWidth = RESTROOM_WIDTH / 2
+  const segments = [
+    [-halfWidth, openingEdges[0][0]],
+    [openingEdges[0][1], openingEdges[1][0]],
+    [openingEdges[1][1], halfWidth],
+  ] as const
+  const parts = segments.map(([start, end]) => {
+    const geometry = new THREE.BoxGeometry(end - start, doorwayHeight, thickness)
+    geometry.translate((start + end) / 2, doorwayHeight / 2, frontZ)
+    return geometry
+  })
+  const header = new THREE.BoxGeometry(RESTROOM_WIDTH, wallHeight - doorwayHeight, thickness)
+  header.translate(0, doorwayHeight + (wallHeight - doorwayHeight) / 2, frontZ)
+  parts.push(header)
+  const geometry = mergeGeometries(parts, false)
+  parts.forEach((part) => part.dispose())
+  geometry.computeVertexNormals()
+  const facade = new THREE.Mesh(geometry, material)
+  facade.castShadow = true; facade.receiveShadow = true; parent.add(facade)
 }
 
 function makeRestroomLabelTexture(gender: 'men' | 'women') {
@@ -557,8 +561,8 @@ function addRestroomSink(parent: THREE.Object3D, wallX: number, direction: -1 | 
   addRoundedBox(parent, [0.68, 0.17, 0.66], [basinX, 0.92, z], ceramic, 0.08)
   addRoundedBox(parent, [0.18, 0.72, 0.18], [basinX, 0.49, z], metal, 0.04)
   addRoundedBox(parent, [0.06, 0.48, 0.72], [wallX + direction * 0.12, 2.02, z], mirror, 0.02)
-  addRoundedBox(parent, [0.07, 0.28, 0.07], [wallX + direction * 0.42, 1.24, z], metal, 0.025)
-  addRoundedBox(parent, [0.22, 0.06, 0.07], [wallX + direction * 0.5, 1.35, z], metal, 0.02)
+  addRoundedBox(parent, [0.08, 0.34, 0.08], [wallX + direction * 0.16, 1.28, z], metal, 0.025)
+  addRoundedBox(parent, [0.3, 0.07, 0.08], [wallX + direction * 0.31, 1.43, z], metal, 0.02)
 }
 
 function createRestroomFacility(facility: StationFacility) {
@@ -567,10 +571,11 @@ function createRestroomFacility(facility: StationFacility) {
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
   const facade = new THREE.MeshStandardMaterial({ color: '#303b45', metalness: 0.12, roughness: 0.68 })
-  const tile = new THREE.MeshStandardMaterial({ color: '#ffffff', map: makeRestroomTileTexture(), metalness: 0.04, roughness: 0.76 })
+  const tile = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92 })
   const floorMaterial = new THREE.MeshStandardMaterial({ color: '#596168', metalness: 0.06, roughness: 0.8 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
+  const entranceDoor = new THREE.MeshStandardMaterial({ color: '#dce2e5', metalness: 0.16, roughness: 0.48 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })
   const metal = new THREE.MeshStandardMaterial({ color: '#aebbc0', metalness: 0.82, roughness: 0.18 })
   const mirror = new THREE.MeshPhysicalMaterial({ color: '#bbdce4', metalness: 0.76, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.03 })
@@ -583,22 +588,27 @@ function createRestroomFacility(facility: StationFacility) {
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.1, 4.45, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, 2.42, 0], tile, 0.02)
   addRoundedBox(group, [0.18, 4.62, RESTROOM_DEPTH - 0.28], [0, 2.31, -0.02], tile, 0.025)
-  addRoundedBox(group, [halfWidth - 0.22, 0.1, RESTROOM_DEPTH - 0.5], [-halfWidth / 2, 0.05, 0], floorMaterial, 0.02)
-  addRoundedBox(group, [halfWidth - 0.22, 0.1, RESTROOM_DEPTH - 0.5], [halfWidth / 2, 0.05, 0], floorMaterial, 0.02)
+  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.1, RESTROOM_DEPTH - 0.5], [0, 0.05, 0], floorMaterial, 0.02)
   addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], new THREE.MeshStandardMaterial({ color: '#f4f6f5', roughness: 0.82 }), 0.03)
 
   const doorwayWidth = 1.7
-  const doorwayHeight = 3.5
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
-  const facadeSegments = [
-    [-halfWidth, openingEdges[0][0]],
-    [openingEdges[0][1], openingEdges[1][0]],
-    [openingEdges[1][1], halfWidth],
-  ] as const
-  const frontZ = halfDepth - 0.12
-  for (const [start, end] of facadeSegments) addRoundedBox(group, [end - start, doorwayHeight, 0.3], [(start + end) / 2, doorwayHeight / 2, frontZ], facade, 0.025)
-  addRoundedBox(group, [RESTROOM_WIDTH, 1.38, 0.3], [0, doorwayHeight + 0.69, frontZ], facade, 0.025)
+  const frontZ = halfDepth + 0.02
+  addRestroomFacade(group, openingEdges, frontZ, facade)
+
+  const slidingDoors: THREE.Mesh[] = []
+  for (const center of doorwayCenters) {
+    for (const direction of [-1, 1] as const) {
+      const closedX = center + direction * 0.43
+      const door = addRoundedBox(group, [0.78, 3.16, 0.1], [closedX, 1.58, frontZ + 0.2], entranceDoor, 0.025)
+      door.userData.closedX = closedX
+      door.userData.openX = center + direction * 1.18
+      slidingDoors.push(door)
+    }
+  }
+  group.userData.slidingDoors = slidingDoors
+  group.userData.restroomDoors = true
 
   for (const [index, x] of [-4.85, 4.85].entries()) {
     const gender = index === 0 ? 'men' : 'women'
@@ -606,9 +616,9 @@ function createRestroomFacility(facility: StationFacility) {
       new THREE.PlaneGeometry(2.5, 0.62),
       new THREE.MeshBasicMaterial({ map: makeRestroomLabelTexture(gender), transparent: true, side: THREE.DoubleSide }),
     )
-    label.position.set(x, 3.58, halfDepth + 0.055); group.add(label)
+    label.position.set(x, 3.58, frontZ + 0.175); group.add(label)
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 2.36), makeRestroomIconMaterial(gender))
-    pictogram.position.set(x, 1.96, halfDepth + 0.058); group.add(pictogram)
+    pictogram.position.set(x, 1.96, frontZ + 0.178); group.add(pictogram)
   }
 
   for (const x of [-5.5, -4.25, -3, -1.75, 1.75, 3, 4.25, 5.5]) addRestroomStall(group, x, partition, stallDoor, ceramic, metal)
@@ -618,8 +628,6 @@ function createRestroomFacility(facility: StationFacility) {
     addRestroomSink(group, 0.12, 1, z, ceramic, metal, mirror)
   }
   for (const z of [-0.5, 0.6, 1.7]) addRoundedBox(group, [0.72, 1.38, 0.08], [-5.78, 1.16, z], partition, 0.02)
-  addRoundedBox(group, [0.46, 0.66, 0.46], [-1.05, 0.34, -1.45], partition, 0.06)
-  addRoundedBox(group, [0.46, 0.66, 0.46], [1.05, 0.34, -1.45], partition, 0.06)
 
   for (const x of [-3.8, 3.8]) {
     for (const z of [-2.15, 0.1, 2.25]) {
@@ -684,7 +692,7 @@ function buildMetaverseStation(scene: THREE.Scene) {
   for (const facility of FACILITIES) {
     const builtFacility = createFacility(facility)
     scene.add(builtFacility)
-    if (builtFacility.userData.hingedDoor) animated.push(builtFacility)
+    if (builtFacility.userData.hingedDoor || builtFacility.userData.slidingDoors) animated.push(builtFacility)
   }
   const trackLength = 46
   const trackCenterX = -1
@@ -861,7 +869,8 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         }
         const slidingDoors = object.userData.slidingDoors as THREE.Mesh[] | undefined
         if (slidingDoors) {
-          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.75
+          const openDistance = object.userData.restroomDoors ? 5.2 : 2.75
+          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < openDistance
           slidingDoors.forEach((door) => {
             const closedX = door.userData.closedX as number
             const openX = door.userData.openX as number
