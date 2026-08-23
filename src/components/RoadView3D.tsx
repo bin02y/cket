@@ -65,6 +65,7 @@ const INFORMATION_DEPTH = RESTROOM_DEPTH
 const INFORMATION_ZONE_X = STATION_WIDTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_DEPTH / 2
 const INFORMATION_GATE_X = INFORMATION_ZONE_X - INFORMATION_DEPTH / 2
 const INFORMATION_ZONE_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - INFORMATION_WIDTH / 2
+const RESTROOM_EXTERIOR_GRAY = '#5a5b5b'
 const FACILITY_FRONT_Z = STATION_DEPTH / 2 - PERIMETER_WALL_THICKNESS - RESTROOM_WIDTH
 const FACILITY_ADJACENT_BOOTH_Z = FACILITY_FRONT_Z - BOOTH_WIDTH / 2
 const FACILITY_UPPER_BOOTH_Z = FACILITY_ADJACENT_BOOTH_Z - BOOTH_WIDTH
@@ -999,16 +1000,18 @@ function createBooth(zone: RoadViewBooth) {
   else if (zone.gate.side === 'west') group.rotation.y = -Math.PI / 2
   else if (zone.gate.side === 'north') group.rotation.y = Math.PI
   const boothWhite = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0.02, roughness: 0.4, clearcoat: 0.3, clearcoatRoughness: 0.28 })
+  const boothGray = new THREE.MeshStandardMaterial({ color: RESTROOM_EXTERIOR_GRAY, metalness: 0.1, roughness: 0.42 })
+  const titleBlock = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.14, roughness: 0.36 })
   const halfWidth = BOOTH_WIDTH / 2
   const halfDepth = BOOTH_DEPTH / 2
   const wallHeight = FACILITY_HEIGHT
 
   addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothWhite, 0.035)
-  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothWhite, 0.035)
-  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothWhite, 0.035)
-  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothWhite, 0.035)
-  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothWhite, 0.045)
-  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothWhite, 0.04)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothGray, 0.035)
+  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothGray, 0.035)
+  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothGray, 0.035)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothGray, 0.045)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], titleBlock, 0.04)
 
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(BOOTH_WIDTH - 0.36, 0.42),
@@ -1061,7 +1064,7 @@ function createRestroomFacility(facility: StationFacility) {
   const interiorSurface = new THREE.MeshStandardMaterial({ color: restroomLightGray, roughness: 0.72, side: THREE.DoubleSide })
   const exteriorWhite = new THREE.MeshPhysicalMaterial({ color: '#fbfbfa', metalness: 0.01, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.36 })
   const exteriorTrim = new THREE.MeshStandardMaterial({ color: '#d8d9d7', metalness: 0.04, roughness: 0.56 })
-  const charcoalFrame = new THREE.MeshStandardMaterial({ color: '#5a5b5b', metalness: 0.1, roughness: 0.42 })
+  const charcoalFrame = new THREE.MeshStandardMaterial({ color: RESTROOM_EXTERIOR_GRAY, metalness: 0.1, roughness: 0.42 })
   const charcoalInset = new THREE.MeshStandardMaterial({ color: '#737473', metalness: 0.08, roughness: 0.5 })
   const entranceDoor = new THREE.MeshPhysicalMaterial({ color: '#f7f7f5', metalness: 0.03, roughness: 0.4, clearcoat: 0.26, clearcoatRoughness: 0.34 })
   const floorSurface = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
@@ -1229,6 +1232,7 @@ function createInformationFacility(facility: StationFacility) {
   const halfWidth = INFORMATION_WIDTH / 2
   const halfDepth = INFORMATION_DEPTH / 2
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
+  const exteriorGray = new THREE.MeshStandardMaterial({ color: RESTROOM_EXTERIOR_GRAY, metalness: 0.1, roughness: 0.42 })
   const woodCeiling = new THREE.MeshPhysicalMaterial({ color: '#a97845', metalness: 0.02, roughness: 0.54, clearcoat: 0.22, clearcoatRoughness: 0.36 })
   const roofFrame = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.14, roughness: 0.36 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
@@ -1243,8 +1247,9 @@ function createInformationFacility(facility: StationFacility) {
   const roofCenterY = FACILITY_HEIGHT - 0.12
 
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
-  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], white, 0.045)
-  addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], white, 0.045)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], exteriorGray, 0.045)
+  addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], exteriorGray, 0.045)
+  addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [halfWidth - 0.11, wallHeight / 2, 0], exteriorGray, 0.045)
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [halfWidth - 0.17, roofCenterY, 0], roofFrame, 0.035)
