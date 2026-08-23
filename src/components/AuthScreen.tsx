@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent, type MouseEvent } from 'react'
 import type { AuthActionResult, AuthCredentials, SignUpDetails } from '../types'
-import { Icon } from './Icon'
 
 type AuthMode = 'login' | 'signup'
 
@@ -89,12 +88,8 @@ export function AuthScreen({ onLogin, onSignUp, onClose }: AuthScreenProps) {
 
   return (
     <div className="auth-dialog-backdrop" role="presentation" onMouseDown={closeOnBackdrop}>
-      <section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <button className="auth-dialog__close" type="button" aria-label="로그인 창 닫기" onClick={onClose}>×</button>
+      <section className="auth-dialog" role="dialog" aria-modal="true" aria-label="회원 인증">
         <div className="auth-panel">
-        <h2 id="auth-title">{mode === 'signup' ? '에코 여정을 시작해요' : '다시 만나 반가워요'}</h2>
-        <p>{mode === 'signup' ? '간편 가입 후 CKET TICKET과 나의 포인트를 기록할 수 있어요.' : '가입한 이메일로 CKET에 다시 로그인하세요.'}</p>
-
         <div className="auth-tabs" role="tablist" aria-label="인증 방식">
           <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => changeMode('signup')}>회원가입</button>
           <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => changeMode('login')}>로그인</button>
@@ -106,7 +101,7 @@ export function AuthScreen({ onLogin, onSignUp, onClose }: AuthScreenProps) {
           <label><span>비밀번호</span><input name="password" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} placeholder="6자 이상 입력해 주세요" /></label>
           <p className="auth-error" role="alert" aria-live="polite">{error}</p>
           {notice ? <p className="auth-notice" role="status">{notice}</p> : null}
-          <button className="auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? '연결 중...' : mode === 'signup' ? '가입' : '로그인'} {!isSubmitting ? <Icon name="arrow" /> : null}</button>
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? '연결 중...' : mode === 'signup' ? '가입' : '로그인'}</button>
         </form>
         </div>
       </section>
