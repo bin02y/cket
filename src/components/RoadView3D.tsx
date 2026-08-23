@@ -1163,14 +1163,16 @@ function createRestroomFacility(facility: StationFacility) {
   }
 
   for (const center of doorwayCenters) {
-    const doorFrameHeight = RESTROOM_DOOR_HEIGHT + 0.2
+    const doorFrameBottomY = 0.2
+    const doorFrameTopY = RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT + 0.2
+    const doorFrameHeight = doorFrameTopY - doorFrameBottomY
     addNonShadowingRectFrame(
       group,
       doorwayWidth + 0.2,
       doorFrameHeight,
       0.12,
       0.13,
-      [center, RESTROOM_INTERIOR_FLOOR_Y + doorFrameHeight / 2, facadeFrontZ - 0.047],
+      [center, doorFrameBottomY + doorFrameHeight / 2, facadeFrontZ - 0.047],
       exteriorTrim,
     )
   }
@@ -1423,7 +1425,9 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const ratio = Math.min(window.devicePixelRatio || 1, 2)
   const bounds = canvas.getBoundingClientRect()
   const size = Math.max(1, Math.floor(Math.min(bounds.width, bounds.height || bounds.width)))
-  canvas.width = Math.round(size * ratio); canvas.height = Math.round(size * ratio); context.setTransform(ratio, 0, 0, ratio, 0, 0)
+  const pixelWidth = Math.round(size * ratio); const pixelHeight = Math.round(size * ratio)
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) { canvas.width = pixelWidth; canvas.height = pixelHeight }
+  context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
   const worldXToMap = (value: number) => ((value + STATION_WIDTH / 2) / STATION_WIDTH) * size
   const worldZToMap = (value: number) => ((value + STATION_DEPTH / 2) / STATION_DEPTH) * size
@@ -1536,27 +1540,26 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     let renderer: THREE.WebGLRenderer
     try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }) } catch { setRenderError(true); return }
     renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.22
-    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.enabled = false
     const scene = new THREE.Scene(); scene.background = new THREE.Color('#ffffff'); scene.fog = new THREE.Fog('#ffffff', 40, 100)
     const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 120); camera.rotation.order = 'YXZ'
     scene.add(new THREE.HemisphereLight('#ffffff', '#ffffff', 2.25))
-    const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024)
-    sun.shadow.bias = -0.00015; sun.shadow.normalBias = 0.035
-    sun.shadow.camera.left = -36; sun.shadow.camera.right = 36; sun.shadow.camera.top = 36; sun.shadow.camera.bottom = -36; scene.add(sun)
+    const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = false; scene.add(sun)
     const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = jumpRef.current
     jump.height = 0; jump.velocity = 0
     const collisionDoors = animated.flatMap((object) => (object.userData.collisionDoors as THREE.Mesh[] | undefined) ?? [])
-    let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
+    let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0; let renderedMapCanvas: HTMLCanvasElement | null = null
     const animatedWorldPosition = new THREE.Vector3()
     const animatedLocalPlayerPosition = new THREE.Vector3()
     const resize = () => {
       const bounds = canvas.getBoundingClientRect()
       const width = Math.max(1, Math.round(bounds.width))
       const height = Math.max(1, Math.round(bounds.height))
-      const pixelRatioLimit = width < 720 ? 1.35 : 1.65
+      const pixelRatioLimit = width < 720 ? 1 : 1.25
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioLimit))
       renderer.setSize(width, height, false)
       camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix()
+      renderedMapCanvas = null
     }
     const resizeTarget = canvas.parentElement ?? canvas
     const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(resizeTarget); resize()
@@ -1642,7 +1645,10 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         if (!passedBooth) lastGateRef.current = null
         else if (lastGateRef.current !== passedBooth.id) { lastGateRef.current = passedBooth.id; stopMovement(); setSelectedBoothImage(boothImageForVisit(passedBooth)); setSelectedBooth(passedBooth); claimGateReward(passedBooth) }
       }
-      if (overlayRef.current.mapOpen && mapRef.current) drawMap(mapRef.current, player)
+      if (overlayRef.current.mapOpen && mapRef.current && renderedMapCanvas !== mapRef.current) {
+        drawMap(mapRef.current, player)
+        renderedMapCanvas = mapRef.current
+      } else if (!overlayRef.current.mapOpen) renderedMapCanvas = null
       renderer.render(scene, camera); animationFrame = requestAnimationFrame(frame)
     }
     window.addEventListener('keydown', handleKeyDown); window.addEventListener('keyup', handleKeyUp); window.addEventListener('blur', stopMovement)
