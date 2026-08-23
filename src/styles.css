@@ -193,8 +193,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .profile-account-card { align-items: center; flex-direction: row; gap: 7px; padding: 13px 12px; }
   .profile-account-card__info { flex: 1 1 auto; min-width: 0; gap: 6px !important; }
   .profile-account-card__info > span { flex: 0 0 auto; width: 32px !important; height: 32px !important; }
-  .profile-account-card__info p { gap: 0; }
-  .profile-account-card__info small { display: none; }
+  .profile-account-card__info p { flex: 1 1 auto; gap: 6px; overflow: hidden; }
+  .profile-account-card__info small { display: block; flex: 1 1 auto; }
   .profile-account-actions { gap: 5px; }
   .profile-account-delete { min-height: 34px; padding: 0 9px; font-size: 8px; white-space: nowrap; }
   .account-dialog { padding: 35px 22px 24px; }
@@ -252,6 +252,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .cket-ticket__points { font-size: clamp(7.5px,2.2vw,9px); }
   .cket-ticket__stub i { height: clamp(40px,11vw,49px); transform: none; }
   .cket-ticket__cutout { width: clamp(14px,4vw,17px); height: clamp(10px,2.8vw,12px); transform: translateX(-50%) scaleX(.76); }
+  .cket-ticket__cutout-line { stroke-width: 1px; }
   .cket-ticket__cutout--top { top: -1px; }
   .cket-ticket__cutout--bottom { bottom: -1px; transform: translateX(-50%) rotate(180deg) scaleX(.76); }
 }
@@ -506,6 +507,12 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .roadview__panel.roadview__map-panel { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
 .roadview__booth-info .roadview__booth-image { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
 .roadview__booth-info .roadview__gate-reward { width: 100%; margin: 12px 0 0; border-radius: 0; }
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  .roadview__booth-info .roadview__booth-image--contain,
+  .roadview__booth-info .roadview__booth-video { width: min(100%,345px); margin-right: auto; margin-left: auto; }
+  .roadview__booth-info .roadview__booth-image--contain { background: transparent; }
+  .roadview__booth-image--contain img { width: 100%; }
+}
 /* Goods search, saved items, cart, and order history */
 .shop-catalog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 21px; }
 .shop-catalog-heading__main { display: flex; flex: 1 1 auto; align-items: center; min-width: 0; }
