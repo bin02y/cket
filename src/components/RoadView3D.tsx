@@ -346,6 +346,19 @@ function makeInformationSignTexture() {
   return texture
 }
 
+function makeRestroomDoorLabelTexture(label: 'WOMEN' | 'MEN') {
+  const canvas = document.createElement('canvas')
+  canvas.width = 384; canvas.height = 96
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#545756'; context.font = '700 44px Arial, sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'
+  context.fillText(label, canvas.width / 2, canvas.height / 2)
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
+  return texture
+}
+
 function makeTurnstileArrowTexture() {
   const canvas = document.createElement('canvas')
   canvas.width = 256; canvas.height = 256
@@ -815,6 +828,7 @@ function createRestroomFacility(facility: StationFacility) {
   const exteriorWhite = new THREE.MeshPhysicalMaterial({ color: '#fbfbfa', metalness: 0.01, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.36 })
   const exteriorTrim = new THREE.MeshStandardMaterial({ color: '#d8d9d7', metalness: 0.04, roughness: 0.56 })
   const charcoalFrame = new THREE.MeshStandardMaterial({ color: '#5a5b5b', metalness: 0.1, roughness: 0.42 })
+  const charcoalInset = new THREE.MeshStandardMaterial({ color: '#737473', metalness: 0.08, roughness: 0.5 })
   const entranceDoor = new THREE.MeshPhysicalMaterial({ color: '#f7f7f5', metalness: 0.03, roughness: 0.4, clearcoat: 0.26, clearcoatRoughness: 0.34 })
   const floorSurface = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
@@ -853,11 +867,28 @@ function createRestroomFacility(facility: StationFacility) {
   addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], charcoalFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [halfWidth - 0.17, roofCenterY, 0], charcoalFrame, 0.035)
   addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.2, 0.22], [0, 0.1, -halfDepth + 0.11], charcoalFrame, 0.025)
-  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.2, 0.16], [0, 0.1, frontZ + 0.16], charcoalFrame, 0.025)
   addNonShadowingRoundedBox(group, [0.22, 0.2, RESTROOM_DEPTH], [-halfWidth + 0.11, 0.1, 0], charcoalFrame, 0.025)
   addNonShadowingRoundedBox(group, [0.22, 0.2, RESTROOM_DEPTH], [halfWidth - 0.11, 0.1, 0], charcoalFrame, 0.025)
-  for (const x of [-halfWidth + 0.22, halfWidth - 0.22]) for (const z of [-halfDepth + 0.22, frontZ + 0.14]) {
-    addNonShadowingRoundedBox(group, [0.44, FACILITY_HEIGHT - 0.42, 0.44], [x, (FACILITY_HEIGHT - 0.42) / 2 + 0.2, z], charcoalFrame, 0.025)
+  const pilasterHeight = FACILITY_HEIGHT - 0.42
+  const pilasterCenterY = pilasterHeight / 2 + 0.2
+  for (const x of [-halfWidth + 0.22, halfWidth - 0.22]) {
+    addNonShadowingRoundedBox(group, [0.44, pilasterHeight, 0.44], [x, pilasterCenterY, -halfDepth + 0.22], charcoalFrame, 0.025)
+  }
+  const frontPilasterWidth = 0.68
+  const frontPilasterX = halfWidth - frontPilasterWidth / 2
+  const frontPilasterZ = frontZ + 0.14
+  for (const x of [-frontPilasterX, frontPilasterX]) {
+    addNonShadowingRoundedBox(group, [frontPilasterWidth, pilasterHeight, 0.38], [x, pilasterCenterY, frontPilasterZ], charcoalFrame, 0.025)
+  }
+
+  const facadeInnerLeft = -halfWidth + frontPilasterWidth
+  const facadeInnerRight = halfWidth - frontPilasterWidth
+  for (const [start, end] of [
+    [facadeInnerLeft, openingEdges[0][0]],
+    [openingEdges[0][1], openingEdges[1][0]],
+    [openingEdges[1][1], facadeInnerRight],
+  ] as const) {
+    addNonShadowingRoundedBox(group, [end - start, 0.2, 0.16], [(start + end) / 2, 0.1, frontZ + 0.16], charcoalFrame, 0.025)
   }
 
   const frontPanelZ = frontZ + 0.18
@@ -867,11 +898,26 @@ function createRestroomFacility(facility: StationFacility) {
     addNonShadowingRoundedBox(group, [width, 0.05, 0.035], [centerX, centerY - height / 2, frontPanelZ], exteriorTrim, 0.012)
     addNonShadowingRoundedBox(group, [width, 0.05, 0.035], [centerX, centerY + height / 2, frontPanelZ], exteriorTrim, 0.012)
   }
-  for (const [centerX, width] of [[-2.85, 1.35], [0, 1.12], [2.85, 1.35]] as const) {
+  for (const [centerX, width] of [[-2.62, 1.02], [0, 1.12], [2.62, 1.02]] as const) {
     addFrontPanelFrame(centerX, 1.3, width, 1.78)
     addFrontPanelFrame(centerX, 3.78, width, 1.38)
   }
   for (const centerX of doorwayCenters) addFrontPanelFrame(centerX, 3.78, doorwayWidth - 0.2, 1.38)
+
+  const pilasterFaceZ = frontPilasterZ + 0.205
+  const addPilasterInset = (centerX: number, centerY: number, height: number) => {
+    const width = 0.42
+    const edge = 0.035
+    addNonShadowingRoundedBox(group, [edge, height, 0.025], [centerX - width / 2, centerY, pilasterFaceZ], charcoalInset, 0.008)
+    addNonShadowingRoundedBox(group, [edge, height, 0.025], [centerX + width / 2, centerY, pilasterFaceZ], charcoalInset, 0.008)
+    addNonShadowingRoundedBox(group, [width, edge, 0.025], [centerX, centerY - height / 2, pilasterFaceZ], charcoalInset, 0.008)
+    addNonShadowingRoundedBox(group, [width, edge, 0.025], [centerX, centerY + height / 2, pilasterFaceZ], charcoalInset, 0.008)
+  }
+  for (const x of [-frontPilasterX, frontPilasterX]) {
+    addPilasterInset(x, 1.24, 1.42)
+    addPilasterInset(x, 2.62, 0.82)
+    addPilasterInset(x, 4.02, 1.06)
+  }
 
   const addSidePanelFrame = (side: -1 | 1, centerZ: number, centerY: number, width: number, height: number) => {
     const x = side * (halfWidth + 0.018)
@@ -886,18 +932,29 @@ function createRestroomFacility(facility: StationFacility) {
   }
 
   for (const center of doorwayCenters) {
-    addNonShadowingRoundedBox(group, [0.1, RESTROOM_DOOR_HEIGHT + 0.18, 0.13], [center - doorwayWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT / 2, frontZ + 0.18], exteriorTrim, 0.02)
-    addNonShadowingRoundedBox(group, [0.1, RESTROOM_DOOR_HEIGHT + 0.18, 0.13], [center + doorwayWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT / 2, frontZ + 0.18], exteriorTrim, 0.02)
-    addNonShadowingRoundedBox(group, [doorwayWidth + 0.2, 0.1, 0.13], [center, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT + 0.04, frontZ + 0.18], exteriorTrim, 0.02)
+    const jambHeight = RESTROOM_DOOR_HEIGHT + 0.12
+    const jambCenterY = RESTROOM_INTERIOR_FLOOR_Y + jambHeight / 2
+    addNonShadowingRoundedBox(group, [0.1, jambHeight, 0.13], [center - doorwayWidth / 2, jambCenterY, frontZ + 0.18], exteriorTrim, 0.02)
+    addNonShadowingRoundedBox(group, [0.1, jambHeight, 0.13], [center + doorwayWidth / 2, jambCenterY, frontZ + 0.18], exteriorTrim, 0.02)
+    addNonShadowingRoundedBox(group, [doorwayWidth + 0.2, 0.1, 0.13], [center, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT + 0.05, frontZ + 0.18], exteriorTrim, 0.02)
+    addNonShadowingRoundedBox(group, [doorwayWidth - 0.08, 0.06, 0.16], [center, RESTROOM_INTERIOR_FLOOR_Y + 0.03, frontZ + 0.17], exteriorTrim, 0.015)
   }
 
   const sconceLight = new THREE.MeshBasicMaterial({ color: '#fff7ca' })
-  for (const x of [-halfWidth + 0.24, halfWidth - 0.24]) {
-    addNonShadowingRoundedBox(group, [0.58, 0.07, 0.13], [x, 3.62, frontZ + 0.22], charcoalFrame, 0.018)
-    addNonShadowingRoundedBox(group, [0.34, 0.025, 0.04], [x, 3.56, frontZ + 0.29], sconceLight, 0.01)
+  const sconceGlow = new THREE.MeshBasicMaterial({ color: '#fff1a0', transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  const glowShape = new THREE.Shape()
+  glowShape.moveTo(-0.035, 0.3); glowShape.lineTo(0.035, 0.3); glowShape.lineTo(0.2, -0.34); glowShape.lineTo(-0.2, -0.34); glowShape.closePath()
+  const glowGeometry = new THREE.ShapeGeometry(glowShape)
+  for (const x of [-frontPilasterX, frontPilasterX]) {
+    addNonShadowingRoundedBox(group, [0.5, 0.07, 0.13], [x, 3.92, pilasterFaceZ + 0.075], charcoalFrame, 0.018)
+    addNonShadowingRoundedBox(group, [0.34, 0.025, 0.04], [x, 3.86, pilasterFaceZ + 0.15], sconceLight, 0.01)
+    const glow = new THREE.Mesh(glowGeometry, sconceGlow)
+    glow.position.set(x, 3.55, pilasterFaceZ + 0.025)
+    glow.castShadow = false; glow.receiveShadow = false; glow.renderOrder = 4
+    group.add(glow)
     const spot = new THREE.SpotLight('#fff3b0', 1.05, 4.2, Math.PI / 5.5, 0.55, 2)
-    spot.position.set(x, 3.5, frontZ + 0.32)
-    spot.target.position.set(x, 2.28, frontZ + 1.1)
+    spot.position.set(x, 3.82, pilasterFaceZ + 0.18)
+    spot.target.position.set(x, 2.64, frontZ + 1.1)
     spot.castShadow = false
     group.add(spot, spot.target)
   }
@@ -917,6 +974,12 @@ function createRestroomFacility(facility: StationFacility) {
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 1.28), makeRestroomIconMaterial(gender))
     pictogram.position.set(0, -0.08, 0.071)
     panel.add(pictogram)
+    const doorLabel = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.48, 0.12),
+      new THREE.MeshBasicMaterial({ map: makeRestroomDoorLabelTexture(gender === 'women' ? 'WOMEN' : 'MEN'), transparent: true, depthWrite: false }),
+    )
+    doorLabel.position.set(0.27, doorHeight / 2 - 0.17, 0.073)
+    panel.add(doorLabel)
     hingedDoor.userData.openRotation = -hingeSide * 1.55
     hingedDoor.userData.openDistance = 1.45
     hingedDoor.userData.collisionPanel = panel
