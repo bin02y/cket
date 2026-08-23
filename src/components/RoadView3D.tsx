@@ -137,10 +137,10 @@ const BOOTH_TURNSTILE_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => 
   ]
 })
 const BOOTH_SCULPTURE_COLLIDERS: readonly Collider[] = BOOTHS.filter((booth) => !booth.trainCar).map((booth) => ({
-  x1: booth.x - 0.82,
-  x2: booth.x + 0.82,
-  z1: booth.z - 0.82,
-  z2: booth.z + 0.82,
+  x1: booth.x - 1.38,
+  x2: booth.x + 1.38,
+  z1: booth.z - 1.38,
+  z2: booth.z + 1.38,
 }))
 const BOOTH_IMAGES: Readonly<Partial<Record<number, BoothImage>>> = {
   1: { src: boothOneImage, alt: '녹는 빙하 위에서 펭귄을 구하는 1번 부스 안내 이미지' },
@@ -179,6 +179,21 @@ function zoneSize(zone: RoadViewBooth | StationFacility) {
   return { width: BOOTH_WIDTH, depth: BOOTH_DEPTH }
 }
 
+function localRectToWorldCollider(zone: RoadViewBooth | StationFacility, localX1: number, localX2: number, localZ1: number, localZ2: number): Collider {
+  const corners = [
+    [localX1, localZ1], [localX1, localZ2], [localX2, localZ1], [localX2, localZ2],
+  ] as const
+  const worldPoints = corners.map(([localX, localZ]) => {
+    if (zone.gate.side === 'east') return [zone.x + localZ, zone.z - localX] as const
+    if (zone.gate.side === 'west') return [zone.x - localZ, zone.z + localX] as const
+    if (zone.gate.side === 'north') return [zone.x - localX, zone.z - localZ] as const
+    return [zone.x + localX, zone.z + localZ] as const
+  })
+  const worldXs = worldPoints.map(([x]) => x)
+  const worldZs = worldPoints.map(([, z]) => z)
+  return { x1: Math.min(...worldXs), x2: Math.max(...worldXs), z1: Math.min(...worldZs), z2: Math.max(...worldZs) }
+}
+
 const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
   const size = zoneSize(zone)
   const halfWidth = size.width / 2
@@ -192,9 +207,9 @@ const COLLIDERS: readonly Collider[] = [...ZONES.flatMap((zone) => {
     ]
     if (zone.gateCode === 'F02') return [
       ...shellWalls,
-      { x1: zone.x - 2.8, x2: zone.x - 1.55, z1: zone.z + 0.7, z2: zone.z + 3.8 },
-      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z - 3.7, z2: zone.z - 1.4 },
-      { x1: zone.x, x2: zone.x + 1.1, z1: zone.z + 1.4, z2: zone.z + 3.7 },
+      localRectToWorldCollider(zone, 0.85, 3.75, 2.62, 3.48),
+      localRectToWorldCollider(zone, -3.45, -0.85, -1.75, 0.65),
+      localRectToWorldCollider(zone, 0.85, 3.45, -1.75, 0.65),
     ]
     if (zone.gateCode === 'F01') {
       const doorwayOffset = 1.35
@@ -641,8 +656,11 @@ function createTrainDoor(zone: RoadViewBooth) {
     addRoundedBox(door, [0.78, 1.12, 0.05], [0, TRAIN_WINDOW_CENTER_Y - door.position.y, 0.1], windowMaterial, 0.05)
     door.userData.closedX = x
     door.userData.openX = Math.sign(x) * 2.3
+    door.userData.collisionWidth = 1.5
+    door.userData.collisionDepth = 0.16
   }
   group.userData.slidingDoors = [leftDoor, rightDoor]
+  group.userData.collisionDoors = [leftDoor, rightDoor]
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(3.05, 1.07),
     new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
@@ -796,22 +814,31 @@ function createBoothSculpture(boothId: number) {
   base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true; group.add(base)
 
   if (boothId === 1) {
-    const black = new THREE.MeshStandardMaterial({ color: '#172731', metalness: 0.04, roughness: 0.58 })
-    const white = new THREE.MeshPhysicalMaterial({ color: '#f9fcfd', metalness: 0.02, roughness: 0.34, clearcoat: 0.28 })
-    const orange = new THREE.MeshStandardMaterial({ color: '#f2a13b', metalness: 0.02, roughness: 0.5 })
-    addSculptureSphere(group, 0.78, [0.78, 1.18, 0.7], [0, 1.18, 0], black)
-    addSculptureSphere(group, 0.58, [1, 0.9, 0.92], [0, 2.05, 0.02], black)
-    addSculptureSphere(group, 0.53, [0.62, 0.92, 0.72], [0, 1.2, 0.5], white)
-    addSculptureSphere(group, 0.14, [1, 0.7, 0.7], [-0.2, 2.1, 0.5], white)
-    addSculptureSphere(group, 0.14, [1, 0.7, 0.7], [0.2, 2.1, 0.5], white)
-    addSculptureSphere(group, 0.04, [1, 1, 0.55], [-0.2, 2.12, 0.61], black)
-    addSculptureSphere(group, 0.04, [1, 1, 0.55], [0.2, 2.12, 0.61], black)
-    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.36, 4), orange)
-    beak.rotation.x = Math.PI / 2; beak.rotation.z = Math.PI / 4; beak.position.set(0, 1.92, 0.68); group.add(beak)
-    for (const direction of [-1, 1]) {
-      const wing = addSculptureSphere(group, 0.55, [0.28, 1.12, 0.32], [direction * 0.58, 1.22, 0], black)
-      wing.rotation.z = -direction * 0.28
-      addSculptureSphere(group, 0.3, [1.2, 0.28, 1.5], [direction * 0.25, 0.42, 0.23], orange)
+    const black = new THREE.MeshPhysicalMaterial({ color: '#17232a', metalness: 0.02, roughness: 0.42, clearcoat: 0.32, clearcoatRoughness: 0.3 })
+    const white = new THREE.MeshPhysicalMaterial({ color: '#fffefa', metalness: 0.01, roughness: 0.38, clearcoat: 0.24, clearcoatRoughness: 0.34 })
+    const orange = new THREE.MeshPhysicalMaterial({ color: '#f1a53b', metalness: 0.01, roughness: 0.4, clearcoat: 0.28 })
+    const blush = new THREE.MeshPhysicalMaterial({ color: '#ef9d9d', metalness: 0, roughness: 0.52, transparent: true, opacity: 0.82 })
+    const eyeHighlight = new THREE.MeshBasicMaterial({ color: '#ffffff' })
+
+    addSculptureSphere(group, 0.76, [0.84, 1.17, 0.72], [0, 1.18, 0], black)
+    addSculptureSphere(group, 0.6, [1, 0.92, 0.9], [0, 2.02, 0.04], black)
+    addSculptureSphere(group, 0.58, [0.66, 0.95, 0.32], [0, 1.22, 0.55], white)
+    addSculptureSphere(group, 0.4, [1.02, 0.72, 0.28], [0, 2.03, 0.53], white)
+    for (const direction of [-1, 1] as const) {
+      const wing = addSculptureSphere(group, 0.53, [0.27, 1.08, 0.38], [direction * 0.59, 1.28, 0.02], black)
+      wing.rotation.z = -direction * 0.3
+      const eye = addSculptureSphere(group, 0.063, [0.88, 1.16, 0.68], [direction * 0.19, 2.14, 0.64], black)
+      eye.rotation.z = direction * 0.08
+      addSculptureSphere(group, 0.018, [1, 1, 0.6], [direction * 0.176, 2.166, 0.684], eyeHighlight)
+      addSculptureSphere(group, 0.055, [1.2, 0.62, 0.32], [direction * 0.3, 1.98, 0.65], blush)
+      const foot = addSculptureSphere(group, 0.29, [1.28, 0.3, 0.74], [direction * 0.27, 0.39, 0.25], orange)
+      foot.rotation.y = direction * 0.12
+    }
+    addSculptureSphere(group, 0.15, [1.25, 0.45, 0.72], [0, 1.98, 0.72], orange)
+    addSculptureSphere(group, 0.1, [1.15, 0.34, 0.62], [0, 1.91, 0.73], orange)
+    for (const [x, rotation] of [[-0.11, -0.28], [0, 0], [0.11, 0.28]] as const) {
+      const tuft = addSculptureSphere(group, 0.11, [0.32, 1, 0.35], [x, 2.58, 0.02], black)
+      tuft.rotation.z = rotation
     }
   } else if (boothId === 3) {
     const paperLight = new THREE.MeshStandardMaterial({ color: '#fffef8', metalness: 0.01, roughness: 0.72, side: THREE.DoubleSide })
@@ -889,16 +916,48 @@ function createBoothSculpture(boothId: number) {
       fanAssembly.add(new THREE.Mesh(new THREE.TubeGeometry(strandCurve, 16, 0.008, 7, false), cord))
     }
   } else if (boothId === 4) {
-    const fur = new THREE.MeshPhysicalMaterial({ color: '#f4f7f6', metalness: 0.01, roughness: 0.52, clearcoat: 0.18 })
-    const dark = new THREE.MeshStandardMaterial({ color: '#1f2b30', metalness: 0.02, roughness: 0.5 })
-    addSculptureSphere(group, 0.82, [1.15, 0.82, 0.68], [0, 1.05, 0], fur)
-    addSculptureSphere(group, 0.58, [1, 0.92, 0.92], [0, 1.82, 0.28], fur)
-    addSculptureSphere(group, 0.2, [1, 1, 0.72], [-0.37, 2.18, 0.23], fur)
-    addSculptureSphere(group, 0.2, [1, 1, 0.72], [0.37, 2.18, 0.23], fur)
-    addSculptureSphere(group, 0.28, [1.08, 0.7, 0.75], [0, 1.68, 0.78], fur)
-    addSculptureSphere(group, 0.09, [1, 0.72, 0.65], [0, 1.72, 0.98], dark)
-    for (const x of [-0.22, 0.22]) addSculptureSphere(group, 0.045, [1, 1, 0.55], [x, 1.94, 0.78], dark)
-    for (const x of [-0.52, 0.52]) addSculptureSphere(group, 0.3, [0.72, 1.35, 0.75], [x, 0.52, 0.16], fur)
+    const fur = new THREE.MeshPhysicalMaterial({ color: '#e3e9e7', metalness: 0.01, roughness: 0.48, clearcoat: 0.14, clearcoatRoughness: 0.42 })
+    const muzzle = new THREE.MeshPhysicalMaterial({ color: '#f3f0e7', metalness: 0, roughness: 0.5, clearcoat: 0.12 })
+    const innerEar = new THREE.MeshStandardMaterial({ color: '#c8cecc', metalness: 0, roughness: 0.66 })
+    const dark = new THREE.MeshPhysicalMaterial({ color: '#292c2e', metalness: 0.04, roughness: 0.34, clearcoat: 0.38 })
+    const eyeHighlight = new THREE.MeshBasicMaterial({ color: '#ffffff' })
+
+    addSculptureSphere(group, 0.8, [0.9, 1.13, 0.76], [0, 1.16, 0], fur)
+    addSculptureSphere(group, 0.64, [1, 0.92, 0.91], [0, 2.03, 0.08], fur)
+    addSculptureSphere(group, 0.19, [1, 1, 0.72], [-0.44, 2.47, 0.02], fur)
+    addSculptureSphere(group, 0.19, [1, 1, 0.72], [0.44, 2.47, 0.02], fur)
+    addSculptureSphere(group, 0.105, [1, 1, 0.5], [-0.44, 2.47, 0.145], innerEar)
+    addSculptureSphere(group, 0.105, [1, 1, 0.5], [0.44, 2.47, 0.145], innerEar)
+    addSculptureSphere(group, 0.32, [1.1, 0.7, 0.58], [0, 1.91, 0.59], muzzle)
+    addSculptureSphere(group, 0.13, [1.3, 0.72, 0.72], [0, 2.02, 0.79], dark)
+    for (const direction of [-1, 1] as const) {
+      const eye = addSculptureSphere(group, 0.065, [0.85, 1.2, 0.65], [direction * 0.22, 2.18, 0.65], dark)
+      eye.rotation.z = direction * 0.06
+      addSculptureSphere(group, 0.018, [1, 1, 0.5], [direction * 0.207, 2.207, 0.695], eyeHighlight)
+      const arm = addSculptureSphere(group, 0.44, [0.39, 1.03, 0.46], [direction * 0.65, 1.28, 0.16], fur)
+      arm.rotation.z = direction * 0.3
+      addSculptureSphere(group, 0.34, [0.72, 0.42, 0.78], [direction * 0.32, 0.43, 0.17], fur)
+
+      const eyebrowCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(direction * 0.34, 2.38, 0.65),
+        new THREE.Vector3(direction * 0.23, 2.42, 0.69),
+        new THREE.Vector3(direction * 0.12, 2.39, 0.67),
+      ])
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(eyebrowCurve, 14, 0.018, 7, false), dark))
+      const smileCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 1.91, 0.79),
+        new THREE.Vector3(direction * 0.11, 1.84, 0.78),
+        new THREE.Vector3(direction * 0.23, 1.88, 0.72),
+      ])
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(smileCurve, 14, 0.013, 7, false), dark))
+    }
+    const mouthCenterCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 1.97, 0.79),
+      new THREE.Vector3(0, 1.9, 0.81),
+      new THREE.Vector3(0, 1.84, 0.78),
+    ])
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(mouthCenterCurve, 10, 0.013, 7, false), dark))
+    addSculptureSphere(group, 0.14, [1, 0.8, 0.85], [0, 1.02, -0.66], fur)
   } else {
     const earthMaterial = new THREE.MeshPhysicalMaterial({ map: makeEarthTexture(), metalness: 0.02, roughness: 0.42, clearcoat: 0.34, clearcoatRoughness: 0.24 })
     const atmosphereMaterial = new THREE.MeshPhysicalMaterial({ color: '#bcecff', transparent: true, opacity: 0.13, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.08, side: THREE.DoubleSide, depthWrite: false })
@@ -971,7 +1030,9 @@ function addRestroomStall(parent: THREE.Object3D, x: number, door: THREE.Materia
   panel.userData.collisionWidth = doorWidth
   panel.userData.collisionDepth = 0.07
   addRoundedBox(panel, [0.12, 0.08, 0.04], [doorWidth * 0.3, 0, 0.055], metal, 0.02)
-  hingedDoor.userData.openRotation = 1.18
+  hingedDoor.userData.inwardRotation = 1.18
+  hingedDoor.userData.doorPlaneZ = RESTROOM_STALL_FRONT_Z
+  hingedDoor.userData.bidirectional = true
   hingedDoor.userData.openDistance = 1.75
   hingedDoor.userData.collisionPanel = panel
   parent.add(hingedDoor)
@@ -1136,8 +1197,10 @@ function createRestroomFacility(facility: StationFacility) {
     const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 1.28), makeRestroomIconMaterial(gender))
     pictogram.position.set(0, -0.08, 0.071)
     panel.add(pictogram)
-    hingedDoor.userData.openRotation = -hingeSide * 1.55
-    hingedDoor.userData.openDistance = 1.45
+    hingedDoor.userData.inwardRotation = -hingeSide * 1.55
+    hingedDoor.userData.doorPlaneZ = frontZ + 0.205
+    hingedDoor.userData.bidirectional = true
+    hingedDoor.userData.openDistance = 2.15
     hingedDoor.userData.collisionPanel = panel
     group.add(hingedDoor)
     hingedDoors.push(hingedDoor)
@@ -1475,6 +1538,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     const collisionDoors = animated.flatMap((object) => (object.userData.collisionDoors as THREE.Mesh[] | undefined) ?? [])
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0
     const animatedWorldPosition = new THREE.Vector3()
+    const animatedLocalPlayerPosition = new THREE.Vector3()
     const resize = () => {
       const bounds = canvas.getBoundingClientRect()
       const width = Math.max(1, Math.round(bounds.width))
@@ -1543,12 +1607,23 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         }
         const hingedDoors = object.userData.hingedDoors as THREE.Group[] | undefined
         if (hingedDoors) {
+          animatedLocalPlayerPosition.set(player.x, 0, player.z)
+          object.worldToLocal(animatedLocalPlayerPosition)
           hingedDoors.forEach((door) => {
             door.getWorldPosition(animatedWorldPosition)
             const openDistance = door.userData.openDistance as number
             const open = Math.hypot(animatedWorldPosition.x - player.x, animatedWorldPosition.z - player.z) < openDistance
-            const openRotation = door.userData.openRotation as number
-            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, open ? openRotation : 0, 0.12)
+            const inwardRotation = door.userData.inwardRotation as number
+            if (open && door.userData.activeOpenRotation === undefined) {
+              const doorPlaneZ = door.userData.doorPlaneZ as number
+              door.userData.activeOpenRotation = animatedLocalPlayerPosition.z > doorPlaneZ ? inwardRotation : -inwardRotation
+            }
+            const activeOpenRotation = (door.userData.activeOpenRotation as number | undefined) ?? inwardRotation
+            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, open ? activeOpenRotation : 0, 0.12)
+            if (!open && Math.abs(door.rotation.y) < 0.015) {
+              door.rotation.y = 0
+              delete door.userData.activeOpenRotation
+            }
           })
         }
       }
