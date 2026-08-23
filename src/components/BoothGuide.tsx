@@ -361,24 +361,26 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
 
           <section className="carrier-story" aria-label="윌리스 캐리어의 주요 발명 배경과 원리">
             <div className="carrier-carousel">
-              <div className="carrier-story__grid" style={{ transform: `translateX(-${carrierStep * 100}%)` }}>
-                {carrierCards.map((card, cardIndex) => (
-                  <article
-                    className={`carrier-card carrier-card--visual carrier-card--${card.variant}`}
-                    tabIndex={cardIndex === carrierStep ? 0 : -1}
-                    aria-hidden={cardIndex !== carrierStep}
-                    key={card.title}
-                  >
-                    <figure className="carrier-card__image">
-                      <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                      <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} loading="lazy" decoding="async" />
-                    </figure>
-                    <div className="carrier-card__overlay">
-                      <h3>{card.title}</h3>
-                      <p>{card.description}</p>
-                    </div>
-                  </article>
-                ))}
+              <div className="carrier-carousel__viewport">
+                <div className="carrier-story__grid" style={{ transform: `translateX(-${carrierStep * 100}%)` }}>
+                  {carrierCards.map((card, cardIndex) => (
+                    <article
+                      className={`carrier-card carrier-card--visual carrier-card--${card.variant}`}
+                      tabIndex={cardIndex === carrierStep ? 0 : -1}
+                      aria-hidden={cardIndex !== carrierStep}
+                      key={card.title}
+                    >
+                      <figure className="carrier-card__image">
+                        <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                        <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} loading="lazy" decoding="async" />
+                      </figure>
+                      <div className="carrier-card__overlay">
+                        <h3>{card.title}</h3>
+                        <p>{card.description}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
               <button
                 className="carrier-carousel__button carrier-carousel__button--previous"

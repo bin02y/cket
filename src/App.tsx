@@ -1,11 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { preload } from 'react-dom'
 import { AuthScreen } from './components/AuthScreen'
 import { TopNavigation } from './components/BottomNavigation'
 import { BoothGuide } from './components/BoothGuide'
 import { Icon } from './components/Icon'
 import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, translateDataError } from './lib/participantData'
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
+import { rewardProducts } from './data/rewards'
 import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SignUpDetails, TabId } from './types'
 import cketLogo from './assets/cket-logo.jpg'
 
@@ -13,6 +15,8 @@ const MyProfile = lazy(() => import('./components/MyProfile').then(({ MyProfile:
 const RewardShop = lazy(() => import('./components/RewardShop').then(({ RewardShop: component }) => ({ default: component })))
 
 const tabLoadingFallback = <main id="main-content" className="page tab-loading" aria-live="polite">화면을 불러오고 있습니다…</main>
+
+rewardProducts.forEach(({ image }) => preload(image, { as: 'image', fetchPriority: 'low' }))
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('booths')
