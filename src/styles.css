@@ -391,7 +391,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .roadview-entry__image { position: absolute; z-index: 0; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .roadview-entry__copy { position: absolute; z-index: 2; top: 52%; right: 20px; left: 20px; text-align: center; transform: translateY(-50%); }
 .roadview-entry__copy h1 { margin: 0; color: #fff; font-size: clamp(27px,3vw,42px); line-height: 1.18; letter-spacing: -.045em; text-shadow: 0 4px 16px rgba(3,24,41,.72); text-wrap: balance; word-break: keep-all; }
-.roadview-entry__trigger { position: absolute; z-index: 3; top: calc(52% + clamp(65px,7vw,92px)); left: 50%; width: min(220px,calc(100% - 40px)); height: auto; padding: 0; background: transparent; border: 0; cursor: pointer; transform: translateX(-50%); }
+.roadview-entry__trigger { position: absolute; z-index: 3; top: calc(52% + clamp(65px,7vw,92px)); left: 50%; width: min(74px,calc(100% - 40px)); height: auto; padding: 0; background: transparent; border: 0; cursor: pointer; transform: translateX(-50%); }
 .roadview-entry__trigger > span { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; min-height: 52px; padding: 0 22px; color: white; background: #041a33; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; box-shadow: 0 0 0 1px rgba(0,24,43,.12),0 9px 24px rgba(0,24,43,.3); transition: background-color 160ms ease,transform 160ms ease,box-shadow 160ms ease; }
 .roadview-entry__trigger em { font-size: 12px; font-style: normal; font-weight: 850; }
 .roadview-entry__trigger svg { width: 17px; height: 17px; }
@@ -430,14 +430,14 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .home-video,.roadview-entry { border-radius: 14px; }
   .roadview-entry { min-height: 0; aspect-ratio: 16 / 9; padding: 28px 19px; }
   .roadview-entry__copy { top: 50%; }
-  .roadview-entry__trigger { top: calc(50% + 65px); }
+  .roadview-entry__trigger { top: calc(50% + 38px); }
   .roadview-entry__copy h1 { font-size: 28px; }
   .carrier-carousel,.carrier-card { border-radius: 14px; }
-  .carrier-card { grid-template-columns: minmax(0,44%) minmax(0,56%); grid-template-rows: minmax(0,1fr); min-height: clamp(270px,82vw,340px); }
+  .carrier-card { grid-template-columns: minmax(0,46%) minmax(0,54%); grid-template-rows: minmax(0,1fr); min-height: 0; aspect-ratio: 2 / 1; }
   .carrier-card__image { min-height: 0; }
-  .carrier-card__overlay { min-height: 0; padding: 24px 44px 24px 16px; }
-  .carrier-card__overlay h3 { font-size: 20px; }
-  .carrier-card__overlay p { margin-top: 11px; font-size: 11.5px; line-height: 1.55; }
+  .carrier-card__overlay { min-height: 0; padding: 14px 28px 14px 12px; }
+  .carrier-card__overlay h3 { font-size: 18px; }
+  .carrier-card__overlay p { margin-top: 8px; font-size: 10px; line-height: 1.4; }
   .carrier-carousel__button { width: 36px; height: 36px; }
   .carrier-carousel__button--previous { left: 8px; }
   .carrier-carousel__button--next { right: 8px; }
