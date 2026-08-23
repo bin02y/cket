@@ -176,6 +176,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [carrierStep, setCarrierStep] = useState(0)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const homeVideoRef = useRef<HTMLVideoElement>(null)
+  const academyImagePreloadRef = useRef<HTMLImageElement[]>([])
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
 
@@ -187,6 +188,19 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
       return kitStart + nextSlide
     })
   }, [])
+
+  useEffect(() => {
+    if (section !== 'education' || academyImagePreloadRef.current.length > 0) return
+
+    academyImagePreloadRef.current = academyContents.map(({ image }) => {
+      const preload = new Image()
+      preload.decoding = 'async'
+      preload.loading = 'eager'
+      preload.src = image
+      if (typeof preload.decode === 'function') void preload.decode().catch(() => undefined)
+      return preload
+    })
+  }, [section])
 
   const releaseRoadViewDisplay = useCallback(() => {
     const orientation = screen.orientation as LockableScreenOrientation | undefined
@@ -396,7 +410,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                 <Icon name="arrow" />
               </button>
               <button className="academy-image-viewer__image" type="button" aria-label="상세 이미지 닫기" onClick={() => setAcademyStep(null)} autoFocus>
-                <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} decoding="async" />
+                <img src={currentAcademyContent.image} alt={currentAcademyContent.imageAlt} loading="eager" decoding="sync" fetchPriority="high" />
               </button>
               <button className="academy-image-viewer__nav academy-image-viewer__nav--next" type="button" aria-label="다음 이미지" onClick={() => moveAcademySlide(1)}>
                 <Icon name="arrow" />

@@ -155,9 +155,9 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .academy-image-viewer__stage { grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: auto auto; align-content: center; gap: 12px; }
   .academy-image-viewer__image { grid-column: 1 / -1; grid-row: 1; width: 100%; height: auto; max-height: calc(92dvh - 50px); padding: 0; }
   .academy-image-viewer__image img { width: 100%; max-width: none; height: auto; max-height: calc(92dvh - 50px); }
-  .academy-image-viewer__nav { position: static; grid-row: 2; width: 38px; height: 38px; justify-self: center; transform: none; }
-  .academy-image-viewer__nav--previous { grid-column: 1; }
-  .academy-image-viewer__nav--next { grid-column: 2; }
+  .academy-image-viewer__nav { position: static; grid-row: 2; width: 38px; height: 38px; transform: none; }
+  .academy-image-viewer__nav--previous { grid-column: 1; justify-self: start; margin-left: 12px; }
+  .academy-image-viewer__nav--next { grid-column: 2; justify-self: end; margin-right: 12px; }
 }
 
 @media (max-width: 900px) {
@@ -435,15 +435,16 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .roadview-entry__trigger { position: relative; top: auto; left: auto; grid-row: 4; justify-self: center; transform: none; }
   .roadview-entry__copy h1 { font-size: 28px; }
   .carrier-carousel,.carrier-card { border-radius: 14px; }
+  .carrier-carousel { padding-bottom: 52px; }
   .carrier-card { grid-template-columns: minmax(0,46%) minmax(0,54%); grid-template-rows: minmax(0,1fr); min-height: 0; aspect-ratio: 2 / 1; }
   .carrier-card__image { min-height: 0; }
   .carrier-card__overlay { min-height: 0; padding: 14px 28px 14px 12px; }
   .carrier-card__overlay h3 { font-size: 18px; }
   .carrier-card__overlay p { margin-top: 8px; font-size: 10px; line-height: 1.4; }
   .carrier-card--factory .carrier-card__image-foreground { object-fit: cover; object-position: left center; }
-  .carrier-carousel__button { width: 36px; height: 36px; }
-  .carrier-carousel__button--previous { left: 8px; }
-  .carrier-carousel__button--next { right: 8px; }
+  .carrier-carousel__button { top: auto; bottom: 8px; width: 36px; height: 36px; transform: none; }
+  .carrier-carousel__button--previous { left: calc(50% - 44px); }
+  .carrier-carousel__button--next { right: calc(50% - 44px); }
 }
 
 /* Three.js metaverse station */
