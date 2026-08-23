@@ -1476,21 +1476,20 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const trainX = worldXToMap(TRAIN_NOSE_X); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
   const trainWidth = worldXToMap(TRAIN_TAIL_X) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
   context.save(); context.shadowColor = 'rgba(29,77,101,.16)'; context.shadowBlur = size * 0.025; context.shadowOffsetY = size * 0.008
-  context.fillStyle = 'rgba(255,255,255,.98)'; context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, size * 0.018); context.fill(); context.restore()
-  context.strokeStyle = '#6f93a5'; context.lineWidth = Math.max(1.5, size * 0.003); context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, size * 0.018); context.stroke()
-  context.fillStyle = '#187daf'; context.beginPath(); context.roundRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12, 3); context.fill()
+  context.fillStyle = 'rgba(255,255,255,.98)'; context.fillRect(trainX, trainY, trainWidth, trainHeight); context.restore()
+  context.strokeStyle = '#6f93a5'; context.lineWidth = Math.max(1.5, size * 0.003); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
+  context.fillStyle = '#187daf'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
     const x = worldXToMap(zone.x - zoneDimensions.width / 2); const y = worldZToMap(zone.z - zoneDimensions.depth / 2)
     const width = worldXToMap(zone.x + zoneDimensions.width / 2) - x; const height = worldZToMap(zone.z + zoneDimensions.depth / 2) - y
     const inset = Math.max(1.5, size * 0.004)
     const cardX = x + inset; const cardY = y + inset; const cardWidth = width - inset * 2; const cardHeight = height - inset * 2
-    const cardRadius = Math.min(size * 0.017, cardWidth * 0.12, cardHeight * 0.12)
     context.save(); context.shadowColor = 'rgba(25,68,88,.15)'; context.shadowBlur = size * 0.014; context.shadowOffsetY = size * 0.005
-    context.fillStyle = 'rgba(255,255,255,.96)'; context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.fill(); context.restore()
-    context.save(); context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.clip()
+    context.fillStyle = 'rgba(255,255,255,.96)'; context.fillRect(cardX, cardY, cardWidth, cardHeight); context.restore()
+    context.save(); context.beginPath(); context.rect(cardX, cardY, cardWidth, cardHeight); context.clip()
     context.globalAlpha = zone.trainCar ? 0.88 : 0.8; context.fillStyle = zone.color; context.fillRect(cardX, cardY, cardWidth, cardHeight * 0.38); context.globalAlpha = 0.1; context.fillRect(cardX, cardY + cardHeight * 0.38, cardWidth, cardHeight * 0.62); context.restore()
-    context.strokeStyle = zone.color; context.lineWidth = Math.max(1.2, size * 0.003); context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.stroke()
+    context.strokeStyle = zone.color; context.lineWidth = Math.max(1.2, size * 0.003); context.strokeRect(cardX, cardY, cardWidth, cardHeight)
     const fontSize = Math.max(7, size * 0.0185)
     context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillStyle = '#0b2b3c'; context.font = `700 ${fontSize}px Paperlogy, sans-serif`
     context.fillText(zoneDisplayLabel(zone), cardX + cardWidth / 2, cardY + cardHeight * 0.2, cardWidth * 0.86)
@@ -1510,12 +1509,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.fillStyle = '#1677ee'; context.beginPath(); context.arc(0, 0, markerRadius * 0.56, 0, Math.PI * 2); context.fill()
   context.rotate(-player.yaw); context.fillStyle = '#ffffff'; context.beginPath(); context.moveTo(0, -markerRadius * 0.42); context.lineTo(markerRadius * 0.25, markerRadius * 0.24); context.lineTo(-markerRadius * 0.25, markerRadius * 0.24); context.closePath(); context.fill()
   context.restore()
-  const locationLabelWidth = Math.max(52, size * 0.13); const locationLabelHeight = Math.max(18, size * 0.04)
-  const locationLabelX = Math.min(size - mapPadding - locationLabelWidth, x + markerRadius * 1.25)
-  const locationLabelY = Math.max(mapPadding, y - locationLabelHeight / 2)
-  context.fillStyle = 'rgba(9,47,71,.9)'; context.beginPath(); context.roundRect(locationLabelX, locationLabelY, locationLabelWidth, locationLabelHeight, locationLabelHeight / 2); context.fill()
-  context.fillStyle = '#ffffff'; context.font = `700 ${Math.max(7, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText('현재 위치', locationLabelX + locationLabelWidth / 2, locationLabelY + locationLabelHeight / 2)
-  context.strokeStyle = 'rgba(65,119,143,.32)'; context.lineWidth = Math.max(1, size * 0.0025); context.beginPath(); context.roundRect(1, 1, size - 2, size - 2, size * 0.035); context.stroke()
+  context.strokeStyle = 'rgba(65,119,143,.32)'; context.lineWidth = Math.max(1, size * 0.0025); context.strokeRect(1, 1, size - 2, size - 2)
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
@@ -1608,9 +1602,8 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     const animatedWorldPosition = new THREE.Vector3()
     const animatedLocalPlayerPosition = new THREE.Vector3()
     const resize = () => {
-      const bounds = canvas.getBoundingClientRect()
-      const width = Math.max(1, Math.round(bounds.width))
-      const height = Math.max(1, Math.round(bounds.height))
+      const width = Math.max(1, canvas.clientWidth)
+      const height = Math.max(1, canvas.clientHeight)
       const pixelRatioLimit = width < 720 ? 1 : 1.25
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioLimit))
       renderer.setSize(width, height, false)
@@ -1618,7 +1611,11 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       renderedMapCanvas = null
     }
     const resizeTarget = canvas.parentElement ?? canvas
-    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(resizeTarget); resize()
+    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(resizeTarget)
+    window.addEventListener('resize', resize)
+    window.visualViewport?.addEventListener('resize', resize)
+    screen.orientation?.addEventListener('change', resize)
+    resize()
     const stopMovement = () => { movementRef.current = { ...EMPTY_MOVEMENT } }
     const handleKey = (event: KeyboardEvent, pressed: boolean) => {
       const key = event.key.toLowerCase(); const overlay = overlayRef.current
@@ -1700,7 +1697,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     canvas.addEventListener('pointerdown', handlePointerDown); canvas.addEventListener('pointermove', handlePointerMove); canvas.addEventListener('pointerup', handlePointerUp); canvas.addEventListener('pointercancel', handlePointerUp)
     animationFrame = requestAnimationFrame(frame)
     return () => {
-      cancelAnimationFrame(animationFrame); resizeObserver.disconnect(); window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('keyup', handleKeyUp); window.removeEventListener('blur', stopMovement)
+      cancelAnimationFrame(animationFrame); resizeObserver.disconnect(); window.removeEventListener('resize', resize); window.visualViewport?.removeEventListener('resize', resize); screen.orientation?.removeEventListener('change', resize); window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('keyup', handleKeyUp); window.removeEventListener('blur', stopMovement)
       canvas.removeEventListener('pointerdown', handlePointerDown); canvas.removeEventListener('pointermove', handlePointerMove); canvas.removeEventListener('pointerup', handlePointerUp); canvas.removeEventListener('pointercancel', handlePointerUp)
       const geometries = new Set<THREE.BufferGeometry>()
       const materials = new Set<THREE.Material>()
