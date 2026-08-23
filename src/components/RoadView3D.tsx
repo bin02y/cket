@@ -1246,16 +1246,23 @@ function createInformationFacility(facility: StationFacility) {
   const light = new THREE.MeshBasicMaterial({ color: '#ffffff' })
   const wallHeight = FACILITY_HEIGHT - 0.24
   const roofCenterY = FACILITY_HEIGHT - 0.12
+  const roofFrameWidth = 0.34
+  const ceilingThickness = 0.1
+  const ceilingBottomY = roofCenterY - 0.12
+  const ceilingCenterY = ceilingBottomY + ceilingThickness / 2
+  const ceilingFrameOverlap = 0.04
+  const ceilingWidth = INFORMATION_WIDTH - roofFrameWidth * 2 + ceilingFrameOverlap * 2
+  const ceilingDepth = INFORMATION_DEPTH - roofFrameWidth * 2 + ceilingFrameOverlap * 2
 
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], exteriorGray, 0.045)
   addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], exteriorGray, 0.045)
   addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [halfWidth - 0.11, wallHeight / 2, 0], exteriorGray, 0.045)
-  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [halfWidth - 0.17, roofCenterY, 0], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.68, 0.1, INFORMATION_DEPTH - 0.68], [0, FACILITY_HEIGHT - 0.29, 0], woodCeiling, 0.025)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, roofFrameWidth], [0, roofCenterY, -halfDepth + roofFrameWidth / 2], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [roofFrameWidth, 0.24, INFORMATION_DEPTH], [-halfWidth + roofFrameWidth / 2, roofCenterY, 0], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [roofFrameWidth, 0.24, INFORMATION_DEPTH], [halfWidth - roofFrameWidth / 2, roofCenterY, 0], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, roofFrameWidth], [0, roofCenterY, halfDepth - roofFrameWidth / 2], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [ceilingWidth, ceilingThickness, ceilingDepth], [0, ceilingCenterY, 0], woodCeiling, 0.01)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 3.05); group.add(deskGroup)
   addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
@@ -1298,9 +1305,9 @@ function createInformationFacility(facility: StationFacility) {
   const ceilingLightXs = [-1.5, -0.5, 0.5, 1.5].map((offset) => offset * ceilingLightSpacing)
   const ceilingLightZs = [-0.5, 0.5].map((offset) => -0.08 + offset * ceilingLightSpacing)
   for (const x of ceilingLightXs) for (const z of ceilingLightZs) {
-    addNonShadowingRoundedBox(group, [0.52, 0.028, 0.52], [x, FACILITY_HEIGHT - 0.37, z], light, 0.018)
+    addNonShadowingRoundedBox(group, [0.52, 0.028, 0.52], [x, ceilingBottomY - 0.014, z], light, 0.018)
     const ceilingLight = new THREE.SpotLight('#fff4cf', 2.1, 6.2, Math.PI / 7.5, 0.72, 1.6)
-    ceilingLight.position.set(x, FACILITY_HEIGHT - 0.46, z)
+    ceilingLight.position.set(x, ceilingBottomY - 0.08, z)
     ceilingLight.target.position.set(x, 0.24, z)
     ceilingLight.castShadow = false
     group.add(ceilingLight, ceilingLight.target)
@@ -1434,7 +1441,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.fillRect(x, y, width, height); context.globalAlpha = 1
     context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.strokeRect(x, y, width, height)
     context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `700 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zoneDisplayLabel(zone), x + width / 2, y + height * 0.44, width * 0.9)
-    context.font = `500 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
+    context.font = `500 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
     if ('id' in zone) {
       context.fillStyle = '#143e57'
       if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldXToMap(zone.gate.x) - 2, worldZToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
