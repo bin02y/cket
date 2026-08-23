@@ -9,7 +9,7 @@ import { loadParticipantData, saveRewardRedemption, saveRoadViewGateVisit, trans
 import { isSupabaseConfigured, profileFromAuthUser, supabase, translateAuthError } from './lib/supabase'
 import { rewardProducts } from './data/rewards'
 import type { AuthActionResult, AuthCredentials, CheckoutDetails, ParticipantProfile, PointTransaction, RewardId, RewardOrder, RewardRedemptionResult, RoadViewGateCode, RoadViewGateRewardResult, SignUpDetails, TabId } from './types'
-import cketLogo from './assets/cket-logo.jpg'
+import cketLogo from './assets/cket-logo.webp'
 
 const MyProfile = lazy(() => import('./components/MyProfile').then(({ MyProfile: component }) => ({ default: component })))
 const RewardShop = lazy(() => import('./components/RewardShop').then(({ RewardShop: component }) => ({ default: component })))
