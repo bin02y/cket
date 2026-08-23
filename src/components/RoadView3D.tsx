@@ -1241,7 +1241,6 @@ function createInformationFacility(facility: StationFacility) {
   const halfDepth = INFORMATION_DEPTH / 2
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
   const exteriorGray = new THREE.MeshStandardMaterial({ color: RESTROOM_EXTERIOR_GRAY, metalness: 0.1, roughness: 0.42 })
-  const informationCeiling = new THREE.MeshPhysicalMaterial({ color: '#ffefd5', metalness: 0.02, roughness: 0.54, clearcoat: 0.22, clearcoatRoughness: 0.36 })
   const roofFrame = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.14, roughness: 0.36 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
   const chrome = new THREE.MeshStandardMaterial({ color: '#b8c3c8', metalness: 0.86, roughness: 0.16 })
@@ -1269,7 +1268,7 @@ function createInformationFacility(facility: StationFacility) {
   addNonShadowingRoundedBox(group, [roofFrameWidth, 0.24, INFORMATION_DEPTH], [-halfWidth + roofFrameWidth / 2, roofCenterY, 0], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [roofFrameWidth, 0.24, INFORMATION_DEPTH], [halfWidth - roofFrameWidth / 2, roofCenterY, 0], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, roofFrameWidth], [0, roofCenterY, halfDepth - roofFrameWidth / 2], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [ceilingWidth, ceilingThickness, ceilingDepth], [0, ceilingCenterY, 0], informationCeiling, 0.01)
+  addNonShadowingRoundedBox(group, [ceilingWidth, ceilingThickness, ceilingDepth], [0, ceilingCenterY, 0], exteriorGray, 0.01)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 3.05); group.add(deskGroup)
   addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
