@@ -813,9 +813,9 @@ function createRestroomFacility(facility: StationFacility) {
   if (facility.gate.side === 'east') group.rotation.y = Math.PI / 2
   else if (facility.gate.side === 'west') group.rotation.y = -Math.PI / 2
 
-  const restroomWhite = '#ffffff'
-  const interiorSurface = new THREE.MeshStandardMaterial({ color: restroomWhite, roughness: 0.72, side: THREE.DoubleSide })
-  const floorSurface = new THREE.MeshStandardMaterial({ color: restroomWhite, roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
+  const restroomLightGray = '#dfe3e6'
+  const interiorSurface = new THREE.MeshStandardMaterial({ color: restroomLightGray, roughness: 0.72, side: THREE.DoubleSide })
+  const floorSurface = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
   const ceramic = new THREE.MeshPhysicalMaterial({ color: '#fbffff', metalness: 0.02, roughness: 0.16, clearcoat: 0.85, clearcoatRoughness: 0.12 })

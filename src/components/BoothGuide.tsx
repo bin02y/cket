@@ -339,8 +339,8 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
               <div className="roadview-entry__copy">
                 <h1 id="roadview-entry-title">3D 전시관<br />로드뷰</h1>
               </div>
-              <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 열기" onClick={openRoadView}>
-                <span><em>입장하러 가기</em><Icon name="arrow" /></span>
+              <button className="roadview-entry__trigger" type="button" aria-label="3D 전시관 로드뷰 입장" onClick={openRoadView}>
+                <span><em>입장</em></span>
               </button>
             </section>
           </div>
