@@ -1437,6 +1437,16 @@ function buildMetaverseStation(scene: THREE.Scene) {
   return animationTargets
 }
 
+function splitMapTitle(title: string) {
+  for (const ending of ['에서', '부터']) {
+    const endingIndex = title.indexOf(ending)
+    if (endingIndex < 0) continue
+    const breakIndex = endingIndex + ending.length
+    if (breakIndex < title.length) return [title.slice(0, breakIndex).trim(), title.slice(breakIndex).trim()]
+  }
+  return [title]
+}
+
 function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const context = canvas.getContext('2d'); if (!context) return
   const ratio = Math.min(window.devicePixelRatio || 1, 2)
@@ -1445,28 +1455,65 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   const pixelWidth = Math.round(size * ratio); const pixelHeight = Math.round(size * ratio)
   if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) { canvas.width = pixelWidth; canvas.height = pixelHeight }
   context.setTransform(ratio, 0, 0, ratio, 0, 0)
-  context.clearRect(0, 0, size, size); context.fillStyle = '#f8faf9'; context.fillRect(0, 0, size, size)
-  const worldXToMap = (value: number) => ((value + STATION_WIDTH / 2) / STATION_WIDTH) * size
-  const worldZToMap = (value: number) => ((value + STATION_DEPTH / 2) / STATION_DEPTH) * size
+  context.clearRect(0, 0, size, size)
+  const background = context.createLinearGradient(0, 0, size, size)
+  background.addColorStop(0, '#f7fcff'); background.addColorStop(0.55, '#eef7fa'); background.addColorStop(1, '#e8f2f5')
+  context.fillStyle = background; context.fillRect(0, 0, size, size)
+  const mapPadding = Math.max(12, size * 0.032)
+  const mapExtent = size - mapPadding * 2
+  const worldXToMap = (value: number) => mapPadding + ((value + STATION_WIDTH / 2) / STATION_WIDTH) * mapExtent
+  const worldZToMap = (value: number) => mapPadding + ((value + STATION_DEPTH / 2) / STATION_DEPTH) * mapExtent
+
+  context.save()
+  context.strokeStyle = 'rgba(77,130,153,.09)'; context.lineWidth = 1
+  for (let index = 0; index <= 8; index += 1) {
+    const position = mapPadding + mapExtent * index / 8
+    context.beginPath(); context.moveTo(position, mapPadding); context.lineTo(position, size - mapPadding); context.stroke()
+    context.beginPath(); context.moveTo(mapPadding, position); context.lineTo(size - mapPadding, position); context.stroke()
+  }
+  context.setLineDash([Math.max(3, size * 0.008), Math.max(4, size * 0.011)])
+  context.strokeStyle = 'rgba(32,115,148,.19)'; context.lineWidth = Math.max(1.5, size * 0.004)
+  context.beginPath()
+  context.moveTo(worldXToMap(-11.9), worldZToMap(-7.4))
+  context.lineTo(worldXToMap(-6.3), worldZToMap(0))
+  context.lineTo(worldXToMap(-6.3), worldZToMap(10.2))
+  context.lineTo(worldXToMap(6.3), worldZToMap(10.2))
+  context.lineTo(worldXToMap(6.3), worldZToMap(0))
+  context.lineTo(worldXToMap(11.9), worldZToMap(-7.4))
+  context.stroke(); context.restore()
+
   const trainX = worldXToMap(TRAIN_NOSE_X); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
   const trainWidth = worldXToMap(TRAIN_TAIL_X) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
-  context.fillStyle = '#fdfefe'; context.strokeStyle = '#6c8796'; context.lineWidth = 1.5
-  context.fillRect(trainX, trainY, trainWidth, trainHeight); context.strokeRect(trainX, trainY, trainWidth, trainHeight)
-  context.fillStyle = '#1874aa'; context.fillRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12)
-  context.fillStyle = '#335469'; context.font = `300 ${Math.max(5, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.fillText('CKET EXHIBITION TRAIN', trainX + trainWidth / 2, trainY + trainHeight * 0.18)
+  context.save(); context.shadowColor = 'rgba(29,77,101,.16)'; context.shadowBlur = size * 0.025; context.shadowOffsetY = size * 0.008
+  context.fillStyle = 'rgba(255,255,255,.98)'; context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, size * 0.018); context.fill(); context.restore()
+  context.strokeStyle = '#6f93a5'; context.lineWidth = Math.max(1.5, size * 0.003); context.beginPath(); context.roundRect(trainX, trainY, trainWidth, trainHeight, size * 0.018); context.stroke()
+  context.fillStyle = '#187daf'; context.beginPath(); context.roundRect(trainX + 5, trainY + trainHeight * 0.72, trainWidth - 10, trainHeight * 0.12, 3); context.fill()
   for (const zone of ZONES) {
     const zoneDimensions = zoneSize(zone)
     const x = worldXToMap(zone.x - zoneDimensions.width / 2); const y = worldZToMap(zone.z - zoneDimensions.depth / 2)
     const width = worldXToMap(zone.x + zoneDimensions.width / 2) - x; const height = worldZToMap(zone.z + zoneDimensions.depth / 2) - y
-    context.fillStyle = zone.trainCar ? '#ffffff' : zone.color; context.globalAlpha = zone.trainCar ? 0.95 : 0.72
-    context.fillRect(x, y, width, height); context.globalAlpha = 1
-    context.strokeStyle = zone.color; context.lineWidth = zone.trainCar ? 2 : 1; context.strokeRect(x, y, width, height)
-    context.fillStyle = '#0c2737'; context.textAlign = 'center'; context.font = `700 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zoneDisplayLabel(zone), x + width / 2, y + height * 0.44, width * 0.9)
-    context.font = `500 ${Math.max(7, size * 0.019)}px Paperlogy, sans-serif`; context.fillText(zone.title, x + width / 2, y + height * 0.7, width * 0.88)
+    const inset = Math.max(1.5, size * 0.004)
+    const cardX = x + inset; const cardY = y + inset; const cardWidth = width - inset * 2; const cardHeight = height - inset * 2
+    const cardRadius = Math.min(size * 0.017, cardWidth * 0.12, cardHeight * 0.12)
+    context.save(); context.shadowColor = 'rgba(25,68,88,.15)'; context.shadowBlur = size * 0.014; context.shadowOffsetY = size * 0.005
+    context.fillStyle = 'rgba(255,255,255,.96)'; context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.fill(); context.restore()
+    context.save(); context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.clip()
+    context.globalAlpha = zone.trainCar ? 0.88 : 0.8; context.fillStyle = zone.color; context.fillRect(cardX, cardY, cardWidth, cardHeight * 0.38); context.globalAlpha = 0.1; context.fillRect(cardX, cardY + cardHeight * 0.38, cardWidth, cardHeight * 0.62); context.restore()
+    context.strokeStyle = zone.color; context.lineWidth = Math.max(1.2, size * 0.003); context.beginPath(); context.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius); context.stroke()
+    const fontSize = Math.max(7, size * 0.0185)
+    context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillStyle = '#0b2b3c'; context.font = `700 ${fontSize}px Paperlogy, sans-serif`
+    context.fillText(zoneDisplayLabel(zone), cardX + cardWidth / 2, cardY + cardHeight * 0.2, cardWidth * 0.86)
+    context.font = `500 ${fontSize}px Paperlogy, sans-serif`
+    const titleLines = splitMapTitle(zone.title)
+    const titleLineHeight = fontSize * 1.18
+    const titleCenterY = cardY + cardHeight * 0.69
+    const firstTitleY = titleCenterY - (titleLines.length - 1) * titleLineHeight / 2
+    titleLines.forEach((line, index) => context.fillText(line, cardX + cardWidth / 2, firstTitleY + index * titleLineHeight, cardWidth * 0.86))
     if ('id' in zone) {
-      context.fillStyle = '#143e57'
-      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldXToMap(zone.gate.x) - 2, worldZToMap(zone.gate.z) - height * 0.11, 4, height * 0.22)
-      else context.fillRect(worldXToMap(zone.gate.x) - width * 0.14, worldZToMap(zone.gate.z) - 2, width * 0.28, 4)
+      context.fillStyle = '#123d54'; context.shadowColor = 'rgba(18,61,84,.22)'; context.shadowBlur = 3
+      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldXToMap(zone.gate.x) - 2, worldZToMap(zone.gate.z) - height * 0.1, 4, height * 0.2)
+      else context.fillRect(worldXToMap(zone.gate.x) - width * 0.13, worldZToMap(zone.gate.z) - 2, width * 0.26, 4)
+      context.shadowColor = 'transparent'
     }
   }
   const x = worldXToMap(player.x); const y = worldZToMap(player.z)
@@ -1476,7 +1523,14 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
   context.fillStyle = '#0878e8'; context.beginPath(); context.arc(0, 0, markerRadius, 0, Math.PI * 2); context.fill()
   context.shadowColor = 'transparent'; context.fillStyle = '#ffffff'; context.beginPath(); context.arc(0, 0, markerRadius * 0.82, 0, Math.PI * 2); context.fill()
   context.fillStyle = '#1677ee'; context.beginPath(); context.arc(0, 0, markerRadius * 0.56, 0, Math.PI * 2); context.fill()
+  context.rotate(-player.yaw); context.fillStyle = '#ffffff'; context.beginPath(); context.moveTo(0, -markerRadius * 0.42); context.lineTo(markerRadius * 0.25, markerRadius * 0.24); context.lineTo(-markerRadius * 0.25, markerRadius * 0.24); context.closePath(); context.fill()
   context.restore()
+  const locationLabelWidth = Math.max(52, size * 0.13); const locationLabelHeight = Math.max(18, size * 0.04)
+  const locationLabelX = Math.min(size - mapPadding - locationLabelWidth, x + markerRadius * 1.25)
+  const locationLabelY = Math.max(mapPadding, y - locationLabelHeight / 2)
+  context.fillStyle = 'rgba(9,47,71,.9)'; context.beginPath(); context.roundRect(locationLabelX, locationLabelY, locationLabelWidth, locationLabelHeight, locationLabelHeight / 2); context.fill()
+  context.fillStyle = '#ffffff'; context.font = `700 ${Math.max(7, size * 0.014)}px Paperlogy, sans-serif`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText('현재 위치', locationLabelX + locationLabelWidth / 2, locationLabelY + locationLabelHeight / 2)
+  context.strokeStyle = 'rgba(65,119,143,.32)'; context.lineWidth = Math.max(1, size * 0.0025); context.beginPath(); context.roundRect(1, 1, size - 2, size - 2, size * 0.035); context.stroke()
 }
 
 export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
@@ -1733,6 +1787,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         </div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
+        <header className="roadview__map-header"><div><span>CKET STATION GUIDE</span><h2>3D 전시관 지도</h2></div><button type="button" aria-label="지도 닫기" onClick={() => setMapOpen(false)}>×</button></header>
         <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-label={`${selectedBooth.title} 방문 미디어와 포인트 획득 결과`} style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
