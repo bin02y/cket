@@ -215,11 +215,11 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 }
 
 .cket-ticket-board { margin-top: 28px; }
-.cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; padding: 9px 7px 7px; }
+.cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 .cket-ticket { --ticket-band-size: 42px; --ticket-edge: 0px; --ticket-stub-width: 34.5%; --ticket-shell: #e4e7e9; --ticket-outline: #c9cfd3; position: relative; min-width: 0; overflow: visible; background: var(--ticket-shell); border: 2px solid var(--ticket-outline); border-radius: 22px; box-shadow: none; transition: background-color 180ms ease,border-color 180ms ease; }
 .cket-ticket__cutout { position: absolute; z-index: 4; left: calc(100% - var(--ticket-edge) - var(--ticket-stub-width)); width: 25px; height: 15px; pointer-events: none; transform: translateX(-50%); }
-.cket-ticket__cutout--top { top: 0; }
-.cket-ticket__cutout--bottom { bottom: 0; transform: translateX(-50%) rotate(180deg); }
+.cket-ticket__cutout--top { top: -2px; }
+.cket-ticket__cutout--bottom { bottom: -2px; transform: translateX(-50%) rotate(180deg); }
 .cket-ticket__cutout svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .cket-ticket__cutout-fill { fill: #fff; }
 .cket-ticket__cutout-line { fill: none; stroke: var(--ticket-outline); stroke-linecap: butt; stroke-linejoin: round; stroke-width: 2px; vector-effect: non-scaling-stroke; }
@@ -240,7 +240,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 }
 @media (max-width: 700px) {
   .cket-ticket-board { margin-top: clamp(20px,6vw,26px); }
-  .cket-ticket-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(7px,2.2vw,10px); padding: clamp(5px,2.3vw,9px) clamp(4px,1.8vw,7px) clamp(4px,1.8vw,7px); }
+  .cket-ticket-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(7px,2.2vw,10px); }
   .cket-ticket { --ticket-band-size: clamp(19px,5.1vw,22px); --ticket-stub-width: 34%; border-width: 1px; border-radius: clamp(8px,2.2vw,10px); }
   .cket-ticket__header strong { overflow: hidden; padding-left: clamp(5px,1.5vw,7px); font-size: clamp(7.5px,2.2vw,9px); text-overflow: ellipsis; white-space: nowrap; }
   .cket-ticket__header small { overflow: hidden; padding-right: clamp(4px,1.2vw,6px); font-size: clamp(5px,1.35vw,6px); text-overflow: ellipsis; }
@@ -252,7 +252,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .cket-ticket__points { font-size: clamp(7.5px,2.2vw,9px); }
   .cket-ticket__stub i { height: clamp(40px,11vw,49px); transform: none; }
   .cket-ticket__cutout { width: clamp(14px,4vw,17px); height: clamp(10px,2.8vw,12px); transform: translateX(-50%) scaleX(.76); }
-  .cket-ticket__cutout--bottom { transform: translateX(-50%) rotate(180deg) scaleX(.76); }
+  .cket-ticket__cutout--top { top: -1px; }
+  .cket-ticket__cutout--bottom { bottom: -1px; transform: translateX(-50%) rotate(180deg) scaleX(.76); }
 }
 
 @media (prefers-reduced-motion: reduce) {
