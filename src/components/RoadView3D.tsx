@@ -336,8 +336,8 @@ function makeInformationSignTexture() {
 
   context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height)
   context.fillStyle = '#080808'; context.beginPath(); context.arc(250, 210, 118, 0, Math.PI * 2); context.fill()
-  context.fillStyle = '#ffffff'; context.font = 'italic 900 208px Georgia, serif'; context.textAlign = 'center'; context.textBaseline = 'middle'
-  context.fillText('i', 250, 198)
+  context.fillStyle = '#ffffff'; context.beginPath(); context.arc(250, 158, 17, 0, Math.PI * 2); context.fill()
+  context.beginPath(); context.roundRect(234, 187, 32, 96, 16); context.fill()
   context.fillStyle = '#080808'; context.font = '800 162px Arial, sans-serif'; context.textAlign = 'left'
   context.fillText('Information', 420, 220, 1050)
 
@@ -880,7 +880,6 @@ function createRestroomFacility(facility: StationFacility) {
 
   const roofCenterY = FACILITY_HEIGHT - 0.14
   addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.28, 0.34], [0, roofCenterY, -halfDepth + 0.17], charcoalFrame, 0.035)
-  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.28, 0.22], [0, roofCenterY, frontZ + 0.18], charcoalFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], charcoalFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [halfWidth - 0.17, roofCenterY, 0], charcoalFrame, 0.035)
   addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.2, 0.22], [0, 0.1, -halfDepth + 0.11], charcoalFrame, 0.025)
@@ -894,23 +893,25 @@ function createRestroomFacility(facility: StationFacility) {
   const frontPilasterWidth = 0.68
   const frontPilasterX = halfWidth - frontPilasterWidth / 2
   const frontPilasterZ = frontZ + 0.14
-  const frontPilasterHeight = FACILITY_HEIGHT - 0.22
-  const frontPilasterCenterY = frontPilasterHeight / 2 + 0.1
-  for (const x of [-frontPilasterX, frontPilasterX]) {
-    addNonShadowingRoundedBox(group, [frontPilasterWidth, frontPilasterHeight, 0.38], [x, frontPilasterCenterY, frontPilasterZ], charcoalFrame, 0.025)
-  }
-
-  const facadeInnerLeft = -halfWidth + frontPilasterWidth
-  const facadeInnerRight = halfWidth - frontPilasterWidth
-  const baseOuterLeft = facadeInnerLeft - 0.18
-  const baseOuterRight = facadeInnerRight + 0.18
-  for (const [start, end] of [
-    [baseOuterLeft, openingEdges[0][0]],
-    [openingEdges[0][1], openingEdges[1][0]],
-    [openingEdges[1][1], baseOuterRight],
-  ] as const) {
-    addNonShadowingRoundedBox(group, [end - start, 0.2, 0.16], [(start + end) / 2, 0.1, frontZ + 0.16], charcoalFrame, 0.025)
-  }
+  const frontFrameShape = new THREE.Shape()
+  frontFrameShape.moveTo(-halfWidth, 0)
+  frontFrameShape.lineTo(halfWidth, 0)
+  frontFrameShape.lineTo(halfWidth, FACILITY_HEIGHT)
+  frontFrameShape.lineTo(-halfWidth, FACILITY_HEIGHT)
+  frontFrameShape.closePath()
+  const frontFrameOpening = new THREE.Path()
+  frontFrameOpening.moveTo(-halfWidth + frontPilasterWidth, 0.2)
+  frontFrameOpening.lineTo(-halfWidth + frontPilasterWidth, FACILITY_HEIGHT - 0.28)
+  frontFrameOpening.lineTo(halfWidth - frontPilasterWidth, FACILITY_HEIGHT - 0.28)
+  frontFrameOpening.lineTo(halfWidth - frontPilasterWidth, 0.2)
+  frontFrameOpening.closePath()
+  frontFrameShape.holes.push(frontFrameOpening)
+  const frontFrameGeometry = new THREE.ExtrudeGeometry(frontFrameShape, { depth: 0.38, bevelEnabled: false, curveSegments: 1 })
+  frontFrameGeometry.translate(0, 0, -0.19)
+  const frontFrame = new THREE.Mesh(frontFrameGeometry, charcoalFrame)
+  frontFrame.position.z = frontPilasterZ
+  frontFrame.castShadow = false; frontFrame.receiveShadow = false
+  group.add(frontFrame)
 
   const frontPanelZ = frontZ + 0.18
   const addFrontPanelFrame = (centerX: number, centerY: number, width: number, height: number) => {
@@ -942,12 +943,16 @@ function createRestroomFacility(facility: StationFacility) {
   }
 
   for (const center of doorwayCenters) {
-    const jambHeight = RESTROOM_DOOR_HEIGHT + 0.12
-    const jambCenterY = RESTROOM_INTERIOR_FLOOR_Y + jambHeight / 2
-    addNonShadowingRoundedBox(group, [0.1, jambHeight, 0.13], [center - doorwayWidth / 2, jambCenterY, frontZ + 0.18], exteriorTrim, 0.02)
-    addNonShadowingRoundedBox(group, [0.1, jambHeight, 0.13], [center + doorwayWidth / 2, jambCenterY, frontZ + 0.18], exteriorTrim, 0.02)
-    addNonShadowingRoundedBox(group, [doorwayWidth + 0.2, 0.1, 0.13], [center, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT + 0.05, frontZ + 0.18], exteriorTrim, 0.02)
-    addNonShadowingRoundedBox(group, [doorwayWidth - 0.08, 0.06, 0.16], [center, RESTROOM_INTERIOR_FLOOR_Y + 0.03, frontZ + 0.17], exteriorTrim, 0.015)
+    const doorFrameHeight = RESTROOM_DOOR_HEIGHT + 0.2
+    addNonShadowingRectFrame(
+      group,
+      doorwayWidth + 0.2,
+      doorFrameHeight,
+      0.1,
+      0.13,
+      [center, RESTROOM_INTERIOR_FLOOR_Y + doorFrameHeight / 2, frontZ + 0.18],
+      exteriorTrim,
+    )
   }
 
   const sconceLight = new THREE.MeshStandardMaterial({ color: '#fffdf4', emissive: '#ffe27a', emissiveIntensity: 1.8, roughness: 0.24 })
@@ -995,10 +1000,6 @@ function createRestroomFacility(facility: StationFacility) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
   }
-  for (const x of [-2.55, 2.55]) {
-    const pointLight = new THREE.PointLight('#f4fbff', 0.82, 6.4, 2)
-    pointLight.position.set(x, 4.46, -0.8); group.add(pointLight)
-  }
   return group
 }
 
@@ -1037,11 +1038,7 @@ function createInformationFacility(facility: StationFacility) {
   for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addNonShadowingRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
-  const deskShape = new THREE.Shape()
-  deskShape.moveTo(-1.45, 0); deskShape.lineTo(1.45, 0); deskShape.lineTo(1.2, 1.08); deskShape.lineTo(-1.2, 1.08); deskShape.closePath()
-  const deskGeometry = new THREE.ExtrudeGeometry(deskShape, { depth: 0.82, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.045, bevelThickness: 0.045 })
-  deskGeometry.translate(0, 0, -0.41)
-  const desk = new THREE.Mesh(deskGeometry, white); desk.position.y = 0.1; desk.castShadow = true; desk.receiveShadow = true; deskGroup.add(desk)
+  addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
   addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], signTop, 0.025)
   const deskSign = new THREE.Mesh(
     new THREE.PlaneGeometry(2.4, 0.66),
@@ -1077,12 +1074,16 @@ function createInformationFacility(facility: StationFacility) {
   addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
   addLoungeSet(2.55, -0.55, [-0.1, 2.05, 4.05])
 
-  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) {
+  const ceilingLightSpacing = 1.75
+  const ceilingLightXs = [-1.5, -0.5, 0.5, 1.5].map((offset) => offset * ceilingLightSpacing)
+  const ceilingLightZs = [-0.5, 0.5].map((offset) => -0.08 + offset * ceilingLightSpacing)
+  for (const x of ceilingLightXs) for (const z of ceilingLightZs) {
     addNonShadowingRoundedBox(group, [0.52, 0.028, 0.52], [x, FACILITY_HEIGHT - 0.37, z], light, 0.018)
-    const ceilingLight = new THREE.PointLight('#fffdf2', 0.42, 5.2, 2)
-    ceilingLight.position.set(x, FACILITY_HEIGHT - 0.52, z)
+    const ceilingLight = new THREE.SpotLight('#fff4cf', 2.1, 6.2, Math.PI / 7.5, 0.72, 1.6)
+    ceilingLight.position.set(x, FACILITY_HEIGHT - 0.46, z)
+    ceilingLight.target.position.set(x, 0.24, z)
     ceilingLight.castShadow = false
-    group.add(ceilingLight)
+    group.add(ceilingLight, ceilingLight.target)
   }
   return group
 }
