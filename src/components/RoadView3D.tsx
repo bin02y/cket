@@ -338,8 +338,8 @@ function makeInformationSignTexture() {
   context.fillStyle = '#080808'; context.beginPath(); context.arc(250, 210, 118, 0, Math.PI * 2); context.fill()
   context.fillStyle = '#ffffff'; context.beginPath(); context.arc(250, 158, 17, 0, Math.PI * 2); context.fill()
   context.beginPath(); context.roundRect(234, 187, 32, 96, 16); context.fill()
-  context.fillStyle = '#080808'; context.font = '800 162px Arial, sans-serif'; context.textAlign = 'left'
-  context.fillText('Information', 420, 220, 1050)
+  context.fillStyle = '#080808'; context.font = '800 162px Arial, sans-serif'; context.textAlign = 'left'; context.textBaseline = 'middle'
+  context.fillText('Information', 390, 210, 1080)
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4
@@ -948,7 +948,7 @@ function createRestroomFacility(facility: StationFacility) {
       group,
       doorwayWidth + 0.2,
       doorFrameHeight,
-      0.1,
+      0.12,
       0.13,
       [center, RESTROOM_INTERIOR_FLOOR_Y + doorFrameHeight / 2, frontZ + 0.18],
       exteriorTrim,
@@ -972,7 +972,7 @@ function createRestroomFacility(facility: StationFacility) {
     const doorWidth = doorwayWidth
     const doorHeight = RESTROOM_DOOR_HEIGHT
     const hingedDoor = new THREE.Group()
-    hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
+    hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.205)
     const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], entranceDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
@@ -1039,7 +1039,7 @@ function createInformationFacility(facility: StationFacility) {
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
   addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
-  addRoundedBox(deskGroup, [2.66, 0.12, 0.98], [0, 1.24, -0.02], signTop, 0.025)
+  addRoundedBox(deskGroup, [2.9, 0.12, 0.98], [0, 1.24, -0.02], signTop, 0.025)
   const deskSign = new THREE.Mesh(
     new THREE.PlaneGeometry(2.4, 0.66),
     new THREE.MeshBasicMaterial({ map: makeInformationSignTexture(), side: THREE.DoubleSide }),
@@ -1071,8 +1071,8 @@ function createInformationFacility(facility: StationFacility) {
       addLoungeChair(centerX + Math.cos(angle) * radius, centerZ + Math.sin(angle) * radius, Math.PI / 2 - angle)
     }
   }
-  addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
-  addLoungeSet(2.55, -0.55, [-0.1, 2.05, 4.05])
+  addLoungeSet(-2.15, -0.55, [0.15, 2.15, 4.15])
+  addLoungeSet(2.15, -0.55, [-0.1, 2.05, 4.05])
 
   const ceilingLightSpacing = 1.75
   const ceilingLightXs = [-1.5, -0.5, 0.5, 1.5].map((offset) => offset * ceilingLightSpacing)
@@ -1242,8 +1242,24 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
   const [selectedBooth, setSelectedBooth] = useState<RoadViewBooth | null>(null); const [renderError, setRenderError] = useState(false)
   const [selectedBoothImage, setSelectedBoothImage] = useState<BoothImage | null>(null)
   const [gateRewardNotice, setGateRewardNotice] = useState<GateRewardNotice | null>(null)
+  const [desktopHelpVisible, setDesktopHelpVisible] = useState(true)
+  const desktopHelpTimerRef = useRef<number | null>(null)
   onGatePassedRef.current = onGatePassed
   overlayRef.current = { mapOpen, selectedBooth }
+
+  const showDesktopHelp = () => {
+    if (desktopHelpTimerRef.current !== null) window.clearTimeout(desktopHelpTimerRef.current)
+    desktopHelpTimerRef.current = null
+    setDesktopHelpVisible(true)
+  }
+  const queueDesktopHelpHide = () => {
+    if (useMobileControls) return
+    if (desktopHelpTimerRef.current !== null) window.clearTimeout(desktopHelpTimerRef.current)
+    desktopHelpTimerRef.current = window.setTimeout(() => {
+      setDesktopHelpVisible(false)
+      desktopHelpTimerRef.current = null
+    }, 3000)
+  }
 
   const claimGateReward = (booth: RoadViewBooth) => {
     const cached = gateRewardCacheRef.current.get(booth.gateCode)
@@ -1262,6 +1278,17 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       setGateRewardNotice(notice)
     })
   }
+
+  useEffect(() => {
+    if (useMobileControls) return
+    desktopHelpTimerRef.current = window.setTimeout(() => {
+      setDesktopHelpVisible(false)
+      desktopHelpTimerRef.current = null
+    }, 3000)
+    return () => {
+      if (desktopHelpTimerRef.current !== null) window.clearTimeout(desktopHelpTimerRef.current)
+    }
+  }, [useMobileControls])
 
   useEffect(() => {
     const root = document.documentElement
@@ -1430,7 +1457,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     <section className={`roadview${useMobileControls ? ' roadview--touch' : ''}`} role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
-      <div className="roadview__desktop-help" aria-hidden="true"><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
+      <div className={`roadview__desktop-help${desktopHelpVisible ? '' : ' roadview__desktop-help--hidden'}`} aria-hidden="true" onMouseEnter={showDesktopHelp} onMouseLeave={queueDesktopHelpHide}><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
         <div className="roadview__dpad" role="group" aria-label="상하좌우 이동과 점프">
           {([
