@@ -33,9 +33,9 @@ type BoothImage = { src: string; alt: string }
 
 const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 7.2
-const BOOTH_TURNSTILE_OFFSET = 0.62
 const BOOTH_TURNSTILE_BODY_WIDTH = 0.48
 const BOOTH_TURNSTILE_BODY_DEPTH = 1.2
+const BOOTH_TURNSTILE_OFFSET = BOOTH_TURNSTILE_BODY_DEPTH / 2
 const BOOTH_TURNSTILE_BODY_LATERAL = 0.95
 const BOOTH_TURNSTILE_PASSAGE_HALF_WIDTH = BOOTH_TURNSTILE_BODY_LATERAL - BOOTH_TURNSTILE_BODY_WIDTH / 2
 const RESTROOM_WIDTH = 7.8
@@ -581,11 +581,11 @@ function createBoothTurnstile(zone: RoadViewBooth) {
   const dark = new THREE.MeshStandardMaterial({ color: '#101b20', metalness: 0.38, roughness: 0.2 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#9bd8e9', transparent: true, opacity: 0.34, metalness: 0.08, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04, depthWrite: false })
   const arrowMaterial = new THREE.MeshBasicMaterial({ map: makeTurnstileArrowTexture(), side: THREE.DoubleSide })
-  const localZ = BOOTH_DEPTH / 2 + BOOTH_TURNSTILE_OFFSET
+  const localZ = BOOTH_DEPTH / 2 + BOOTH_TURNSTILE_BODY_DEPTH / 2
 
   for (const lateral of [-BOOTH_TURNSTILE_BODY_LATERAL, BOOTH_TURNSTILE_BODY_LATERAL]) {
     addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH, 1.34, BOOTH_TURNSTILE_BODY_DEPTH], [lateral, 0.67, localZ], silver, 0.09)
-    addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH + 0.08, 0.11, BOOTH_TURNSTILE_BODY_DEPTH + 0.08], [lateral, 1.37, localZ], edge, 0.035)
+    addRoundedBox(group, [BOOTH_TURNSTILE_BODY_WIDTH, 0.11, BOOTH_TURNSTILE_BODY_DEPTH], [lateral, 1.37, localZ], edge, 0.035)
     addRoundedBox(group, [0.3, 0.045, 0.42], [lateral, 1.445, localZ - 0.18], dark, 0.025)
     const arrow = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.38), arrowMaterial)
     arrow.position.set(lateral, 0.7, localZ + BOOTH_TURNSTILE_BODY_DEPTH / 2 + 0.008); group.add(arrow)
@@ -1033,7 +1033,7 @@ function createInformationFacility(facility: StationFacility) {
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.68, 0.1, INFORMATION_DEPTH - 0.68], [0, FACILITY_HEIGHT - 0.29, 0], woodCeiling, 0.025)
 
-  const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
+  const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 3.05); group.add(deskGroup)
   addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
   addRoundedBox(deskGroup, [2.9, 0.12, 0.82], [0, 1.24, 0], signTop, 0.025)
   const deskSign = new THREE.Mesh(
