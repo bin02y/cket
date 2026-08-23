@@ -385,6 +385,86 @@ function makeBoothMarqueeTexture(title: string, label: string, accent: string) {
   return texture
 }
 
+function makePleatedFanPanelGeometry(innerRadius: number, outerRadius: number, startAngle: number, endAngle: number, startZ: number, endZ: number) {
+  const thickness = 0.028
+  const point = (radius: number, angle: number, z: number) => [Math.cos(angle) * radius, Math.sin(angle) * radius, z] as const
+  const front = [
+    point(innerRadius, startAngle, startZ),
+    point(outerRadius, startAngle, startZ),
+    point(outerRadius, endAngle, endZ),
+    point(innerRadius, endAngle, endZ),
+  ]
+  const positions = [...front, ...front.map(([x, y, z]) => [x, y, z - thickness] as const)].flat()
+  const indices = [
+    0, 1, 2, 0, 2, 3,
+    4, 6, 5, 4, 7, 6,
+    0, 4, 5, 0, 5, 1,
+    1, 5, 6, 1, 6, 2,
+    2, 6, 7, 2, 7, 3,
+    3, 7, 4, 3, 4, 0,
+  ]
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()
+  return geometry
+}
+
+function makeEarthTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1536; canvas.height = 768
+  const context = canvas.getContext('2d')
+  if (!context) return new THREE.CanvasTexture(canvas)
+
+  const ocean = context.createLinearGradient(0, 0, 0, canvas.height)
+  ocean.addColorStop(0, '#207fc0'); ocean.addColorStop(0.48, '#2b9bd2'); ocean.addColorStop(1, '#176fae')
+  context.fillStyle = ocean; context.fillRect(0, 0, canvas.width, canvas.height)
+
+  const toPoint = ([longitude, latitude]: readonly [number, number]) => [
+    (longitude + 180) / 360 * canvas.width,
+    (90 - latitude) / 180 * canvas.height,
+  ] as const
+  const drawPolygon = (points: readonly (readonly [number, number])[], fill: string) => {
+    context.beginPath()
+    points.forEach((coordinate, index) => {
+      const [x, y] = toPoint(coordinate)
+      if (index === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath(); context.fillStyle = fill; context.fill()
+    context.strokeStyle = 'rgba(38, 91, 61, 0.72)'; context.lineWidth = 4; context.lineJoin = 'round'; context.stroke()
+  }
+
+  const continents: readonly { points: readonly (readonly [number, number])[]; color: string }[] = [
+    { color: '#8fbf62', points: [[-168, 70], [-145, 72], [-126, 57], [-115, 50], [-94, 50], [-82, 28], [-98, 16], [-112, 22], [-126, 39], [-141, 54]] },
+    { color: '#a8c873', points: [[-73, 83], [-18, 82], [-22, 61], [-45, 58], [-63, 68]] },
+    { color: '#83b85d', points: [[-81, 12], [-61, 9], [-35, -7], [-42, -25], [-54, -55], [-69, -48], [-77, -18]] },
+    { color: '#a6c978', points: [[-11, 72], [34, 70], [43, 55], [30, 42], [10, 36], [-9, 44]] },
+    { color: '#b1c96e', points: [[-17, 36], [18, 38], [49, 13], [42, -14], [28, -35], [10, -34], [-4, -8]] },
+    { color: '#93bd61', points: [[30, 71], [74, 76], [124, 68], [178, 59], [146, 43], [142, 11], [113, 2], [86, 8], [66, 24], [42, 39]] },
+    { color: '#9dc36c', points: [[112, -11], [146, -9], [155, -27], [147, -43], [116, -38]] },
+    { color: '#d8dfc8', points: [[-180, -72], [-120, -68], [-60, -73], [0, -69], [60, -74], [120, -68], [180, -72], [180, -90], [-180, -90]] },
+  ]
+  continents.forEach(({ points, color }) => drawPolygon(points, color))
+
+  context.save()
+  context.strokeStyle = 'rgba(233, 249, 255, 0.27)'; context.lineWidth = 2
+  for (let longitude = -150; longitude <= 150; longitude += 30) {
+    const x = (longitude + 180) / 360 * canvas.width
+    context.beginPath(); context.moveTo(x, 0); context.lineTo(x, canvas.height); context.stroke()
+  }
+  for (let latitude = -60; latitude <= 60; latitude += 30) {
+    const y = (90 - latitude) / 180 * canvas.height
+    context.beginPath(); context.moveTo(0, y); context.lineTo(canvas.width, y); context.stroke()
+  }
+  context.restore()
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  texture.anisotropy = 4
+  return texture
+}
+
 function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], position: [number, number, number], material: THREE.Material, radius = 0.12) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, radius), material)
   mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh)
@@ -734,16 +814,80 @@ function createBoothSculpture(boothId: number) {
       addSculptureSphere(group, 0.3, [1.2, 0.28, 1.5], [direction * 0.25, 0.42, 0.23], orange)
     }
   } else if (boothId === 3) {
-    const fanMaterial = new THREE.MeshPhysicalMaterial({ color: '#45b9c5', metalness: 0.04, roughness: 0.34, clearcoat: 0.5, clearcoatRoughness: 0.18, side: THREE.DoubleSide })
-    const ribMaterial = new THREE.MeshStandardMaterial({ color: '#d7ae72', metalness: 0.03, roughness: 0.62 })
-    const fan = new THREE.Mesh(new THREE.CircleGeometry(1.18, 40, 0, Math.PI), fanMaterial)
-    fan.position.set(0, 0.76, 0); fan.castShadow = true; group.add(fan)
-    for (let index = 0; index <= 10; index += 1) {
-      const angle = index / 10 * Math.PI
-      const rib = addRoundedBox(group, [0.035, 1.04, 0.035], [Math.cos(angle) * 0.52, 0.76 + Math.sin(angle) * 0.52, 0.035], ribMaterial, 0.012)
+    const paperLight = new THREE.MeshStandardMaterial({ color: '#fffef8', metalness: 0.01, roughness: 0.72, side: THREE.DoubleSide })
+    const paperShade = new THREE.MeshStandardMaterial({ color: '#e7e6df', metalness: 0.01, roughness: 0.78, side: THREE.DoubleSide })
+    const foldHighlight = new THREE.MeshStandardMaterial({ color: '#f8f6ed', metalness: 0.01, roughness: 0.68 })
+    const bamboo = new THREE.MeshStandardMaterial({ color: '#a97843', metalness: 0.01, roughness: 0.7 })
+    const bambooEdge = new THREE.MeshStandardMaterial({ color: '#6d472a', metalness: 0.02, roughness: 0.64 })
+    const brass = new THREE.MeshStandardMaterial({ color: '#b89243', metalness: 0.72, roughness: 0.24 })
+    const cord = new THREE.MeshStandardMaterial({ color: '#3d2118', metalness: 0.01, roughness: 0.76 })
+    const fanAssembly = new THREE.Group(); fanAssembly.position.y = 0.7; group.add(fanAssembly)
+    const startAngle = Math.PI * 0.055
+    const endAngle = Math.PI * 0.945
+    const panelCount = 24
+    const innerPaperRadius = 0.61
+    const outerRadius = 1.3
+
+    for (let index = 0; index < panelCount; index += 1) {
+      const angle0 = THREE.MathUtils.lerp(startAngle, endAngle, index / panelCount)
+      const angle1 = THREE.MathUtils.lerp(startAngle, endAngle, (index + 1) / panelCount)
+      const z0 = index % 2 === 0 ? 0.042 : -0.042
+      const z1 = index % 2 === 0 ? -0.042 : 0.042
+      const panel = new THREE.Mesh(
+        makePleatedFanPanelGeometry(innerPaperRadius, outerRadius, angle0, angle1, z0, z1),
+        index % 2 === 0 ? paperLight : paperShade,
+      )
+      panel.position.z = 0.014; panel.castShadow = true; panel.receiveShadow = true; fanAssembly.add(panel)
+    }
+
+    const addRadialRib = (angle: number, radiusStart: number, radiusEnd: number, width: number, z: number, material: THREE.Material) => {
+      const radius = (radiusStart + radiusEnd) / 2
+      const rib = addRoundedBox(
+        fanAssembly,
+        [width, radiusEnd - radiusStart, 0.035],
+        [Math.cos(angle) * radius, Math.sin(angle) * radius, z],
+        material,
+        Math.min(width / 3, 0.012),
+      )
       rib.rotation.z = angle - Math.PI / 2
     }
-    addSculptureSphere(group, 0.14, [1, 1, 0.45], [0, 0.76, 0.08], ribMaterial)
+    for (let index = 0; index <= panelCount; index += 1) {
+      const angle = THREE.MathUtils.lerp(startAngle, endAngle, index / panelCount)
+      const foldZ = (index % 2 === 0 ? 0.042 : -0.042) + 0.014
+      addRadialRib(angle, 0.08, 0.68, 0.045, 0.06, bamboo)
+      addRadialRib(angle, 0.08, 0.68, 0.045, -0.06, bamboo)
+      addRadialRib(angle, innerPaperRadius, outerRadius - 0.015, 0.016, foldZ + 0.018, foldHighlight)
+      addRadialRib(angle, innerPaperRadius, outerRadius - 0.015, 0.016, foldZ - 0.046, foldHighlight)
+    }
+    for (const angle of [startAngle, endAngle]) addRadialRib(angle, 0.06, outerRadius + 0.03, 0.075, 0, bambooEdge)
+
+    const pivot = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.15, 32), bambooEdge)
+    pivot.rotation.x = Math.PI / 2; pivot.castShadow = true; fanAssembly.add(pivot)
+    for (const z of [-0.085, 0.085]) {
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.068, 0.018, 24), brass)
+      cap.rotation.x = Math.PI / 2; cap.position.z = z; fanAssembly.add(cap)
+    }
+
+    const tasselCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.02, -0.08, 0.08),
+      new THREE.Vector3(0.13, -0.23, 0.1),
+      new THREE.Vector3(0.09, -0.39, 0.08),
+      new THREE.Vector3(0.18, -0.54, 0.06),
+    ])
+    const tasselCord = new THREE.Mesh(new THREE.TubeGeometry(tasselCurve, 24, 0.012, 8, false), cord)
+    tasselCord.castShadow = true; fanAssembly.add(tasselCord)
+    for (const [y, radius, material] of [[-0.28, 0.055, brass], [-0.38, 0.06, bambooEdge], [-0.48, 0.047, brass]] as const) {
+      const bead = addSculptureSphere(fanAssembly, radius, [1, 1.2, 1], [0.13, y, 0.09], material)
+      bead.castShadow = true
+    }
+    for (const xOffset of [-0.025, 0.025]) {
+      const strandCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0.18, -0.53, 0.06),
+        new THREE.Vector3(0.2 + xOffset, -0.68, 0.05),
+        new THREE.Vector3(0.17 + xOffset * 1.6, -0.8, 0.04),
+      ])
+      fanAssembly.add(new THREE.Mesh(new THREE.TubeGeometry(strandCurve, 16, 0.008, 7, false), cord))
+    }
   } else if (boothId === 4) {
     const fur = new THREE.MeshPhysicalMaterial({ color: '#f4f7f6', metalness: 0.01, roughness: 0.52, clearcoat: 0.18 })
     const dark = new THREE.MeshStandardMaterial({ color: '#1f2b30', metalness: 0.02, roughness: 0.5 })
@@ -756,22 +900,33 @@ function createBoothSculpture(boothId: number) {
     for (const x of [-0.22, 0.22]) addSculptureSphere(group, 0.045, [1, 1, 0.55], [x, 1.94, 0.78], dark)
     for (const x of [-0.52, 0.52]) addSculptureSphere(group, 0.3, [0.72, 1.35, 0.75], [x, 0.52, 0.16], fur)
   } else {
-    const ocean = new THREE.MeshPhysicalMaterial({ color: '#2f8ed4', metalness: 0.08, roughness: 0.3, clearcoat: 0.7, clearcoatRoughness: 0.18 })
-    const land = new THREE.MeshStandardMaterial({ color: '#67b85b', metalness: 0.02, roughness: 0.52 })
-    const metal = new THREE.MeshStandardMaterial({ color: '#9aacb5', metalness: 0.74, roughness: 0.2 })
-    addRoundedBox(group, [0.16, 0.78, 0.16], [0, 0.66, 0], metal, 0.04)
-    const globe = addSculptureSphere(group, 0.86, [1, 1, 1], [0, 1.72, 0], ocean)
-    globe.rotation.z = -0.18
-    for (const [x, y, z, sx, sy, rotation] of [
-      [-0.3, 1.95, 0.76, 0.33, 0.18, 0.35], [0.2, 1.56, 0.82, 0.28, 0.42, -0.2], [0.47, 2.05, 0.62, 0.27, 0.18, -0.35],
-    ] as const) {
-      const patch = addSculptureSphere(group, 0.3, [sx / 0.3, sy / 0.3, 0.16], [x, y, z], land)
-      patch.rotation.z = rotation
+    const earthMaterial = new THREE.MeshPhysicalMaterial({ map: makeEarthTexture(), metalness: 0.02, roughness: 0.42, clearcoat: 0.34, clearcoatRoughness: 0.24 })
+    const atmosphereMaterial = new THREE.MeshPhysicalMaterial({ color: '#bcecff', transparent: true, opacity: 0.13, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.08, side: THREE.DoubleSide, depthWrite: false })
+    const brass = new THREE.MeshStandardMaterial({ color: '#a88442', metalness: 0.72, roughness: 0.22 })
+    const darkWood = new THREE.MeshPhysicalMaterial({ color: '#57351f', metalness: 0.04, roughness: 0.5, clearcoat: 0.46, clearcoatRoughness: 0.24 })
+
+    const lowerFoot = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.64, 0.12, 40), darkWood)
+    lowerFoot.position.y = 0.35; lowerFoot.castShadow = true; lowerFoot.receiveShadow = true; group.add(lowerFoot)
+    const upperFoot = new THREE.Mesh(new THREE.CylinderGeometry(0.39, 0.5, 0.1, 40), brass)
+    upperFoot.position.y = 0.46; upperFoot.castShadow = true; group.add(upperFoot)
+    addRoundedBox(group, [0.15, 0.38, 0.15], [0.38, 0.64, 0], brass, 0.04)
+
+    const globeAssembly = new THREE.Group()
+    globeAssembly.position.set(0, 1.66, 0)
+    globeAssembly.rotation.z = -THREE.MathUtils.degToRad(23.5)
+    group.add(globeAssembly)
+    const globe = new THREE.Mesh(new THREE.SphereGeometry(0.82, 64, 40), earthMaterial)
+    globe.castShadow = true; globe.receiveShadow = true; globeAssembly.add(globe)
+    const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(0.84, 48, 32), atmosphereMaterial)
+    globeAssembly.add(atmosphere)
+    const meridian = new THREE.Mesh(new THREE.TorusGeometry(0.94, 0.028, 12, 80), brass)
+    meridian.castShadow = true; globeAssembly.add(meridian)
+    const axis = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 1.94, 16), brass)
+    axis.castShadow = true; globeAssembly.add(axis)
+    for (const y of [-0.97, 0.97]) {
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.065, 20, 14), brass)
+      cap.position.y = y; cap.castShadow = true; globeAssembly.add(cap)
     }
-    const meridian = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.035, 10, 48), metal)
-    meridian.position.y = 1.72; meridian.rotation.z = -0.18; group.add(meridian)
-    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.62, 0.12, 32), metal)
-    foot.position.y = 0.34; group.add(foot)
   }
 
   group.userData.autoRotate = true
