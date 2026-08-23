@@ -970,7 +970,7 @@ function createRestroomFacility(facility: StationFacility) {
   for (const center of doorwayCenters) {
     const hingeSide = center < 0 ? -1 : 1
     const doorWidth = doorwayWidth
-    const doorHeight = RESTROOM_DOOR_HEIGHT
+    const doorHeight = RESTROOM_DOOR_HEIGHT + 0.08
     const hingedDoor = new THREE.Group()
     hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.205)
     const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], entranceDoor, 0.02)
@@ -1011,7 +1011,6 @@ function createInformationFacility(facility: StationFacility) {
   const halfWidth = INFORMATION_WIDTH / 2
   const halfDepth = INFORMATION_DEPTH / 2
   const white = new THREE.MeshPhysicalMaterial({ color: '#fbfcfc', metalness: 0.02, roughness: 0.34, clearcoat: 0.38, clearcoatRoughness: 0.28 })
-  const softWhite = new THREE.MeshStandardMaterial({ color: '#eef1f1', metalness: 0.02, roughness: 0.72 })
   const woodCeiling = new THREE.MeshPhysicalMaterial({ color: '#a97845', metalness: 0.02, roughness: 0.54, clearcoat: 0.22, clearcoatRoughness: 0.36 })
   const roofFrame = new THREE.MeshStandardMaterial({ color: '#101010', metalness: 0.14, roughness: 0.36 })
   const glass = new THREE.MeshPhysicalMaterial({ color: '#b9e0e8', transparent: true, opacity: 0.42, metalness: 0.08, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.03, depthWrite: false })
@@ -1032,14 +1031,11 @@ function createInformationFacility(facility: StationFacility) {
   addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [halfWidth - 0.17, roofCenterY, 0], roofFrame, 0.035)
   addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.035)
-  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], woodCeiling, 0.04)
-
-  for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addNonShadowingRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
-  for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addNonShadowingRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.68, 0.1, INFORMATION_DEPTH - 0.68], [0, FACILITY_HEIGHT - 0.29, 0], woodCeiling, 0.025)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
   addRoundedBox(deskGroup, [2.9, 1.08, 0.82], [0, 0.64, 0], white, 0.045)
-  addRoundedBox(deskGroup, [2.9, 0.12, 0.98], [0, 1.24, -0.02], signTop, 0.025)
+  addRoundedBox(deskGroup, [2.9, 0.12, 0.82], [0, 1.24, 0], signTop, 0.025)
   const deskSign = new THREE.Mesh(
     new THREE.PlaneGeometry(2.4, 0.66),
     new THREE.MeshBasicMaterial({ map: makeInformationSignTexture(), side: THREE.DoubleSide }),
