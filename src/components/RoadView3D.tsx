@@ -391,6 +391,13 @@ function addRoundedBox(parent: THREE.Object3D, size: [number, number, number], p
   return mesh
 }
 
+function addNonShadowingRoundedBox(parent: THREE.Object3D, size: [number, number, number], position: [number, number, number], material: THREE.Material, radius = 0.12) {
+  const mesh = addRoundedBox(parent, size, position, material, radius)
+  mesh.castShadow = false
+  mesh.receiveShadow = false
+  return mesh
+}
+
 function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Material, width = BOOTH_WIDTH, depth = BOOTH_DEPTH, omitBottom = false) {
   const wallThickness = 0.34
   const height = FACILITY_HEIGHT
@@ -405,7 +412,7 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
     parts.forEach((part) => part.dispose())
     geometry.computeVertexNormals()
     const shell = new THREE.Mesh(geometry, material)
-    shell.castShadow = true; shell.receiveShadow = true; parent.add(shell)
+    shell.castShadow = false; shell.receiveShadow = false; parent.add(shell)
     return { interiorBackZ: -depth / 2 + wallThickness + 0.06, height }
   }
   const outerBottom = 0
@@ -443,7 +450,7 @@ function addIntegratedBoothShell(parent: THREE.Object3D, material: THREE.Materia
   frameGeometry.dispose(); backGeometry.dispose()
   geometry.computeVertexNormals()
   const shell = new THREE.Mesh(geometry, material)
-  shell.castShadow = true; shell.receiveShadow = true; parent.add(shell)
+  shell.castShadow = false; shell.receiveShadow = false; parent.add(shell)
   return { interiorBackZ: -depth / 2 + wallThickness + 0.06, height }
 }
 
@@ -469,7 +476,7 @@ function addRestroomFacade(parent: THREE.Object3D, openingEdges: readonly (reado
   parts.forEach((part) => part.dispose())
   geometry.computeVertexNormals()
   const facade = new THREE.Mesh(geometry, material)
-  facade.castShadow = true; facade.receiveShadow = true; parent.add(facade)
+  facade.castShadow = false; facade.receiveShadow = false; parent.add(facade)
 }
 
 function makeRestroomIconMaterial(gender: 'men' | 'women') {
@@ -495,7 +502,7 @@ function makeRestroomIconMaterial(gender: 'men' | 'women') {
       void main() {
         float alpha = texture2D(iconTexture, vec2(iconUv.x * 0.5 + horizontalOffset, iconUv.y)).a;
         if (alpha < 0.01) discard;
-        gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
+        gl_FragColor = vec4(0.34, 0.36, 0.37, alpha);
       }
     `,
     transparent: true,
@@ -611,8 +618,8 @@ function createIntegratedTrainShell() {
   geometries.forEach((part) => part.dispose())
   geometry.computeVertexNormals()
   const shell = new THREE.Mesh(geometry, shellMaterial)
-  shell.castShadow = true
-  shell.receiveShadow = true
+  shell.castShadow = false
+  shell.receiveShadow = false
   group.add(shell)
 
   const stripeHeight = 0.72
@@ -751,12 +758,12 @@ function createBooth(zone: RoadViewBooth) {
   const halfDepth = BOOTH_DEPTH / 2
   const wallHeight = FACILITY_HEIGHT
 
-  addRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothWhite, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothWhite, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothWhite, 0.035)
-  addRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothWhite, 0.035)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothWhite, 0.045)
-  addRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothWhite, 0.04)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.12, 0.1, BOOTH_DEPTH - 0.12], [0, 0.05, 0], boothWhite, 0.035)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.16, wallHeight, 0.16], [0, wallHeight / 2, -halfDepth + 0.08], boothWhite, 0.035)
+  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [-halfWidth + 0.08, wallHeight / 2, 0], boothWhite, 0.035)
+  addNonShadowingRoundedBox(group, [0.16, wallHeight, BOOTH_DEPTH - 0.12], [halfWidth - 0.08, wallHeight / 2, 0], boothWhite, 0.035)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.18, BOOTH_DEPTH - 0.08], [0, wallHeight - 0.09, 0], boothWhite, 0.045)
+  addNonShadowingRoundedBox(group, [BOOTH_WIDTH - 0.08, 0.48, 0.22], [0, wallHeight - 0.32, halfDepth - 0.1], boothWhite, 0.04)
 
   const name = new THREE.Mesh(
     new THREE.PlaneGeometry(BOOTH_WIDTH - 0.36, 0.42),
@@ -805,6 +812,10 @@ function createRestroomFacility(facility: StationFacility) {
 
   const restroomLightGray = '#dfe3e6'
   const interiorSurface = new THREE.MeshStandardMaterial({ color: restroomLightGray, roughness: 0.72, side: THREE.DoubleSide })
+  const exteriorWhite = new THREE.MeshPhysicalMaterial({ color: '#fbfbfa', metalness: 0.01, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.36 })
+  const exteriorTrim = new THREE.MeshStandardMaterial({ color: '#d8d9d7', metalness: 0.04, roughness: 0.56 })
+  const charcoalFrame = new THREE.MeshStandardMaterial({ color: '#5a5b5b', metalness: 0.1, roughness: 0.42 })
+  const entranceDoor = new THREE.MeshPhysicalMaterial({ color: '#f7f7f5', metalness: 0.03, roughness: 0.4, clearcoat: 0.26, clearcoatRoughness: 0.34 })
   const floorSurface = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.74, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   const partition = new THREE.MeshStandardMaterial({ color: '#c7ced1', metalness: 0.08, roughness: 0.62 })
   const stallDoor = new THREE.MeshStandardMaterial({ color: '#5f6a70', metalness: 0.18, roughness: 0.52 })
@@ -818,23 +829,78 @@ function createRestroomFacility(facility: StationFacility) {
 
   const interiorWallHeight = RESTROOM_CEILING_BOTTOM_Y - RESTROOM_INTERIOR_FLOOR_Y
   const interiorWallCenterY = RESTROOM_INTERIOR_FLOOR_Y + interiorWallHeight / 2
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.46, interiorWallHeight, 0.08], [0, interiorWallCenterY, interiorBackZ + 0.05], interiorSurface, 0.02)
-  addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
-  addRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
-  addRoundedBox(group, [0.18, interiorWallHeight, RESTROOM_DEPTH - 0.28], [0, interiorWallCenterY, -0.02], interiorSurface, 0.025)
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH - 0.46, interiorWallHeight, 0.08], [0, interiorWallCenterY, interiorBackZ + 0.05], interiorSurface, 0.02)
+  addNonShadowingRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [-halfWidth + 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
+  addNonShadowingRoundedBox(group, [0.1, interiorWallHeight, RESTROOM_DEPTH - 0.46], [halfWidth - 0.27, interiorWallCenterY, 0], interiorSurface, 0.02)
+  addNonShadowingRoundedBox(group, [0.18, interiorWallHeight, RESTROOM_DEPTH - 0.28], [0, interiorWallCenterY, -0.02], interiorSurface, 0.025)
   const cleanFloor = new THREE.Mesh(new THREE.PlaneGeometry(RESTROOM_WIDTH, RESTROOM_DEPTH + RESTROOM_FLOOR_FRONT_EXTENSION), floorSurface)
   cleanFloor.rotation.x = -Math.PI / 2
   cleanFloor.position.set(0, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_FLOOR_FRONT_EXTENSION / 2)
   cleanFloor.renderOrder = 2
   cleanFloor.receiveShadow = false
   group.add(cleanFloor)
-  addRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], interiorSurface, 0.03)
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH - 0.44, 0.16, RESTROOM_DEPTH - 0.44], [0, 4.83, 0], interiorSurface, 0.03)
 
   const doorwayWidth = RESTROOM_ENTRANCE_DOOR_WIDTH
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
   const frontZ = halfDepth + 0.02
-  addRestroomFacade(group, openingEdges, frontZ, interiorSurface, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
+  addRestroomFacade(group, openingEdges, frontZ, exteriorWhite, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
+
+  const roofCenterY = FACILITY_HEIGHT - 0.14
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.28, 0.34], [0, roofCenterY, -halfDepth + 0.17], charcoalFrame, 0.035)
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.28, 0.22], [0, roofCenterY, frontZ + 0.18], charcoalFrame, 0.035)
+  addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], charcoalFrame, 0.035)
+  addNonShadowingRoundedBox(group, [0.34, 0.28, RESTROOM_DEPTH], [halfWidth - 0.17, roofCenterY, 0], charcoalFrame, 0.035)
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.2, 0.22], [0, 0.1, -halfDepth + 0.11], charcoalFrame, 0.025)
+  addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.2, 0.16], [0, 0.1, frontZ + 0.16], charcoalFrame, 0.025)
+  addNonShadowingRoundedBox(group, [0.22, 0.2, RESTROOM_DEPTH], [-halfWidth + 0.11, 0.1, 0], charcoalFrame, 0.025)
+  addNonShadowingRoundedBox(group, [0.22, 0.2, RESTROOM_DEPTH], [halfWidth - 0.11, 0.1, 0], charcoalFrame, 0.025)
+  for (const x of [-halfWidth + 0.22, halfWidth - 0.22]) for (const z of [-halfDepth + 0.22, frontZ + 0.14]) {
+    addNonShadowingRoundedBox(group, [0.44, FACILITY_HEIGHT - 0.42, 0.44], [x, (FACILITY_HEIGHT - 0.42) / 2 + 0.2, z], charcoalFrame, 0.025)
+  }
+
+  const frontPanelZ = frontZ + 0.18
+  const addFrontPanelFrame = (centerX: number, centerY: number, width: number, height: number) => {
+    addNonShadowingRoundedBox(group, [0.05, height, 0.035], [centerX - width / 2, centerY, frontPanelZ], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [0.05, height, 0.035], [centerX + width / 2, centerY, frontPanelZ], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [width, 0.05, 0.035], [centerX, centerY - height / 2, frontPanelZ], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [width, 0.05, 0.035], [centerX, centerY + height / 2, frontPanelZ], exteriorTrim, 0.012)
+  }
+  for (const [centerX, width] of [[-2.85, 1.35], [0, 1.12], [2.85, 1.35]] as const) {
+    addFrontPanelFrame(centerX, 1.3, width, 1.78)
+    addFrontPanelFrame(centerX, 3.78, width, 1.38)
+  }
+  for (const centerX of doorwayCenters) addFrontPanelFrame(centerX, 3.78, doorwayWidth - 0.2, 1.38)
+
+  const addSidePanelFrame = (side: -1 | 1, centerZ: number, centerY: number, width: number, height: number) => {
+    const x = side * (halfWidth + 0.018)
+    addNonShadowingRoundedBox(group, [0.035, height, 0.05], [x, centerY, centerZ - width / 2], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [0.035, height, 0.05], [x, centerY, centerZ + width / 2], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [0.035, 0.05, width], [x, centerY - height / 2, centerZ], exteriorTrim, 0.012)
+    addNonShadowingRoundedBox(group, [0.035, 0.05, width], [x, centerY + height / 2, centerZ], exteriorTrim, 0.012)
+  }
+  for (const side of [-1, 1] as const) for (const z of [-2.55, -0.85, 0.85, 2.55]) {
+    addSidePanelFrame(side, z, 1.42, 1.38, 2.14)
+    addSidePanelFrame(side, z, 3.86, 1.38, 1.2)
+  }
+
+  for (const center of doorwayCenters) {
+    addNonShadowingRoundedBox(group, [0.1, RESTROOM_DOOR_HEIGHT + 0.18, 0.13], [center - doorwayWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT / 2, frontZ + 0.18], exteriorTrim, 0.02)
+    addNonShadowingRoundedBox(group, [0.1, RESTROOM_DOOR_HEIGHT + 0.18, 0.13], [center + doorwayWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT / 2, frontZ + 0.18], exteriorTrim, 0.02)
+    addNonShadowingRoundedBox(group, [doorwayWidth + 0.2, 0.1, 0.13], [center, RESTROOM_INTERIOR_FLOOR_Y + RESTROOM_DOOR_HEIGHT + 0.04, frontZ + 0.18], exteriorTrim, 0.02)
+  }
+
+  const sconceLight = new THREE.MeshBasicMaterial({ color: '#fff7ca' })
+  for (const x of [-halfWidth + 0.24, halfWidth - 0.24]) {
+    addNonShadowingRoundedBox(group, [0.58, 0.07, 0.13], [x, 3.62, frontZ + 0.22], charcoalFrame, 0.018)
+    addNonShadowingRoundedBox(group, [0.34, 0.025, 0.04], [x, 3.56, frontZ + 0.29], sconceLight, 0.01)
+    const spot = new THREE.SpotLight('#fff3b0', 1.05, 4.2, Math.PI / 5.5, 0.55, 2)
+    spot.position.set(x, 3.5, frontZ + 0.32)
+    spot.target.position.set(x, 2.28, frontZ + 1.1)
+    spot.castShadow = false
+    group.add(spot, spot.target)
+  }
 
   const hingedDoors: THREE.Group[] = []
   for (const center of doorwayCenters) {
@@ -843,10 +909,14 @@ function createRestroomFacility(facility: StationFacility) {
     const doorHeight = RESTROOM_DOOR_HEIGHT
     const hingedDoor = new THREE.Group()
     hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.19)
-    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], stallDoor, 0.02)
+    const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], entranceDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
-    addRoundedBox(panel, [0.12, 0.08, 0.04], [-hingeSide * doorWidth * 0.3, 0, 0.055], metal, 0.02)
+    addRoundedBox(panel, [0.07, 0.72, 0.055], [-hingeSide * doorWidth * 0.32, 0, 0.07], metal, 0.02)
+    const gender = center < 0 ? 'women' : 'men'
+    const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 1.28), makeRestroomIconMaterial(gender))
+    pictogram.position.set(0, -0.08, 0.071)
+    panel.add(pictogram)
     hingedDoor.userData.openRotation = -hingeSide * 1.55
     hingedDoor.userData.openDistance = 1.45
     hingedDoor.userData.collisionPanel = panel
@@ -854,17 +924,10 @@ function createRestroomFacility(facility: StationFacility) {
     hingedDoors.push(hingedDoor)
   }
 
-  for (const [index, direction] of [-1, 1].entries()) {
-    const gender = index === 0 ? 'men' : 'women'
-    const pictogramX = direction * 2.8
-    const pictogram = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), makeRestroomIconMaterial(gender))
-    pictogram.position.set(pictogramX, 1.12, frontZ + 0.178); group.add(pictogram)
-  }
-
   const stallPartitionDepth = RESTROOM_STALL_FRONT_Z - RESTROOM_STALL_BACK_Z
   const stallPartitionZ = (RESTROOM_STALL_FRONT_Z + RESTROOM_STALL_BACK_Z) / 2
   for (const x of RESTROOM_STALL_PARTITIONS) {
-    addRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, RESTROOM_INTERIOR_FLOOR_Y + 1.04, stallPartitionZ], partition, 0.015)
+    addNonShadowingRoundedBox(group, [0.06, 2.08, stallPartitionDepth], [x, RESTROOM_INTERIOR_FLOOR_Y + 1.04, stallPartitionZ], partition, 0.015)
   }
   for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
@@ -906,17 +969,17 @@ function createInformationFacility(facility: StationFacility) {
   const wallHeight = FACILITY_HEIGHT - 0.24
   const roofCenterY = FACILITY_HEIGHT - 0.12
 
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], white, 0.045)
-  addRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], white, 0.045)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], roofFrame, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [-halfWidth + 0.14, roofCenterY, 0], roofFrame, 0.055)
-  addRoundedBox(group, [0.28, 0.24, INFORMATION_DEPTH - 0.48], [halfWidth - 0.14, roofCenterY, 0], roofFrame, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.24, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.055)
-  addRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], woodCeiling, 0.04)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.22, 0.12, INFORMATION_DEPTH - 0.22], [0, 0.06, -0.02], white, 0.045)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.24, wallHeight, 0.18], [0, wallHeight / 2, -halfDepth + 0.12], white, 0.045)
+  addNonShadowingRoundedBox(group, [0.18, wallHeight, INFORMATION_DEPTH - 0.2], [-halfWidth + 0.11, wallHeight / 2, 0], white, 0.045)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, -halfDepth + 0.17], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [-halfWidth + 0.17, roofCenterY, 0], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [0.34, 0.24, INFORMATION_DEPTH], [halfWidth - 0.17, roofCenterY, 0], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH, 0.24, 0.34], [0, roofCenterY, halfDepth - 0.17], roofFrame, 0.035)
+  addNonShadowingRoundedBox(group, [INFORMATION_WIDTH - 0.82, 0.1, INFORMATION_DEPTH - 0.82], [0, FACILITY_HEIGHT - 0.29, -0.08], woodCeiling, 0.04)
 
-  for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
-  for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
+  for (const z of [-2.5, -2.04, -1.58, -1.12, -0.66, -0.2, 0.26, 0.72]) addNonShadowingRoundedBox(group, [0.055, 2.42, 0.075], [-halfWidth + 0.2, 2.05, z], softWhite, 0.018)
+  for (const y of [3.58, 3.8, 4.02, 4.24, 4.46, 4.68]) addNonShadowingRoundedBox(group, [3.35, 0.055, 0.07], [2.08, y, -halfDepth + 0.18], softWhite, 0.018)
 
   const deskGroup = new THREE.Group(); deskGroup.position.set(2.3, 0, 2.18); group.add(deskGroup)
   const deskShape = new THREE.Shape()
@@ -959,7 +1022,13 @@ function createInformationFacility(facility: StationFacility) {
   addLoungeSet(-2.55, -0.55, [0.15, 2.15, 4.15])
   addLoungeSet(2.55, -0.55, [-0.1, 2.05, 4.05])
 
-  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) addRoundedBox(group, [0.72, 0.028, 0.36], [x, FACILITY_HEIGHT - 0.37, z], light, 0.018)
+  for (const x of [-2.85, -0.95, 0.95, 2.85]) for (const z of [-1.65, 0.65]) {
+    addNonShadowingRoundedBox(group, [0.52, 0.028, 0.52], [x, FACILITY_HEIGHT - 0.37, z], light, 0.018)
+    const ceilingLight = new THREE.PointLight('#fffdf2', 0.42, 5.2, 2)
+    ceilingLight.position.set(x, FACILITY_HEIGHT - 0.52, z)
+    ceilingLight.castShadow = false
+    group.add(ceilingLight)
+  }
   return group
 }
 
