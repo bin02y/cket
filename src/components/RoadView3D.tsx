@@ -57,7 +57,7 @@ const RESTROOM_STALL_DOOR_WIDTH = 1.15
 const RESTROOM_DOOR_HEIGHT = 2.45
 const RESTROOM_INTERIOR_FLOOR_Y = 0.04
 const RESTROOM_CEILING_BOTTOM_Y = 4.75
-const RESTROOM_FLOOR_FRONT_EXTENSION = 0.17
+const RESTROOM_FLOOR_FRONT_EXTENSION = 0
 const RESTROOM_STALL_CENTERS = [-3, -1.75, 1.75, 3] as const
 const RESTROOM_STALL_PARTITIONS = [-2.375, -1.125, 1.125, 2.375] as const
 const INFORMATION_WIDTH = RESTROOM_WIDTH
@@ -1094,8 +1094,9 @@ function createRestroomFacility(facility: StationFacility) {
   const doorwayWidth = RESTROOM_ENTRANCE_DOOR_WIDTH
   const doorwayCenters = [-1.35, 1.35] as const
   const openingEdges = doorwayCenters.map((center) => [center - doorwayWidth / 2, center + doorwayWidth / 2] as const)
-  const frontZ = halfDepth + 0.02
-  addRestroomFacade(group, openingEdges, frontZ, exteriorWhite, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
+  const facadeFrontZ = halfDepth
+  const facadeCenterZ = facadeFrontZ - 0.15
+  addRestroomFacade(group, openingEdges, facadeCenterZ, exteriorWhite, RESTROOM_INTERIOR_FLOOR_Y, RESTROOM_DOOR_HEIGHT)
 
   const roofCenterY = FACILITY_HEIGHT - 0.14
   addNonShadowingRoundedBox(group, [RESTROOM_WIDTH, 0.28, 0.34], [0, roofCenterY, -halfDepth + 0.17], charcoalFrame, 0.035)
@@ -1111,7 +1112,7 @@ function createRestroomFacility(facility: StationFacility) {
   }
   const frontPilasterWidth = 0.68
   const frontPilasterX = halfWidth - frontPilasterWidth / 2
-  const frontPilasterZ = frontZ + 0.14
+  const frontPilasterZ = facadeFrontZ - 0.172
   const frontFrameShape = new THREE.Shape()
   frontFrameShape.moveTo(-halfWidth, 0)
   frontFrameShape.lineTo(halfWidth, 0)
@@ -1132,7 +1133,7 @@ function createRestroomFacility(facility: StationFacility) {
   frontFrame.castShadow = false; frontFrame.receiveShadow = false
   group.add(frontFrame)
 
-  const frontPanelZ = frontZ + 0.18
+  const frontPanelZ = facadeFrontZ - 0.007
   const addFrontPanelFrame = (centerX: number, centerY: number, width: number, height: number) => {
     addNonShadowingRectFrame(group, width, height, 0.05, 0.035, [centerX, centerY, frontPanelZ], exteriorTrim)
   }
@@ -1142,7 +1143,7 @@ function createRestroomFacility(facility: StationFacility) {
   }
   for (const centerX of doorwayCenters) addFrontPanelFrame(centerX, 3.78, doorwayWidth - 0.2, 1.38)
 
-  const pilasterFaceZ = frontPilasterZ + 0.205
+  const pilasterFaceZ = facadeFrontZ + 0.0005
   const addPilasterInset = (centerX: number, centerY: number, height: number) => {
     addNonShadowingRectFrame(group, 0.42, height, 0.035, 0.025, [centerX, centerY, pilasterFaceZ], charcoalInset)
   }
@@ -1169,18 +1170,18 @@ function createRestroomFacility(facility: StationFacility) {
       doorFrameHeight,
       0.12,
       0.13,
-      [center, RESTROOM_INTERIOR_FLOOR_Y + doorFrameHeight / 2, frontZ + 0.18],
+      [center, RESTROOM_INTERIOR_FLOOR_Y + doorFrameHeight / 2, facadeFrontZ - 0.047],
       exteriorTrim,
     )
   }
 
   const sconceLight = new THREE.MeshStandardMaterial({ color: '#fffdf4', emissive: '#ffe27a', emissiveIntensity: 1.8, roughness: 0.24 })
   for (const x of [-frontPilasterX, frontPilasterX]) {
-    addNonShadowingRoundedBox(group, [0.5, 0.07, 0.13], [x, 3.92, pilasterFaceZ + 0.075], charcoalFrame, 0.018)
-    addNonShadowingRoundedBox(group, [0.34, 0.025, 0.04], [x, 3.86, pilasterFaceZ + 0.15], sconceLight, 0.01)
+    addNonShadowingRoundedBox(group, [0.5, 0.07, 0.13], [x, 3.92, facadeFrontZ - 0.0475], charcoalFrame, 0.018)
+    addNonShadowingRoundedBox(group, [0.34, 0.025, 0.04], [x, 3.86, facadeFrontZ - 0.002], sconceLight, 0.01)
     const spot = new THREE.SpotLight('#ffd866', 4.2, 3.6, Math.PI / 4.2, 0.68, 1.6)
-    spot.position.set(x, 3.84, pilasterFaceZ + 0.3)
-    spot.target.position.set(x, 3.08, pilasterFaceZ - 0.03)
+    spot.position.set(x, 3.84, facadeFrontZ + 0.05)
+    spot.target.position.set(x, 3.08, facadeFrontZ - 0.3)
     spot.castShadow = false
     group.add(spot, spot.target)
   }
@@ -1191,7 +1192,7 @@ function createRestroomFacility(facility: StationFacility) {
     const doorWidth = doorwayWidth
     const doorHeight = RESTROOM_DOOR_HEIGHT + 0.08
     const hingedDoor = new THREE.Group()
-    hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, frontZ + 0.205)
+    hingedDoor.position.set(center + hingeSide * doorwayWidth / 2, 0, facadeFrontZ - 0.1)
     const panel = addRoundedBox(hingedDoor, [doorWidth, doorHeight, 0.08], [-hingeSide * doorWidth / 2, RESTROOM_INTERIOR_FLOOR_Y + doorHeight / 2, 0], entranceDoor, 0.02)
     panel.userData.collisionWidth = doorWidth
     panel.userData.collisionDepth = 0.08
@@ -1201,7 +1202,7 @@ function createRestroomFacility(facility: StationFacility) {
     pictogram.position.set(0, -0.08, 0.071)
     panel.add(pictogram)
     hingedDoor.userData.inwardRotation = -hingeSide * 1.55
-    hingedDoor.userData.doorPlaneZ = frontZ + 0.205
+    hingedDoor.userData.doorPlaneZ = facadeFrontZ - 0.1
     hingedDoor.userData.bidirectional = true
     hingedDoor.userData.openDistance = 2.15
     hingedDoor.userData.collisionPanel = panel
@@ -1471,13 +1472,10 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     desktopHelpTimerRef.current = null
     setDesktopHelpVisible(true)
   }
-  const queueDesktopHelpHide = () => {
-    if (useMobileControls) return
+  const hideDesktopHelp = () => {
     if (desktopHelpTimerRef.current !== null) window.clearTimeout(desktopHelpTimerRef.current)
-    desktopHelpTimerRef.current = window.setTimeout(() => {
-      setDesktopHelpVisible(false)
-      desktopHelpTimerRef.current = null
-    }, 3000)
+    desktopHelpTimerRef.current = null
+    setDesktopHelpVisible(false)
   }
 
   const claimGateReward = (booth: RoadViewBooth) => {
@@ -1688,7 +1686,7 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     <section className={`roadview${useMobileControls ? ' roadview--touch' : ''}`} role="dialog" aria-modal="true" aria-label="에코 익스프레스 메타버스 3D 역사">
       <canvas ref={sceneRef} className="roadview__scene" aria-label="개찰구를 통과해 안내를 확인하는 에코 익스프레스 메타버스 역사" />
       {renderError ? <div className="roadview__render-error"><strong>3D 공간을 불러오지 못했습니다.</strong><span>브라우저의 그래픽 가속을 켜고 다시 시도해 주세요.</span></div> : null}
-      <div className={`roadview__desktop-help${desktopHelpVisible ? '' : ' roadview__desktop-help--hidden'}`} aria-hidden="true" onMouseEnter={showDesktopHelp} onMouseLeave={queueDesktopHelpHide}><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
+      <div className={`roadview__desktop-help${desktopHelpVisible ? '' : ' roadview__desktop-help--hidden'}`} aria-hidden="true" onMouseEnter={showDesktopHelp} onMouseLeave={hideDesktopHelp}><span><kbd>W A S D</kbd> 이동</span><span><kbd>SHIFT</kbd> 달리기</span><span><kbd>SPACE</kbd> 점프</span><span><kbd>드래그</kbd> 시점</span><span><kbd>M</kbd> 지도</span></div>
       <div className="roadview__mobile-controls" aria-label="3D 로드뷰 이동 조작">
         <div className="roadview__dpad" role="group" aria-label="상하좌우 이동과 점프">
           {([
