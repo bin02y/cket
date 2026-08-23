@@ -1,12 +1,12 @@
 import type { RewardProduct } from '../types'
-import coolingKeycapImage from '../assets/rewards/cooling-keycap.webp'
-import cyclePartsKeyringImage from '../assets/rewards/cycle-parts-keyring.webp'
-import ecoPowerBankImage from '../assets/rewards/eco-power-bank.webp'
-import ecoTumblerImage from '../assets/rewards/eco-tumbler.webp'
-import miniEcoPouchImage from '../assets/rewards/mini-eco-pouch.webp'
-import miniFanImage from '../assets/rewards/mini-fan.webp'
-import recycledPlasticPenImage from '../assets/rewards/recycled-plastic-pen.webp'
-import thermoStickerImage from '../assets/rewards/thermo-sticker.webp'
+import coolingKeycapImage from '../assets/rewards/cooling-keycap.png'
+import cyclePartsKeyringImage from '../assets/rewards/cycle-parts-keyring.png'
+import ecoPowerBankImage from '../assets/rewards/eco-power-bank.png'
+import ecoTumblerImage from '../assets/rewards/eco-tumbler.png'
+import miniEcoPouchImage from '../assets/rewards/mini-eco-pouch.png'
+import miniFanImage from '../assets/rewards/mini-fan.png'
+import recycledPlasticPenImage from '../assets/rewards/recycled-plastic-pen.png'
+import thermoStickerImage from '../assets/rewards/thermo-sticker.png'
 
 export const rewardProducts: readonly RewardProduct[] = [
   {
