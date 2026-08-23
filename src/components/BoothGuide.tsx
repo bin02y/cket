@@ -371,7 +371,6 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                       key={card.title}
                     >
                       <figure className="carrier-card__image">
-                        <img className="carrier-card__image-backdrop" src={card.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
                         <img className="carrier-card__image-foreground" src={card.image} alt={card.imageAlt} loading="lazy" decoding="async" />
                       </figure>
                       <div className="carrier-card__overlay">
