@@ -674,18 +674,8 @@ function addSculptureSphere(parent: THREE.Object3D, radius: number, scale: [numb
 function createBoothSculpture(boothId: number) {
   const group = new THREE.Group()
   const pedestal = new THREE.MeshPhysicalMaterial({ color: '#f5f8fa', metalness: 0.12, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2 })
-  const pedestalTrim = new THREE.MeshStandardMaterial({ color: '#258dff', emissive: '#0879f4', emissiveIntensity: 3.2, metalness: 0.24, roughness: 0.18 })
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.88, 0.98, 0.3, 40), pedestal)
   base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true; group.add(base)
-  const trim = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.06, 10, 48), pedestalTrim)
-  trim.rotation.x = Math.PI / 2; trim.position.y = 0.3; group.add(trim)
-  const glow = new THREE.Mesh(
-    new THREE.TorusGeometry(0.92, 0.1, 10, 48),
-    new THREE.MeshBasicMaterial({ color: '#42a8ff', transparent: true, opacity: 0.34, blending: THREE.AdditiveBlending, depthWrite: false }),
-  )
-  glow.rotation.x = Math.PI / 2; glow.position.y = 0.3; group.add(glow)
-  const pedestalLight = new THREE.PointLight('#168cff', 3.4, 4.8, 2)
-  pedestalLight.position.set(0, 0.5, 0); group.add(pedestalLight)
 
   if (boothId === 1) {
     const black = new THREE.MeshStandardMaterial({ color: '#172731', metalness: 0.04, roughness: 0.58 })
@@ -715,7 +705,7 @@ function createBoothSculpture(boothId: number) {
       const rib = addRoundedBox(group, [0.035, 1.04, 0.035], [Math.cos(angle) * 0.52, 0.76 + Math.sin(angle) * 0.52, 0.035], ribMaterial, 0.012)
       rib.rotation.z = angle - Math.PI / 2
     }
-    addSculptureSphere(group, 0.14, [1, 1, 0.45], [0, 0.76, 0.08], pedestalTrim)
+    addSculptureSphere(group, 0.14, [1, 1, 0.45], [0, 0.76, 0.08], ribMaterial)
   } else if (boothId === 4) {
     const fur = new THREE.MeshPhysicalMaterial({ color: '#f4f7f6', metalness: 0.01, roughness: 0.52, clearcoat: 0.18 })
     const dark = new THREE.MeshStandardMaterial({ color: '#1f2b30', metalness: 0.02, roughness: 0.5 })
