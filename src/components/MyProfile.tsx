@@ -9,7 +9,6 @@ type MyProfileProps = {
   balance: number
   visitedRoadViewGates: ReadonlySet<RoadViewGateCode>
   orders: readonly RewardOrder[]
-  onLogout: () => void
   onDeleteAccount: () => Promise<string | null>
 }
 
@@ -40,7 +39,7 @@ const roadViewTickets: readonly { code: RoadViewGateCode; title: string; color: 
   { code: 'B04', title: '나비효과로부터 지구를 지켜라', color: '#82e76d' },
 ]
 
-export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLogout, onDeleteAccount }: MyProfileProps) {
+export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -113,7 +112,6 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onLo
         <div className="profile-account-card__info"><span><Icon name="my" /></span><p><strong>참가자 계정</strong><small>{profile.name} · {profile.email}</small></p></div>
         <div className="profile-account-actions">
           <button className="profile-account-delete" type="button" onClick={() => setShowDeleteDialog(true)}>회원탈퇴</button>
-          <button className="profile-account-logout" type="button" onClick={onLogout}>로그아웃</button>
         </div>
       </section>
 

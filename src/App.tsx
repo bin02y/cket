@@ -184,10 +184,6 @@ function App() {
     }
   }
 
-  if (isAuthOpen && !currentParticipant) {
-    return <AuthScreen onLogin={login} onSignUp={signUp} onClose={() => setIsAuthOpen(false)} />
-  }
-
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문 바로가기</a>
@@ -197,11 +193,14 @@ function App() {
             <button className="app-header__logo" type="button" aria-label="CKET 홈으로 이동" onClick={() => navigateTo('booths')}>
               <img src={cketLogo} alt="" />
             </button>
-            {!currentParticipant ? (
-              <button className="app-header__auth-link" type="button" disabled={isAuthLoading} onClick={() => setIsAuthOpen(true)}>
-                로그인/회원가입 <span aria-hidden="true">&gt;</span>
-              </button>
-            ) : null}
+            <button
+              className="app-header__auth-link"
+              type="button"
+              disabled={isAuthLoading}
+              onClick={() => currentParticipant ? void logout() : setIsAuthOpen(true)}
+            >
+              {currentParticipant ? '로그아웃' : <>로그인/회원가입 <span aria-hidden="true">&gt;</span></>}
+            </button>
           </div>
           <TopNavigation activeTab={activeTab} onChange={navigateTo} />
         </div>
@@ -219,9 +218,10 @@ function App() {
         </Suspense>
       ) : (
         <Suspense fallback={tabLoadingFallback}>
-          <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onLogout={logout} onDeleteAccount={deleteAccount} />
+          <MyProfile profile={currentParticipant} balance={balance} visitedRoadViewGates={visitedRoadViewGates} orders={orders} onDeleteAccount={deleteAccount} />
         </Suspense>
       )}
+      {isAuthOpen && !currentParticipant ? <AuthScreen onLogin={login} onSignUp={signUp} onClose={() => setIsAuthOpen(false)} /> : null}
     </div>
   )
 }
