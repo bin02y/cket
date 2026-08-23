@@ -30,6 +30,14 @@ type MobileDirection = 'forward' | 'backward' | 'left' | 'right'
 type Collider = { x1: number; x2: number; z1: number; z2: number }
 type GateRewardNotice = { gateCode: RoadViewGateCode; status: 'pending' | RoadViewGateRewardResult['status']; points: number }
 type BoothImage = { src: string; alt: string }
+type SlidingDoorGroup = { anchor: THREE.Object3D; doors: THREE.Mesh[]; openDistance: number }
+type HingedDoorGroup = { anchor: THREE.Object3D; doors: THREE.Group[] }
+type StationAnimationTargets = {
+  rotatingBoothSculptures: THREE.Object3D[]
+  slidingDoorGroups: SlidingDoorGroup[]
+  hingedDoorGroups: HingedDoorGroup[]
+  collisionDoors: THREE.Mesh[]
+}
 
 const BOOTH_WIDTH = 5.8
 const BOOTH_DEPTH = 7.2
@@ -661,7 +669,6 @@ function createTrainDoor(zone: RoadViewBooth) {
     door.userData.collisionDepth = 0.16
   }
   group.userData.slidingDoors = [leftDoor, rightDoor]
-  group.userData.collisionDoors = [leftDoor, rightDoor]
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(3.05, 1.07),
     new THREE.MeshBasicMaterial({ map: makeTrainBoothSignTexture(zone.title, zone.label, zone.color), transparent: true, side: THREE.DoubleSide }),
@@ -989,7 +996,6 @@ function createBoothSculpture(boothId: number) {
     }
   }
 
-  group.userData.autoRotate = true
   return group
 }
 
@@ -1219,7 +1225,6 @@ function createRestroomFacility(facility: StationFacility) {
   }
   for (const x of RESTROOM_STALL_CENTERS) hingedDoors.push(addRestroomStall(group, x, stallDoor, ceramic, metal))
   group.userData.hingedDoors = hingedDoors
-  group.userData.collisionDoors = hingedDoors.map((door) => door.userData.collisionPanel as THREE.Mesh)
   for (const z of [0.45, 1.65]) {
     addRestroomSink(group, -0.09, -1, z, ceramic, metal, mirror)
     addRestroomSink(group, 0.09, 1, z, ceramic, metal, mirror)
@@ -1346,7 +1351,12 @@ function createFacility(facility: StationFacility) {
 }
 
 function buildMetaverseStation(scene: THREE.Scene) {
-  const animated: THREE.Object3D[] = []
+  const animationTargets: StationAnimationTargets = {
+    rotatingBoothSculptures: [],
+    slidingDoorGroups: [],
+    hingedDoorGroups: [],
+    collisionDoors: [],
+  }
   const envelopeMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0, roughness: 0.92, side: THREE.DoubleSide })
   const stationFloorShape = new THREE.Shape()
   stationFloorShape.moveTo(-STATION_WIDTH / 2, -STATION_DEPTH / 2)
@@ -1386,16 +1396,23 @@ function buildMetaverseStation(scene: THREE.Scene) {
     scene.add(builtBooth)
     if (booth.trainCar) {
       const entrance = createTrainDoor(booth)
-      scene.add(entrance); animated.push(entrance)
+      scene.add(entrance)
+      const doors = entrance.userData.slidingDoors as THREE.Mesh[]
+      animationTargets.slidingDoorGroups.push({ anchor: entrance, doors, openDistance: 2.75 })
+      animationTargets.collisionDoors.push(...doors)
     } else {
-      animated.push(builtBooth)
+      animationTargets.rotatingBoothSculptures.push(builtBooth.userData.rotatingSculpture as THREE.Object3D)
       scene.add(createBoothTurnstile(booth))
     }
   }
   for (const facility of FACILITIES) {
     const builtFacility = createFacility(facility)
     scene.add(builtFacility)
-    if (builtFacility.userData.hingedDoors || builtFacility.userData.slidingDoors) animated.push(builtFacility)
+    const hingedDoors = builtFacility.userData.hingedDoors as THREE.Group[] | undefined
+    if (hingedDoors) {
+      animationTargets.hingedDoorGroups.push({ anchor: builtFacility, doors: hingedDoors })
+      animationTargets.collisionDoors.push(...hingedDoors.map((door) => door.userData.collisionPanel as THREE.Mesh))
+    }
   }
   const trackLength = STATION_WIDTH - 0.8
   const trackCenterX = 0
@@ -1417,7 +1434,7 @@ function buildMetaverseStation(scene: THREE.Scene) {
     addRoundedBox(scene, [trackLength, 0.08, 0.42], [trackCenterX, 0.19, z], fasteningMaterial, 0.025)
     addRoundedBox(scene, [trackLength, 0.14, 0.18], [trackCenterX, 0.28, z], rail, 0.035)
   }
-  return animated
+  return animationTargets
 }
 
 function drawMap(canvas: HTMLCanvasElement, player: Player) {
@@ -1545,9 +1562,9 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
     const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 120); camera.rotation.order = 'YXZ'
     scene.add(new THREE.HemisphereLight('#ffffff', '#ffffff', 2.25))
     const sun = new THREE.DirectionalLight('#ffffff', 3.1); sun.position.set(-12, 18, 10); sun.castShadow = false; scene.add(sun)
-    const animated = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = jumpRef.current
+    const animationTargets = buildMetaverseStation(scene); const clock = new THREE.Clock(); const jump = jumpRef.current
     jump.height = 0; jump.velocity = 0
-    const collisionDoors = animated.flatMap((object) => (object.userData.collisionDoors as THREE.Mesh[] | undefined) ?? [])
+    const collisionDoors = animationTargets.collisionDoors
     let animationFrame = 0; let dragging = false; let pointerX = 0; let pointerY = 0; let renderedMapCanvas: HTMLCanvasElement | null = null
     const animatedWorldPosition = new THREE.Vector3()
     const animatedLocalPlayerPosition = new THREE.Vector3()
@@ -1598,47 +1615,36 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
       const walking = movement.forward || movement.backward || movement.left || movement.right
       const bob = walking && jump.height === 0 ? Math.sin(elapsed * (movement.sprint ? 13 : 8)) * (movement.sprint ? 0.035 : 0.018) : 0
       camera.position.set(player.x, 1.68 + jump.height + bob, player.z); camera.rotation.set(player.pitch, player.yaw, 0)
-      for (const object of animated) {
-        const rotatingSculpture = object.userData.rotatingSculpture as THREE.Object3D | undefined
-        if (rotatingSculpture) rotatingSculpture.rotation.y = elapsed * 0.72
-        const wings = object.userData.wings as THREE.Mesh[] | undefined
-        if (wings) {
-          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < 2.25
-          wings[0].rotation.y = THREE.MathUtils.lerp(wings[0].rotation.y, open ? -1.15 : 0, 0.1); wings[1].rotation.y = THREE.MathUtils.lerp(wings[1].rotation.y, open ? 1.15 : 0, 0.1)
-        }
-        const slidingDoors = object.userData.slidingDoors as THREE.Mesh[] | undefined
-        if (slidingDoors) {
-          const openDistance = object.userData.restroomDoors ? 5.2 : 2.75
-          const open = Math.hypot(object.position.x - player.x, object.position.z - player.z) < openDistance
-          slidingDoors.forEach((door) => {
-            const closedX = door.userData.closedX as number
-            const openX = door.userData.openX as number
-            const targetX = open ? openX : closedX
-            door.position.x = THREE.MathUtils.lerp(door.position.x, targetX, 0.16)
-            if (Math.abs(door.position.x - targetX) < 0.01) door.position.x = targetX
-          })
-        }
-        const hingedDoors = object.userData.hingedDoors as THREE.Group[] | undefined
-        if (hingedDoors) {
-          animatedLocalPlayerPosition.set(player.x, 0, player.z)
-          object.worldToLocal(animatedLocalPlayerPosition)
-          hingedDoors.forEach((door) => {
-            door.getWorldPosition(animatedWorldPosition)
-            const openDistance = door.userData.openDistance as number
-            const open = Math.hypot(animatedWorldPosition.x - player.x, animatedWorldPosition.z - player.z) < openDistance
-            const inwardRotation = door.userData.inwardRotation as number
-            if (open && door.userData.activeOpenRotation === undefined) {
-              const doorPlaneZ = door.userData.doorPlaneZ as number
-              door.userData.activeOpenRotation = animatedLocalPlayerPosition.z > doorPlaneZ ? inwardRotation : -inwardRotation
-            }
-            const activeOpenRotation = (door.userData.activeOpenRotation as number | undefined) ?? inwardRotation
-            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, open ? activeOpenRotation : 0, 0.12)
-            if (!open && Math.abs(door.rotation.y) < 0.015) {
-              door.rotation.y = 0
-              delete door.userData.activeOpenRotation
-            }
-          })
-        }
+      for (const rotatingSculpture of animationTargets.rotatingBoothSculptures) rotatingSculpture.rotation.y = elapsed * 0.72
+      for (const { anchor, doors, openDistance } of animationTargets.slidingDoorGroups) {
+        const open = Math.hypot(anchor.position.x - player.x, anchor.position.z - player.z) < openDistance
+        doors.forEach((door) => {
+          const closedX = door.userData.closedX as number
+          const openX = door.userData.openX as number
+          const targetX = open ? openX : closedX
+          door.position.x = THREE.MathUtils.lerp(door.position.x, targetX, 0.16)
+          if (Math.abs(door.position.x - targetX) < 0.01) door.position.x = targetX
+        })
+      }
+      for (const { anchor, doors } of animationTargets.hingedDoorGroups) {
+        animatedLocalPlayerPosition.set(player.x, 0, player.z)
+        anchor.worldToLocal(animatedLocalPlayerPosition)
+        doors.forEach((door) => {
+          door.getWorldPosition(animatedWorldPosition)
+          const openDistance = door.userData.openDistance as number
+          const open = Math.hypot(animatedWorldPosition.x - player.x, animatedWorldPosition.z - player.z) < openDistance
+          const inwardRotation = door.userData.inwardRotation as number
+          if (open && door.userData.activeOpenRotation === undefined) {
+            const doorPlaneZ = door.userData.doorPlaneZ as number
+            door.userData.activeOpenRotation = animatedLocalPlayerPosition.z > doorPlaneZ ? inwardRotation : -inwardRotation
+          }
+          const activeOpenRotation = (door.userData.activeOpenRotation as number | undefined) ?? inwardRotation
+          door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, open ? activeOpenRotation : 0, 0.12)
+          if (!open && Math.abs(door.rotation.y) < 0.015) {
+            door.rotation.y = 0
+            delete door.userData.activeOpenRotation
+          }
+        })
       }
       if (!overlayRef.current.mapOpen && !overlayRef.current.selectedBooth) {
         const passedBooth = crossedGate(player)
