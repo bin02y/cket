@@ -1471,16 +1471,7 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     context.beginPath(); context.moveTo(position, mapPadding); context.lineTo(position, size - mapPadding); context.stroke()
     context.beginPath(); context.moveTo(mapPadding, position); context.lineTo(size - mapPadding, position); context.stroke()
   }
-  context.setLineDash([Math.max(3, size * 0.008), Math.max(4, size * 0.011)])
-  context.strokeStyle = 'rgba(32,115,148,.19)'; context.lineWidth = Math.max(1.5, size * 0.004)
-  context.beginPath()
-  context.moveTo(worldXToMap(-11.9), worldZToMap(-7.4))
-  context.lineTo(worldXToMap(-6.3), worldZToMap(0))
-  context.lineTo(worldXToMap(-6.3), worldZToMap(10.2))
-  context.lineTo(worldXToMap(6.3), worldZToMap(10.2))
-  context.lineTo(worldXToMap(6.3), worldZToMap(0))
-  context.lineTo(worldXToMap(11.9), worldZToMap(-7.4))
-  context.stroke(); context.restore()
+  context.restore()
 
   const trainX = worldXToMap(TRAIN_NOSE_X); const trainY = worldZToMap(TRAIN_CENTER_Z - 3.15)
   const trainWidth = worldXToMap(TRAIN_TAIL_X) - trainX; const trainHeight = worldZToMap(TRAIN_CENTER_Z + 3.15) - trainY
@@ -1509,12 +1500,6 @@ function drawMap(canvas: HTMLCanvasElement, player: Player) {
     const titleCenterY = cardY + cardHeight * 0.69
     const firstTitleY = titleCenterY - (titleLines.length - 1) * titleLineHeight / 2
     titleLines.forEach((line, index) => context.fillText(line, cardX + cardWidth / 2, firstTitleY + index * titleLineHeight, cardWidth * 0.86))
-    if ('id' in zone) {
-      context.fillStyle = '#123d54'; context.shadowColor = 'rgba(18,61,84,.22)'; context.shadowBlur = 3
-      if (zone.gate.side === 'east' || zone.gate.side === 'west') context.fillRect(worldXToMap(zone.gate.x) - 2, worldZToMap(zone.gate.z) - height * 0.1, 4, height * 0.2)
-      else context.fillRect(worldXToMap(zone.gate.x) - width * 0.13, worldZToMap(zone.gate.z) - 2, width * 0.26, 4)
-      context.shadowColor = 'transparent'
-    }
   }
   const x = worldXToMap(player.x); const y = worldZToMap(player.z)
   const markerRadius = Math.max(9, size * 0.022)
@@ -1787,7 +1772,6 @@ export default function RoadView3D({ onClose, onGatePassed }: RoadView3DProps) {
         </div>
       </div>
       {mapOpen ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setMapOpen(false)}><section className="roadview__panel roadview__map-panel" role="dialog" aria-modal="true" aria-label="에코 익스프레스 역사 지도">
-        <header className="roadview__map-header"><div><span>CKET STATION GUIDE</span><h2>3D 전시관 지도</h2></div><button type="button" aria-label="지도 닫기" onClick={() => setMapOpen(false)}>×</button></header>
         <canvas ref={mapRef} className="roadview__map" aria-label="현재 위치와 상단 가로 3칸 전시 열차가 표시된 디귿자 역사 지도" />
       </section></div> : null}
       {selectedBooth ? <div className="roadview__overlay roadview__overlay--panel" onMouseDown={(event) => event.target === event.currentTarget && setSelectedBooth(null)}><section className="roadview__panel roadview__booth-info" role="dialog" aria-modal="true" aria-label={`${selectedBooth.title} 방문 미디어와 포인트 획득 결과`} style={{ '--roadview-accent': selectedBooth.color } as CSSProperties}>
