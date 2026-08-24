@@ -20,6 +20,7 @@ rewardProducts.forEach(({ image }) => preload(image, { as: 'image', fetchPriorit
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('booths')
+  const [homeVideoPaused, setHomeVideoPaused] = useState(false)
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [currentParticipant, setCurrentParticipant] = useState<ParticipantProfile | null>(null)
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
@@ -211,11 +212,11 @@ function App() {
       </header>
       {dataError ? <div className="data-status-banner" role="alert"><span><Icon name="warning" /></span><p><strong>활동 기록을 불러오지 못했어요</strong>{dataError}</p><button type="button" onClick={retryDataLoad}>다시 연결</button></div> : null}
       {activeTab === 'education' ? (
-        <BoothGuide section="education" onRoadViewGatePassed={claimRoadViewGate} />
+        <BoothGuide section="education" homeVideoPaused={homeVideoPaused} onHomeVideoPausedChange={setHomeVideoPaused} onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'booths' ? (
-        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
+        <BoothGuide section="booths" homeVideoPaused={homeVideoPaused} onHomeVideoPausedChange={setHomeVideoPaused} onRoadViewGatePassed={claimRoadViewGate} />
       ) : !currentParticipant ? (
-        <BoothGuide section="booths" onRoadViewGatePassed={claimRoadViewGate} />
+        <BoothGuide section="booths" homeVideoPaused={homeVideoPaused} onHomeVideoPausedChange={setHomeVideoPaused} onRoadViewGatePassed={claimRoadViewGate} />
       ) : activeTab === 'shop' ? (
         <Suspense fallback={tabLoadingFallback}>
           <RewardShop participantId={currentParticipant.id} participantName={currentParticipant.name} balance={balance} onRedeem={redeemReward} />

@@ -24,6 +24,8 @@ const RoadView3D = lazy(() => import('./RoadView3D'))
 
 type BoothGuideProps = {
   section: BoothSection
+  homeVideoPaused: boolean
+  onHomeVideoPausedChange: (paused: boolean) => void
   onRoadViewGatePassed: (gateCode: RoadViewGateCode) => Promise<RoadViewGateRewardResult>
 }
 
@@ -171,12 +173,11 @@ const carrierCards = [
   },
 ] as const
 
-export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
+export function BoothGuide({ section, homeVideoPaused, onHomeVideoPausedChange, onRoadViewGatePassed }: BoothGuideProps) {
   const [academyStep, setAcademyStep] = useState<number | null>(null)
   const [carrierStep, setCarrierStep] = useState(0)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const homeVideoRef = useRef<HTMLVideoElement>(null)
-  const homeVideoPausedByUserRef = useRef(false)
   const academyImagePreloadRef = useRef<HTMLImageElement[]>([])
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
@@ -300,15 +301,13 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
     const homeVideo = homeVideoRef.current
     if (!homeVideo) return
 
-    if (roadViewOpen) {
+    if (roadViewOpen || homeVideoPaused) {
       homeVideo.pause()
       return
     }
 
-    if (!homeVideoPausedByUserRef.current) {
-      void homeVideo.play().catch(() => undefined)
-    }
-  }, [roadViewOpen])
+    void homeVideo.play().catch(() => undefined)
+  }, [homeVideoPaused, roadViewOpen])
 
   return (
     <main id="main-content" className="page booth-page">
@@ -332,7 +331,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
             <section className="home-video" aria-label="초고속 냉동공조 영상">
               <video
                 ref={homeVideoRef}
-                autoPlay
+                autoPlay={!homeVideoPaused}
                 loop
                 playsInline
                 preload="metadata"
@@ -340,10 +339,10 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                 onClick={(event) => {
                   const video = event.currentTarget
                   if (video.paused) {
-                    homeVideoPausedByUserRef.current = false
+                    onHomeVideoPausedChange(false)
                     void video.play().catch(() => undefined)
                   } else {
-                    homeVideoPausedByUserRef.current = true
+                    onHomeVideoPausedChange(true)
                     video.pause()
                   }
                 }}
