@@ -176,6 +176,7 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
   const [carrierStep, setCarrierStep] = useState(0)
   const [roadViewOpen, setRoadViewOpen] = useState(false)
   const homeVideoRef = useRef<HTMLVideoElement>(null)
+  const homeVideoPausedByUserRef = useRef(false)
   const academyImagePreloadRef = useRef<HTMLImageElement[]>([])
   const roadViewHistoryEntry = useRef(false)
   const currentAcademyContent = academyStep !== null ? academyContents[academyStep] : null
@@ -304,7 +305,9 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
       return
     }
 
-    void homeVideo.play().catch(() => undefined)
+    if (!homeVideoPausedByUserRef.current) {
+      void homeVideo.play().catch(() => undefined)
+    }
   }, [roadViewOpen])
 
   return (
@@ -337,8 +340,10 @@ export function BoothGuide({ section, onRoadViewGatePassed }: BoothGuideProps) {
                 onClick={(event) => {
                   const video = event.currentTarget
                   if (video.paused) {
+                    homeVideoPausedByUserRef.current = false
                     void video.play().catch(() => undefined)
                   } else {
+                    homeVideoPausedByUserRef.current = true
                     video.pause()
                   }
                 }}
