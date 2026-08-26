@@ -30,6 +30,13 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
 }
 
 type RoadViewTicket = { code: RoadViewGateCode; title: string; color: string; desktopBreakAfter?: string; mobileBreakAfter?: string }
+type TicketFilter = 'all' | 'visited' | 'unvisited'
+
+const ticketFilters: readonly { id: TicketFilter; label: string }[] = [
+  { id: 'all', label: '전체' },
+  { id: 'visited', label: '습득' },
+  { id: 'unvisited', label: '미습득' },
+]
 
 const roadViewTickets: readonly RoadViewTicket[] = [
   { code: 'E01', title: '초고속 냉동사이클', color: '#e69a35' },
@@ -60,9 +67,15 @@ function renderTicketTitle(ticket: RoadViewTicket) {
 }
 
 export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDeleteAccount }: MyProfileProps) {
+  const [ticketFilter, setTicketFilter] = useState<TicketFilter>('all')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const filteredTickets = roadViewTickets.filter((ticket) => {
+    if (ticketFilter === 'all') return true
+    const visited = visitedRoadViewGates.has(ticket.code)
+    return ticketFilter === 'visited' ? visited : !visited
+  })
   async function deleteAccount() {
     setIsDeleting(true)
     const error = await onDeleteAccount()
@@ -72,14 +85,21 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDe
 
   return (
     <main id="main-content" className="page my-page">
-      <section className="profile-point-summary" aria-label="포인트 현황">
-        <article aria-label="사용 가능 잔액 0원"><span aria-hidden="true"><Icon name="wallet" /></span><strong>0</strong><em>원</em></article>
-        <article aria-label={`사용 가능 포인트 ${balance.toLocaleString('ko-KR')} 포인트`}><span aria-hidden="true"><Icon name="point" /></span><strong>{balance.toLocaleString('ko-KR')}</strong><em>P</em></article>
-      </section>
+      <div className="my-ticket-toolbar">
+        <section className="profile-point-summary" aria-label="포인트 현황">
+          <article aria-label="사용 가능 잔액 0원"><span aria-hidden="true"><Icon name="wallet" /></span><strong>0</strong><em>원</em></article>
+          <article aria-label={`사용 가능 포인트 ${balance.toLocaleString('ko-KR')} 포인트`}><span aria-hidden="true"><Icon name="point" /></span><strong>{balance.toLocaleString('ko-KR')}</strong><em>P</em></article>
+        </section>
+        <div className="cket-ticket-filter" role="group" aria-label="티켓 습득 상태 필터">
+          {ticketFilters.map((filter) => (
+            <button type="button" key={filter.id} aria-pressed={ticketFilter === filter.id} onClick={() => setTicketFilter(filter.id)}>{filter.label}</button>
+          ))}
+        </div>
+      </div>
 
       <section className="cket-ticket-board" aria-label="3D 전시관 방문 티켓">
-        <div className="cket-ticket-grid">
-          {roadViewTickets.map((ticket) => {
+        {filteredTickets.length > 0 ? <div className="cket-ticket-grid">
+          {filteredTickets.map((ticket) => {
             const visited = visitedRoadViewGates.has(ticket.code)
             return (
               <article className={`cket-ticket${visited ? ' is-visited' : ''}`} key={ticket.code} style={{ '--ticket-color': ticket.color } as CSSProperties}>
@@ -109,7 +129,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDe
               </article>
             )
           })}
-        </div>
+        </div> : <p className="cket-ticket-empty" role="status">{ticketFilter === 'visited' ? '습득한 티켓이 없어요.' : '모든 티켓을 습득했어요.'}</p>}
       </section>
 
       <section className="order-history" aria-labelledby="order-history-title">
