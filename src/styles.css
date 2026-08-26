@@ -217,8 +217,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 }
 
 .my-ticket-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
-.cket-ticket-filter { display: grid; grid-template-columns: repeat(3,minmax(72px,1fr)); gap: 5px; padding: 4px; background: #eef2f4; border: 1px solid #dce4e8; border-radius: 14px; }
-.cket-ticket-filter button { min-height: 38px; padding: 0 14px; color: #6e8194; background: transparent; border: 0; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; transition: color 150ms ease,background-color 150ms ease,box-shadow 150ms ease; }
+.cket-ticket-filter { display: grid; grid-template-columns: repeat(3,minmax(72px,1fr)); gap: 5px; padding: 4px; background: #eef2f4; border: 1px solid #dce4e8; border-radius: 999px; }
+.cket-ticket-filter button { min-height: 38px; padding: 0 14px; color: #6e8194; background: transparent; border: 0; border-radius: 999px; font-size: 11px; font-weight: 800; cursor: pointer; transition: color 150ms ease,background-color 150ms ease,box-shadow 150ms ease; }
 .cket-ticket-filter button[aria-pressed='true'] { color: #fff; background: var(--blue-950); box-shadow: 0 5px 12px rgba(8,46,92,.18); }
 .cket-ticket-board { margin-top: 28px; }
 .cket-ticket-empty { display: grid; min-height: 128px; margin: 0; place-items: center; color: var(--muted); background: #f7f9fa; border: 1px solid var(--line); border-radius: 18px; font-size: 13px; font-weight: 700; }
@@ -252,8 +252,8 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 }
 @media (max-width: 700px) {
   .my-ticket-toolbar { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
-  .cket-ticket-filter { grid-template-columns: repeat(3,minmax(0,1fr)); width: min(50vw,180px); gap: 3px; padding: 3px; border-radius: 11px; }
-  .cket-ticket-filter button { min-height: 34px; padding: 0 5px; border-radius: 8px; font-size: clamp(8px,2.4vw,10px); }
+  .cket-ticket-filter { grid-template-columns: repeat(3,minmax(0,1fr)); width: min(50vw,180px); gap: 3px; padding: 3px; border-radius: 999px; }
+  .cket-ticket-filter button { min-height: 34px; padding: 0 5px; border-radius: 999px; font-size: clamp(8px,2.4vw,10px); }
   .cket-ticket-board { margin-top: clamp(20px,6vw,26px); }
   .cket-ticket-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(7px,2.2vw,10px); }
   .cket-ticket { --ticket-band-size: clamp(19px,5.1vw,22px); --ticket-stub-width: 34%; border-width: 1px; border-radius: clamp(8px,2.2vw,10px); }
