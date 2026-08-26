@@ -225,7 +225,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .cket-ticket__cutout svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .cket-ticket__cutout-fill { fill: #fff; }
 .cket-ticket__cutout-line { fill: none; stroke: var(--ticket-outline); stroke-linecap: butt; stroke-linejoin: round; stroke-width: 2px; vector-effect: non-scaling-stroke; }
-.cket-ticket.is-visited { --ticket-shell: color-mix(in srgb,var(--ticket-color),#fff 78%); --ticket-outline: color-mix(in srgb,var(--ticket-color),#263d45 24%); --ticket-ink: var(--ticket-color); }
+.cket-ticket.is-visited { --ticket-shell: var(--ticket-color); --ticket-outline: color-mix(in srgb,var(--ticket-color),#263d45 24%); --ticket-ink: #132b3c; }
 .cket-ticket__header { display: grid; grid-template-columns: minmax(0,1fr) var(--ticket-stub-width); align-items: center; height: var(--ticket-band-size); padding: 0 var(--ticket-edge); color: var(--ticket-ink); }
 .cket-ticket__header strong { padding-left: 20px; font-family: Arial,sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -.05em; transform: translateY(1px); }
 .cket-ticket__header small { padding-right: 16px; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700 !important; letter-spacing: .04em; text-align: right; white-space: nowrap; transform: translateY(1.5px); }
