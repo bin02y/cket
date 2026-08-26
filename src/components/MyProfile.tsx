@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { rewardProducts } from '../data/rewards'
 import type { ParticipantProfile, RewardOrder, RewardProduct, RoadViewGateCode } from '../types'
 import { Icon } from './Icon'
@@ -29,15 +29,35 @@ const orderPaymentLabels: Record<RewardOrder['paymentMethod'], string> = {
   cash: '현금',
 }
 
-const roadViewTickets: readonly { code: RoadViewGateCode; title: string; color: string; mobileBreakAfter?: string }[] = [
+type RoadViewTicket = { code: RoadViewGateCode; title: string; color: string; desktopBreakAfter?: string; mobileBreakAfter?: string }
+
+const roadViewTickets: readonly RoadViewTicket[] = [
   { code: 'E01', title: '초고속 냉동사이클', color: '#e69a35' },
   { code: 'L01', title: '교육용 키트', color: '#73b62f' },
   { code: 'R01', title: '굿즈샵', color: '#e45575' },
-  { code: 'B01', title: '녹는 빙하 위에서 펭귄을 구해내라', color: '#45aee8', mobileBreakAfter: '녹는 빙하 위에서' },
-  { code: 'B02', title: '무더운 여름에서 살아남기', color: '#35b981' },
-  { code: 'B03', title: '기후위기에서 동물들을 구하라', color: '#ae7cff', mobileBreakAfter: '기후위기' },
-  { code: 'B04', title: '나비효과로부터 지구를 지켜라', color: '#82e76d', mobileBreakAfter: '나비효과로부터' },
+  { code: 'B01', title: '녹는 빙하 위에서 펭귄을 구해내라', color: '#45aee8', desktopBreakAfter: '녹는 빙하 위에서', mobileBreakAfter: '녹는 빙하 위에서' },
+  { code: 'B02', title: '무더운 여름에서 살아남기', color: '#35b981', desktopBreakAfter: '무더운 여름에서' },
+  { code: 'B03', title: '기후위기에서 동물들을 구하라', color: '#ae7cff', desktopBreakAfter: '기후위기에서', mobileBreakAfter: '기후위기' },
+  { code: 'B04', title: '나비효과로부터 지구를 지켜라', color: '#82e76d', desktopBreakAfter: '나비효과로부터', mobileBreakAfter: '나비효과로부터' },
 ]
+
+function renderTicketTitle(ticket: RoadViewTicket) {
+  const desktopBreak = ticket.desktopBreakAfter?.length
+  const mobileBreak = ticket.mobileBreakAfter?.length
+  const breakpoints = [...new Set([desktopBreak, mobileBreak].filter((point): point is number => point !== undefined))].sort((a, b) => a - b)
+  const content: ReactNode[] = []
+  let start = 0
+
+  breakpoints.forEach((point) => {
+    content.push(ticket.title.slice(start, point))
+    if (desktopBreak === point) content.push(<br className="cket-ticket__desktop-break" key={`desktop-${point}`} />)
+    if (mobileBreak === point) content.push(<br className="cket-ticket__mobile-break" key={`mobile-${point}`} />)
+    start = point
+  })
+  content.push(ticket.title.slice(start))
+
+  return content
+}
 
 export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDeleteAccount }: MyProfileProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -74,7 +94,7 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDe
                   <small>{visited ? 'VISITED' : null}</small>
                 </header>
                 <div className="cket-ticket__body">
-                  <p><strong>{ticket.mobileBreakAfter ? <>{ticket.title.slice(0, ticket.mobileBreakAfter.length)}<br className="cket-ticket__mobile-break" />{ticket.title.slice(ticket.mobileBreakAfter.length)}</> : ticket.title}</strong></p>
+                  <p><strong>{renderTicketTitle(ticket)}</strong></p>
                   <span className="cket-ticket__stub" aria-hidden="true">
                     {visited ? <b className="cket-ticket__points">500P</b> : null}
                     <i />
