@@ -71,11 +71,15 @@ export function MyProfile({ profile, balance, visitedRoadViewGates, orders, onDe
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const filteredTickets = roadViewTickets.filter((ticket) => {
-    if (ticketFilter === 'all') return true
-    const visited = visitedRoadViewGates.has(ticket.code)
-    return ticketFilter === 'visited' ? visited : !visited
-  })
+  const filteredTickets = roadViewTickets
+    .filter((ticket) => {
+      if (ticketFilter === 'all') return true
+      const visited = visitedRoadViewGates.has(ticket.code)
+      return ticketFilter === 'visited' ? visited : !visited
+    })
+    .sort((first, second) => ticketFilter === 'all'
+      ? Number(visitedRoadViewGates.has(second.code)) - Number(visitedRoadViewGates.has(first.code))
+      : 0)
   async function deleteAccount() {
     setIsDeleting(true)
     const error = await onDeleteAccount()
