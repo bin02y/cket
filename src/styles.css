@@ -218,7 +218,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 
 .cket-ticket-board { margin-top: 28px; }
 .cket-ticket-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
-.cket-ticket { --ticket-band-size: 42px; --ticket-edge: 0px; --ticket-stub-width: 34.5%; --ticket-shell: #e4e7e9; --ticket-outline: #c9cfd3; --ticket-ink: #263d45; position: relative; min-width: 0; overflow: visible; background: var(--ticket-shell); border: 2px solid var(--ticket-outline); border-radius: 22px; box-shadow: none; transition: background-color 180ms ease,border-color 180ms ease; }
+.cket-ticket { --ticket-band-size: 42px; --ticket-edge: 0px; --ticket-stub-width: 34.5%; --ticket-shell: #e4e7e9; --ticket-outline: #c9cfd3; --ticket-ink: #b6b8ba; position: relative; min-width: 0; overflow: visible; background: var(--ticket-shell); border: 2px solid var(--ticket-outline); border-radius: 22px; box-shadow: none; transition: background-color 180ms ease,border-color 180ms ease; }
 .cket-ticket__cutout { position: absolute; z-index: 4; left: calc(100% - var(--ticket-edge) - var(--ticket-stub-width)); width: 25px; height: 15px; pointer-events: none; transform: translateX(-50%); }
 .cket-ticket__cutout--top { top: -2px; }
 .cket-ticket__cutout--bottom { bottom: -2px; transform: translateX(-50%) rotate(180deg); }
