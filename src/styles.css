@@ -230,7 +230,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
 .cket-ticket__header strong { padding-left: 20px; font-family: Arial,sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -.05em; transform: translateY(1px); }
 .cket-ticket__header small { padding-right: 16px; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700 !important; letter-spacing: .04em; text-align: right; white-space: nowrap; transform: translateY(1.5px); }
 .cket-ticket.is-visited .cket-ticket__header small { font-size: 18px; letter-spacing: -.05em; transform: translateY(1px); }
-.cket-ticket__body { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0,1fr) var(--ticket-stub-width); min-height: 128px; margin: 0 -2px var(--ticket-band-size); background: #fff; }
+.cket-ticket__body { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0,1fr) var(--ticket-stub-width); min-height: 128px; margin: 0 -2px var(--ticket-band-size); background: #fff; border: 2px solid var(--ticket-outline); }
 .cket-ticket p,.cket-ticket p strong { display: block; min-width: 0; }
 .cket-ticket__mobile-break { display: none; }
 .cket-ticket p { align-self: center; margin: 0; padding: 18px 17px; transform: translateY(-4px); }
@@ -248,7 +248,7 @@ h1, h2, h3, h4, h5, h6, strong, b { font-weight: 700; }
   .cket-ticket__header strong { overflow: hidden; padding-left: clamp(5px,1.5vw,7px); font-size: clamp(7.5px,2.2vw,9px); text-overflow: ellipsis; white-space: nowrap; }
   .cket-ticket__header small { overflow: hidden; padding-right: clamp(4px,1.2vw,6px); font-size: clamp(5px,1.35vw,6px); text-overflow: ellipsis; }
   .cket-ticket.is-visited .cket-ticket__header small { font-size: clamp(7px,1.9vw,8px); }
-  .cket-ticket__body { min-height: clamp(56px,15.3vw,65px); margin-right: -1px; margin-left: -1px; }
+  .cket-ticket__body { min-height: clamp(56px,15.3vw,65px); margin-right: -1px; margin-left: -1px; border-width: 1px; }
   .cket-ticket p { padding: clamp(4px,1.5vw,7px) clamp(5px,1.6vw,8px); transform: none; }
   .cket-ticket p strong { overflow: hidden; font-size: clamp(8.5px,2.45vw,10.5px); line-height: 1.22; word-break: keep-all; }
   .cket-ticket__mobile-break { display: initial; }
